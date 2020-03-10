@@ -27,6 +27,10 @@ jobs:
       with:
         java-version: 1.13
 
+    # Fix gradlew permission denied error
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
     # uncomment for assignment 2-4
     - name: test the project and upload test report -> sonarqube
       run: ./gradlew test jacocoTestReport sonarqube -PsonarToken=$SONAR_TOKEN -PsonarProjectKey=$SONAR_PROJECT_KEY -PsonarOrganization=$SONAR_ORG
