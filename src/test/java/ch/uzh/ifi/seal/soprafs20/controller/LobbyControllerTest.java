@@ -1,14 +1,18 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
+import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyGetDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
+//import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,6 +47,7 @@ public class LobbyControllerTest {
 
     @MockBean
     private LobbyService lobbyService;
+    private UserService userService;
 
     /**
      * Tests post /lobbies
@@ -52,16 +58,17 @@ public class LobbyControllerTest {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
-        lobby.setLobbyname("testName");
+        lobby.setLobbyName("testName");
+        Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
-        lobby.addPlayer(2L);
-        lobby.setGamemode(GameModeStatus.HUMANS);
-        lobby.setCreator(2L);
+        User testPlayer = new User();
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
-        lobbyPostDTO.setLobbyname("testName");
-        lobbyPostDTO.setGamemode(GameModeStatus.HUMANS);
-        lobbyPostDTO.setPlayerId(2L);
+        lobbyPostDTO.setLobbyName("testName");
+        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
 
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
 
@@ -75,10 +82,10 @@ public class LobbyControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
-                .andExpect(jsonPath("$.deck", is(lobby.getDeck())))
-                .andExpect(jsonPath("$.players[0]", is(lobby.getPlayers()[0])))
-                .andExpect(jsonPath("$.gamemode", is(lobby.getGamemode().toString())))
-                .andExpect(jsonPath("$.creator", is(lobby.getCreator())))
+                .andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
+                .andExpect(jsonPath("$.players[0].id", is(lobby.getPlayers().get(0).getId())))
+                .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
+                .andExpect(jsonPath("$.creator.id", is(lobby.getCreator().getId())))
                 ;
     }
 
@@ -92,20 +99,18 @@ public class LobbyControllerTest {
         String exceptionMsg = "You are not allowed to access this page";
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
-        lobbyPostDTO.setLobbyname("testName");
-        lobbyPostDTO.setGamemode(GameModeStatus.HUMANS);
-        lobbyPostDTO.setPlayerId(2L);
+        lobbyPostDTO.setLobbyName("testName");
+        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
 
-        given(lobbyService.checkToken(Mockito.anyString())).willThrow(new UnauthorizedException(exceptionMsg));
+        given(lobbyService.createLobby(Mockito.any())).willThrow(new UnauthorizedException(exceptionMsg));
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder postRequest = post("/lobbies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(lobbyPostDTO));
 
-
         // then
-        mockMvc.perform(getRequest)
+        mockMvc.perform(postRequest)
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", is(exceptionMsg)))
                 .andDo(print());
@@ -121,20 +126,18 @@ public class LobbyControllerTest {
         String exceptionMsg = "Conflict: same player has another lobby open.";
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
-        lobbyPostDTO.setLobbyname("testName");
-        lobbyPostDTO.setGamemode(GameModeStatus.HUMANS);
-        lobbyPostDTO.setPlayerId(2L);
+        lobbyPostDTO.setLobbyName("testName");
+        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
 
-        given(lobbyService.checkCreator(Mockito.anyString())).willThrow(new ConflictException(exceptionMsg));
+        given(lobbyService.createLobby(Mockito.any())).willThrow(new ConflictException(exceptionMsg));
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder postRequest = post("/lobbies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(lobbyPostDTO));
 
-
         // then
-        mockMvc.perform(getRequest)
+        mockMvc.perform(postRequest)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$", is(exceptionMsg)))
                 .andDo(print());

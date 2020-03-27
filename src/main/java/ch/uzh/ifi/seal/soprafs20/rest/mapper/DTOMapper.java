@@ -1,10 +1,8 @@
 package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserGetDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserLoginGetDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPostDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPutDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -20,7 +18,6 @@ import org.mapstruct.factory.Mappers;
 public interface DTOMapper {
 
     DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
-
 
     @Mapping(source = "password", target = "password")
     @Mapping(source = "username", target = "username")
@@ -43,4 +40,12 @@ public interface DTOMapper {
     @Mapping(source = "token", target = "token")
     UserLoginGetDTO convertEntityOfLoggedInUserGetDTO(User user);
 
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "lobbyName", target = "lobbyName")
+    @Mapping(source = "deck", target = "deck")
+    @Mapping(source = "lobbyStatus", target = "lobbyStatus")
+    @Mapping(source = "players", target = "players")
+    @Mapping(source = "gameMode", target = "gameMode")
+    @Mapping(source = "creator", target = "creator")
+    LobbyGetDTO convertEntityToLobbyGetDTO(Lobby createdLobby);
 }
