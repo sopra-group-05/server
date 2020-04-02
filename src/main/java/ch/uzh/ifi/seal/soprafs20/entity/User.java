@@ -23,8 +23,8 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue
-	private Long id;
+	//@GeneratedValue
+	private Long id = 1L;
 
     @Column(nullable = false)
     private LocalDateTime created = LocalDateTime.now();

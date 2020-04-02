@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
-import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
+import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 //import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
@@ -59,6 +59,7 @@ public class LobbyControllerTest {
         Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
         User testPlayer = new User();
+        testPlayer.setId(2L);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testPlayer);
@@ -82,9 +83,9 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
-                .andExpect(jsonPath("$.players[0].id", is(lobby.getPlayers().get(0).getId())))
+                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
-                .andExpect(jsonPath("$.creator.id", is(lobby.getCreator().getId())))
+                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 ;
     }
 
