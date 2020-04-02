@@ -39,6 +39,25 @@ public class LobbyController {
     @ResponseBody
     public LobbyGetDTO createLobby(@RequestBody LobbyPostDTO lobbyPostDTO) {
         // convert API lobby to internal representation
+        Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+
+        // create lobby
+        Lobby createdLobby = lobbyService.createLobby(lobbyInput);
+
+        // convert internal representation of lobby back to API
+        // return with status code 201 created the Location and user object
+        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(createdLobby);
+    }
+
+    /**
+     * GET all Lobbies
+     * @return Status Code 200 and a list of all lobbies
+     */
+    @GetMapping("/lobbies")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public LobbyGetDTO getAllLobbies() {
+        // convert API lobby to internal representation
         Lobby lobbyInput = null;
 
         // create lobby
