@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
@@ -40,6 +42,11 @@ public class LobbyController {
     public LobbyGetDTO createLobby(@RequestBody LobbyPostDTO lobbyPostDTO) {
         // convert API lobby to internal representation
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+
+/*        if (lobbyPostDTO.getGameMode() == 0) {
+            lobbyInput.setGameMode(GameModeStatus.HUMANS);
+        }
+        else {lobbyInput.setGameMode(GameModeStatus.BOTS);}*/
 
         // create lobby
         Lobby createdLobby = lobbyService.createLobby(lobbyInput);

@@ -1,11 +1,11 @@
 package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 
+import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserGetDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserLoginGetDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPostDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPutDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -75,6 +75,7 @@ public class DTOMapperTest {
         userPutDTO.setUsername("firstname@lastname");
         userPutDTO.setToken("1");
         userPutDTO.setBirthday("22.12.2000");
+        userPutDTO.setId(999);
 
         // MAP -> Create UserGetDTO
         User user = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
@@ -84,5 +85,20 @@ public class DTOMapperTest {
         assertEquals(user.getUsername(), userPutDTO.getUsername());
         assertEquals(user.getBirthday(), userPutDTO.getBirthday());
         assertEquals(user.getToken(), userPutDTO.getToken());
+    }
+
+    @Test
+    public void testCreateLobby_fromUserPostDTO_toLobby_success() {
+        // create LobbyPostDTO
+        LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
+        lobbyPostDTO.setLobbyName("test-lobby");
+        lobbyPostDTO.setGameMode("HUMANS");
+
+        // MAP -> Create user
+        Lobby lobby = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+
+        // check content
+        assertEquals(lobbyPostDTO.getLobbyName(), lobby.getLobbyName());
+        assertEquals(GameModeStatus.HUMANS, lobby.getGameMode());
     }
 }

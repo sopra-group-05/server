@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -28,6 +29,7 @@ public class LobbyService
         lobbyInput.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
         checkIfLobbyExists(lobbyInput);
+        lobbyInput.setLobbyStatus(LobbyStatus.OPEN);
 
         // saves the given entity but data is only persisted in the database once flush() is called
         lobbyInput = lobbyRepository.save(lobbyInput);

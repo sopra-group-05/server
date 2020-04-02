@@ -5,6 +5,8 @@ import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 
 /**
  * DTOMapper
@@ -41,8 +43,16 @@ public interface DTOMapper {
     UserLoginGetDTO convertEntityOfLoggedInUserGetDTO(User user);
 
     @Mapping(source = "lobbyName", target = "lobbyName")
-    @Mapping(source = "gameMode", target = "gameMode")
+    @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertToEnum")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
+
+    @Autowired
+    ConversionService conversionService = null;
+
+    @Named("convertToEnum")
+    default Enum convertToEnum(String gameMode) {
+        return conversionService.convert(gameMode, Enum.class);
+    }
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "lobbyName", target = "lobbyName")

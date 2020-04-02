@@ -68,7 +68,7 @@ public class LobbyControllerTest {
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
-        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
+        lobbyPostDTO.setGameMode("HUMANS");
 
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
 
@@ -100,7 +100,7 @@ public class LobbyControllerTest {
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
-        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
+        lobbyPostDTO.setGameMode("HUMANS");
 
         given(lobbyService.createLobby(Mockito.any())).willThrow(new UnauthorizedException(exceptionMsg));
 
@@ -127,7 +127,7 @@ public class LobbyControllerTest {
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
-        lobbyPostDTO.setGameMode(GameModeStatus.HUMANS);
+        lobbyPostDTO.setGameMode("HUMANS");
 
         given(lobbyService.createLobby(Mockito.any())).willThrow(new ConflictException(exceptionMsg));
 
