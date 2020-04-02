@@ -4,12 +4,11 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
+import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyGetDTO;
 //import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
@@ -23,10 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -47,7 +42,9 @@ public class LobbyControllerTest {
 
     @MockBean
     private LobbyService lobbyService;
+    @MockBean
     private UserService userService;
+
 
     /**
      * Tests post /lobbies
@@ -70,7 +67,9 @@ public class LobbyControllerTest {
         lobbyPostDTO.setLobbyName("testName");
         lobbyPostDTO.setGameMode(0);
 
+        given(userService.createUser(Mockito.any())).willReturn(testPlayer);
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
+
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder postRequest = post("/lobbies")
@@ -145,7 +144,7 @@ public class LobbyControllerTest {
 
     /**
      * Helper Method to convert lobbyPostDTO into a JSON string such that the input can be processed
-     * Input will look like this: {"name": "Test LObby", "lobbyName": "testName"}
+     * Input will look like this: {"name": "Test Lobby", "lobbyName": "testName"}
      * @param object
      * @return string
      */

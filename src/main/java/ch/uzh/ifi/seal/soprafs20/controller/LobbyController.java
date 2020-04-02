@@ -2,14 +2,18 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,9 +30,12 @@ import java.util.List;
 public class LobbyController {
 
     private final LobbyService lobbyService;
+    private final UserService userService;
 
-    LobbyController(LobbyService lobbyService) {
+    @Autowired
+    LobbyController(UserService userService, LobbyService lobbyService) {
         this.lobbyService = lobbyService;
+        this.userService = userService;
     }
 
     /**
@@ -39,14 +46,15 @@ public class LobbyController {
     @PostMapping("/lobbies")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public LobbyGetDTO createLobby(@RequestBody LobbyPostDTO lobbyPostDTO) {
+    public LobbyGetDTO createLobby(@RequestHeader(name = "Token", required = false) String token,
+                                   @RequestBody LobbyPostDTO lobbyPostDTO) {
+        //check Access rights via token
+        User creator = userService.checkUserToken(token);
+
         // convert API lobby to internal representation
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
-
-/*        if (lobbyPostDTO.getGameMode() == 0) {
-            lobbyInput.setGameMode(GameModeStatus.HUMANS);
-        }
-        else {lobbyInput.setGameMode(GameModeStatus.BOTS);}*/
+        lobbyInput.setCreator(creator);
+        lobbyInput.addPlayer(creator);
 
         // create lobby
         Lobby createdLobby = lobbyService.createLobby(lobbyInput);

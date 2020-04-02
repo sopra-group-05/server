@@ -22,4 +22,5 @@ public class LobbyPostDTO {
     public void setGameMode(Integer gameMode) {
         this.gameMode = gameMode;
     }
+
 }

@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -46,7 +47,6 @@ public interface DTOMapper {
     @Mapping(source = "lobbyName", target = "lobbyName")
     @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertToEnum")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
-
 
     @Named("convertToEnum")
     default GameModeStatus convertToEnum(Integer gameMode) {
