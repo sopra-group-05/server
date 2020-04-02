@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 public class LobbyPostDTO {
 
     private String lobbyName;
-    private String gameMode;
+    private Integer gameMode;
 
     public String getLobbyName() {
         return lobbyName;
@@ -15,11 +15,11 @@ public class LobbyPostDTO {
         this.lobbyName = lobbyName;
     }
 
-    public String getGameMode() {
+    public Integer getGameMode() {
         return gameMode;
     }
 
-    public void setGameMode(String gameMode) {
+    public void setGameMode(Integer gameMode) {
         this.gameMode = gameMode;
     }
 }

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 
+import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
@@ -46,12 +47,13 @@ public interface DTOMapper {
     @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertToEnum")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
 
-    @Autowired
-    ConversionService conversionService = null;
 
     @Named("convertToEnum")
-    default Enum convertToEnum(String gameMode) {
-        return conversionService.convert(gameMode, Enum.class);
+    default GameModeStatus convertToEnum(Integer gameMode) {
+        if (gameMode == 0) {
+            return GameModeStatus.HUMANS;
+        }
+        else { return GameModeStatus.BOTS; }
     }
 
     @Mapping(source = "id", target = "id")

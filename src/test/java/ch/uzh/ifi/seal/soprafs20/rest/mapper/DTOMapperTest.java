@@ -92,7 +92,7 @@ public class DTOMapperTest {
         // create LobbyPostDTO
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("test-lobby");
-        lobbyPostDTO.setGameMode("HUMANS");
+        lobbyPostDTO.setGameMode(0);
 
         // MAP -> Create user
         Lobby lobby = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
