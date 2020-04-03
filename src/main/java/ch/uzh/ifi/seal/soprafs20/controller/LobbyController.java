@@ -71,17 +71,17 @@ public class LobbyController {
     @GetMapping("/lobbies")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyGetDTO getAllLobbies() {
-        // convert API lobby to internal representation
-        Lobby lobbyInput = null;
+    public List<LobbyGetDTO> getAllLobbies() {
+        // get all lobbies
+        List<Lobby> lobbies = lobbyService.getLobbies();
 
-        // create lobby
-        Lobby createdLobby = lobbyService.createLobby(lobbyInput);
+        List<LobbyGetDTO> lobbyGetDTOs = new ArrayList<>();
 
-        // convert internal representation of lobby back to API
-        LobbyGetDTO lobbyGetDTO = DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(createdLobby);
-
-        // return with status code 201 created the Location and user object
-        return lobbyGetDTO;
+        // return with status code 200
+        // convert each lobby to the API representation
+        for (Lobby lobby : lobbies) {
+            lobbyGetDTOs.add(DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby));
+        }
+        return lobbyGetDTOs;
     }
 }

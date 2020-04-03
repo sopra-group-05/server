@@ -19,9 +19,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -59,7 +63,6 @@ public class LobbyControllerTest {
         Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
         User testPlayer = new User();
-        testPlayer.setId(2L);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testPlayer);
@@ -86,7 +89,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
-                ;
+                .andExpect(status().isCreated());
     }
 
     /**
@@ -118,12 +121,13 @@ public class LobbyControllerTest {
 
     /**
      * Tests post /lobbies
-     * Valid input, but not allowed to view page (no Token / wrong token)
+     * Invalid Input, Conflict, throws error with Status Code 409
      */
     @Test
     public void createLobby_invalidInput_exceptionReturned() throws Exception {
         // given
-        String exceptionMsg = "Conflict: same player has another lobby open.";
+        String exceptionMsg = "Conflict: same player has another lobby open, " +
+                "or there already is a lobby with the same name";
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
@@ -141,6 +145,39 @@ public class LobbyControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$", is(exceptionMsg)))
                 .andDo(print());
+    }
+
+    @Test
+    public void getAllLobbies_lobbiesReturned() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        Deck testDeck = new Deck();
+        lobby.setDeck(testDeck);
+        User testPlayer = new User();
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+
+        List<Lobby> allLobbies = Collections.singletonList(lobby);
+
+        given(lobbyService.getLobbies()).willReturn(allLobbies);
+
+        // when/then -> do the request + validate the result
+        MockHttpServletRequestBuilder getRequest = get("/lobbies")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
+                .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())))
+                .andExpect(jsonPath("$[0].deck.id", is(lobby.getDeck().getId())))
+                .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
+                .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
+                .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
+        ;
     }
 
     /**

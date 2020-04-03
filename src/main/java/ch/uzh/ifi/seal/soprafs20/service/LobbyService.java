@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,6 +28,13 @@ public class LobbyService
         this.lobbyRepository = lobbyRepository;
     }
 
+    /**
+     * This method will create a lobby in the lobby repository
+     *
+     * @param lobbyInput
+     * @return The created Lobby
+     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     */
     public Lobby createLobby(Lobby lobbyInput)
     {
         //checks if there is a lobby with the same name or with the same creator
@@ -43,6 +51,19 @@ public class LobbyService
         log.debug("Created Information for Lobby: {}", lobbyInput);
         return lobbyInput;
     }
+
+    /**
+     * This method will get all lobbies from the lobby repository
+     *
+     * @return A List of all Lobbies
+     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     */
+    public List<Lobby> getLobbies()
+    {
+        return lobbyRepository.findAll();
+    }
+
+
     /**
      * This is a helper method that will check the uniqueness criteria of the username
      * defined in the User entity. The method will do nothing if the input is unique and throw an error otherwise.
