@@ -58,7 +58,7 @@ public interface DTOMapper {
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "lobbyName", target = "lobbyName")
-    @Mapping(source = "deck", target = "deck")
+    // @Mapping(source = "deck", target = "deck")
     @Mapping(source = "lobbyStatus", target = "lobbyStatus")
     @Mapping(source = "players", target = "players")
     @Mapping(source = "gameMode", target = "gameMode")

@@ -4,16 +4,30 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.*;
 
+@Entity
+@Table(name = "LOBBY")
 public class Lobby
 {
+    @Id
+    @Column(nullable = false)
     private Long id;
+    @Column(nullable = false)
     private String lobbyName;
+    @Column(nullable = true)
     private Deck deck;
+    @Column(nullable = false)
     private LobbyStatus lobbyStatus;
+    @Column(nullable = false)
     private ArrayList<User> players = new ArrayList<>();
+    @Column(nullable = false)
     private GameModeStatus gameMode;
+    @Column(nullable = false)
     private User creator;
 
     public Long getId() {
