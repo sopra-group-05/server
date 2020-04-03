@@ -19,6 +19,10 @@ import java.time.LocalDateTime;
 @Table(name = "PLAYER")
 public class Player {
 
+    public Player(){
+        //default constructor require for jpa
+    }
+
     public Player(User user) {
         this.id = user.getId();
         this.username = user.getUsername();

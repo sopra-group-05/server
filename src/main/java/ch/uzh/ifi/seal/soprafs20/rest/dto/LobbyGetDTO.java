@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
+import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 
 import java.util.List;
 

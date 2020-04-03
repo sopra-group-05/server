@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
-import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
+import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 //import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
@@ -21,7 +21,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -92,8 +91,8 @@ public class LobbyControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
-                .andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
-                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
+                .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
+                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(status().isCreated());
@@ -184,8 +183,8 @@ public class LobbyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())))
-                .andExpect(jsonPath("$[0].deck.id", is(lobby.getDeck().getId())))
-                .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
+                .andExpect(jsonPath("$[0].deck.deckId", is(lobby.getDeck().getDeckId())))
+                .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
         ;

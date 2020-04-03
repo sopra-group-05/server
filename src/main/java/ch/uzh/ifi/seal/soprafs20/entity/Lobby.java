@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.soprafs20.entity;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
 
 import javax.persistence.*;
 import java.util.*;
@@ -23,18 +22,25 @@ public class Lobby
     @Column(nullable = false, unique = true)
     @GeneratedValue
     private Long lobbyId;
+
     @Column(nullable = false)
     private String lobbyName;
+
     @Column(nullable = true)
     private Deck deck;
+
     @Column(nullable = false)
     private LobbyStatus lobbyStatus;
-    @Column(nullable = false)
-    private ArrayList<Player> players = new ArrayList<>();
+
+    @ElementCollection
+    private Set<Player> players = new HashSet<>();
+
     @Column(nullable = false)
     private GameModeStatus gameMode;
-    @Column(nullable = false)
+
+    @OneToOne
     private User creator;
+
     @Column(nullable = false)
     private Language language;
 
@@ -70,7 +76,7 @@ public class Lobby
         this.lobbyStatus = lobbyStatus;
     }
 
-    public ArrayList<Player> getPlayers() {
+    public Set<Player> getPlayers() {
         return players;
     }
 
@@ -100,5 +106,12 @@ public class Lobby
 
     public Language getLanguage() {
         return language;
+    }
+
+    public void join(Player player){
+        this.players.add(player);
+    }
+    public void leave(Player player){
+        this.players.remove(player);
     }
 }

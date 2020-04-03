@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
@@ -54,7 +55,7 @@ public class LobbyController {
                                    @RequestBody LobbyPostDTO lobbyPostDTO) {
         //check Access rights via token
         User creator = userService.checkUserToken(token);
-        Player player = playerService.convertUserToPlayer(creator);
+        Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
 
         // convert API lobby to internal representation
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);

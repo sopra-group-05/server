@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -40,8 +41,9 @@ public class PlayerService {
      * @param user
      * @return Player
      */
-    public Player convertUserToPlayer(User user) {
+    public Player convertUserToPlayer(User user, PlayerRole playerRole) {
         Player player = new Player(user);
+        player.setRole(playerRole);
          player = playerRepository.save(player);
          playerRepository.flush();
         return player;
