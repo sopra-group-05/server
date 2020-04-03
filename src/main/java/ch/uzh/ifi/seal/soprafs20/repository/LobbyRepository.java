@@ -12,6 +12,7 @@ import java.util.List;
 public interface LobbyRepository extends JpaRepository<Lobby, Long> {
 
     Lobby findByLobbyName(String lobbyName);
+    Lobby findByLobbyId(Long id);
     Lobby findByCreator(User creator);
     @Override
     List<Lobby> findAll(Sort sort);

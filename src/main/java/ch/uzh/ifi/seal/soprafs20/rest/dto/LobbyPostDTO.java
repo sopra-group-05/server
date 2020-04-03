@@ -1,11 +1,10 @@
 package ch.uzh.ifi.seal.soprafs20.rest.dto;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-
 public class LobbyPostDTO {
 
     private String lobbyName;
     private Integer gameMode;
+    private String language;
 
     public String getLobbyName() {
         return lobbyName;
@@ -23,4 +22,11 @@ public class LobbyPostDTO {
         this.gameMode = gameMode;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 }

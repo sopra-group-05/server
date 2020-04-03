@@ -63,6 +63,17 @@ public class LobbyService
         return lobbyRepository.findAll();
     }
 
+    /**
+     * This method will get a specific Lobby by ID from the Lobby Repository
+     *
+     * @return The requested Lobby
+     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     */
+    public Lobby getLobbyById(Long id)
+    {
+        return lobbyRepository.findByLobbyId(id);
+    }
+
 
     /**
      * This is a helper method that will check the uniqueness criteria of the username

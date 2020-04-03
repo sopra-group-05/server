@@ -84,4 +84,20 @@ public class LobbyController {
         }
         return lobbyGetDTOs;
     }
+
+    /**
+     * GET a specific Lobby with all its Players by ID
+     * @return Status Code 200, the requested Lobby that contains a List of all its Players
+     */
+    @GetMapping("/lobbies/{lobbyId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public LobbyGetDTO getLobbyById(@PathVariable long lobbyId) {
+        // get the requested lobby; send message to the LobbyService
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        // return with status code 200
+        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+    }
+
 }

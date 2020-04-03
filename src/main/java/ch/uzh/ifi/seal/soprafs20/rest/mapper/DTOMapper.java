@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -45,20 +46,43 @@ public interface DTOMapper {
     UserLoginGetDTO convertEntityOfLoggedInUserGetDTO(User user);
 
     @Mapping(source = "lobbyName", target = "lobbyName")
-    @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertToEnum")
+    @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertInt")
+    @Mapping(source = "language", target = "language", qualifiedByName = "convertString")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
 
-    @Named("convertToEnum")
-    default GameModeStatus convertToEnum(Integer gameMode) {
-        if (gameMode == 0) {
-            return GameModeStatus.HUMANS;
+    @Named("convertInt")
+    default GameModeStatus convertIntToEnum(Integer gameMode) {
+        try {
+            if (gameMode == 0) {
+                return GameModeStatus.HUMANS;
+            }
+            else if (gameMode == 1) { return GameModeStatus.BOTS; }
+            else {throw new IllegalArgumentException("Valid values are: (0, 1)." +
+                    "Default gameMode HUMANS was returned.");}
         }
-        else { return GameModeStatus.BOTS; }
+        catch (IllegalArgumentException e) {
+            String msg = "Please provide an Integer value to the gameMode key." +
+                    "Valid values are: (0, 1)." +
+                    "Default gameMode HUMANS was returned.";
+           throw new IllegalArgumentException(msg, e);
+        }
+    }
+    @Named("convertString")
+    default Language convertStringToEnum(String languageString) {
+        try {
+            return Language.valueOf(languageString);
+        }
+        catch (IllegalArgumentException e) {
+            String msg = "Please provide a String value to the language key." +
+                    "Valid values are: ('EN', 'DE')." +
+                    "Default language ENGLISH was returned";
+            throw new IllegalArgumentException(msg, e);
+        }
     }
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "lobbyName", target = "lobbyName")
-    // @Mapping(source = "deck", target = "deck")
+    @Mapping(source = "deck", target = "deck")
     @Mapping(source = "lobbyStatus", target = "lobbyStatus")
     @Mapping(source = "players", target = "players")
     @Mapping(source = "gameMode", target = "gameMode")

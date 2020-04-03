@@ -1,24 +1,21 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Internal User Representation
- * This class composes the internal representation of the user and defines how the user is stored in the database.
+ * Internal Player Representation
+ * This class composes the internal representation of the player and defines how the player is stored in the database.
  * Every variable will be mapped into a database field with the @Column annotation
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unqiue across the database -> composes the primary key
  */
 @Entity
-@Table(name = "USER")
-public class User implements Serializable {
+@Table(name = "PLAYER")
+public class Player implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
