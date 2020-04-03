@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
@@ -93,6 +94,8 @@ public class DTOMapperTest {
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("test-lobby");
         lobbyPostDTO.setGameMode(0);
+        lobbyPostDTO.setLanguage("DE");
+
 
         // MAP -> Create user
         Lobby lobby = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
@@ -100,5 +103,7 @@ public class DTOMapperTest {
         // check content
         assertEquals(lobbyPostDTO.getLobbyName(), lobby.getLobbyName());
         assertEquals(GameModeStatus.HUMANS, lobby.getGameMode());
+        assertEquals(Language.DE, lobby.getLanguage());
+
     }
 }

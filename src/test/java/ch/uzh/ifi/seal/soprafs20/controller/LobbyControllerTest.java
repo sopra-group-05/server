@@ -95,7 +95,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
                 .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
-                //.andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
+                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(status().isCreated());
     }
 
