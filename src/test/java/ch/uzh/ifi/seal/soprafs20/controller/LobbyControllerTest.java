@@ -61,7 +61,7 @@ public class LobbyControllerTest {
         lobby.setId(1L);
         lobby.setLobbyName("testName");
         Deck testDeck = new Deck();
-        //lobby.setDeck(testDeck);
+        lobby.setDeck(testDeck);
         User testPlayer = new User();
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
@@ -85,7 +85,7 @@ public class LobbyControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
-                //.andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
+                .andExpect(jsonPath("$.deck.id", is(lobby.getDeck().getId())))
                 .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
@@ -154,7 +154,7 @@ public class LobbyControllerTest {
         lobby.setId(1L);
         lobby.setLobbyName("testName");
         Deck testDeck = new Deck();
-        //lobby.setDeck(testDeck);
+        lobby.setDeck(testDeck);
         User testPlayer = new User();
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
@@ -173,7 +173,7 @@ public class LobbyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())))
-                //.andExpect(jsonPath("$[0].deck.id", is(lobby.getDeck().getId())))
+                .andExpect(jsonPath("$[0].deck.id", is(lobby.getDeck().getId())))
                 .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().get(0).getId()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
