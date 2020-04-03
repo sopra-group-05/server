@@ -4,10 +4,12 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,11 +33,13 @@ public class LobbyController {
 
     private final LobbyService lobbyService;
     private final UserService userService;
+    private final PlayerService playerService;
 
     @Autowired
-    LobbyController(UserService userService, LobbyService lobbyService) {
+    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService) {
         this.lobbyService = lobbyService;
         this.userService = userService;
+        this.playerService = playerService;
     }
 
     /**
@@ -50,11 +54,12 @@ public class LobbyController {
                                    @RequestBody LobbyPostDTO lobbyPostDTO) {
         //check Access rights via token
         User creator = userService.checkUserToken(token);
+        Player player = playerService.convertUserToPlayer(creator);
 
         // convert API lobby to internal representation
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
         lobbyInput.setCreator(creator);
-        lobbyInput.addPlayer(creator);
+        lobbyInput.addPlayer(player);
 
         // create lobby
         Lobby createdLobby = lobbyService.createLobby(lobbyInput);

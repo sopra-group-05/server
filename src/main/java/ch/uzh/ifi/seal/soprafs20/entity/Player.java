@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 
 import javax.persistence.*;
@@ -15,86 +17,56 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "PLAYER")
-public class Player implements Serializable {
+public class Player {
 
-	private static final long serialVersionUID = 1L;
+    public Player(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.token = user.getToken();
+        this.status = PlayerStatus.JOINED;
+    }
 
 	@Id
-    @GeneratedValue
     @Column(nullable = false, unique = true)
 	private Long id;
-
-    @Column(nullable = false)
-    private LocalDateTime created = LocalDateTime.now();
 	
 	@Column(nullable = false, unique = true) 
 	private String username;
-
-	@Column(nullable = false)
-    private String password;
 	
 	@Column(nullable = false, unique = true) 
 	private String token;
 
 	@Column(nullable = false)
-	private UserStatus status;
+	private PlayerStatus status;
 
-    @Column(nullable = true)
-    private String birthday;
+    @Column(nullable = false)
+    private PlayerRole role;
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-    public LocalDateTime getCreated() {
-        return this.created;
-    }
-
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
-    }
-
-    public String getBirthday() {
-        return this.birthday;
-    }
-
-    public void setBirthday(String birthday) {
-        this.birthday = birthday;
-    }
-
 	public String getUsername() {
 		return username;
 	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-	    return this.password;
-    }
-
-    public void setPassword(String password) {
-	    this.password = password;
-    }
 
 	public String getToken() {
 		return token;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public UserStatus getStatus() {
+	public PlayerStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(UserStatus status) {
+	public void setStatus(PlayerStatus status) {
 		this.status = status;
 	}
+
+    public PlayerRole getRole() {
+        return role;
+    }
+
+    public void setRole(PlayerRole role) {
+        this.role = role;
+    }
 }

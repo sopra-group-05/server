@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
@@ -11,6 +12,7 @@ import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 //import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +50,8 @@ public class LobbyControllerTest {
     private LobbyService lobbyService;
     @MockBean
     private UserService userService;
+    @MockBean
+    private PlayerService playerService;
 
 
     /**
@@ -62,18 +66,19 @@ public class LobbyControllerTest {
         lobby.setLobbyName("testName");
         Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
-        User testPlayer = new User();
-        testPlayer.setId(1L);
+        User testUser = new User();
+        testUser.setId(1L);
+        Player testPlayer = new Player(testUser);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testPlayer);
+        lobby.setCreator(testUser);
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
         lobbyPostDTO.setGameMode(0);
         lobbyPostDTO.setLanguage("EN");
 
-        given(userService.createUser(Mockito.any())).willReturn(testPlayer);
+        given(userService.createUser(Mockito.any())).willReturn(testUser);
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
 
 
@@ -159,11 +164,12 @@ public class LobbyControllerTest {
         lobby.setLobbyName("testName");
         Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
-        User testPlayer = new User();
-        testPlayer.setId(1L);
+        User testUser = new User();
+        testUser.setId(1L);
+        Player testPlayer = new Player(testUser);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testPlayer);
+        lobby.setCreator(testUser);
 
         List<Lobby> allLobbies = Collections.singletonList(lobby);
 

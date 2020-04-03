@@ -88,4 +88,10 @@ public interface DTOMapper {
     @Mapping(source = "gameMode", target = "gameMode")
     @Mapping(source = "creator", target = "creator")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby createdLobby);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "role", target = "role")
+    PlayerGetDTO convertEntityToPlayerGetDTO(PlayerGetDTO convertedPlayer);
 }

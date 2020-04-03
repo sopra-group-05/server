@@ -30,7 +30,7 @@ public class Lobby
     @Column(nullable = false)
     private LobbyStatus lobbyStatus;
     @Column(nullable = false)
-    private ArrayList<User> players = new ArrayList<>();
+    private ArrayList<Player> players = new ArrayList<>();
     @Column(nullable = false)
     private GameModeStatus gameMode;
     @Column(nullable = false)
@@ -70,11 +70,11 @@ public class Lobby
         this.lobbyStatus = lobbyStatus;
     }
 
-    public ArrayList<User> getPlayers() {
+    public ArrayList<Player> getPlayers() {
         return players;
     }
 
-    public void addPlayer(User player) {
+    public void addPlayer(Player player) {
         this.players.add(player);
     }
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.rest.dto;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.helpers.Deck;
 
@@ -13,7 +14,7 @@ public class LobbyGetDTO {
     private String lobbyName;
     private Deck deck;
     private LobbyStatus lobbyStatus;
-    private List<User> players;
+    private List<Player> players;
     private GameModeStatus gameMode;
     private User creator;
 
@@ -49,11 +50,11 @@ public class LobbyGetDTO {
         this.lobbyStatus = lobbyStatus;
     }
 
-    public List<User> getPlayers() {
+    public List<Player> getPlayers() {
         return players;
     }
 
-    public void setPlayers(List<User> players) {
+    public void setPlayers(List<Player> players) {
         this.players = players;
     }
 
