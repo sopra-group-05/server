@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
@@ -95,7 +94,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
-                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
+                .andExpect(jsonPath("$.players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(status().isCreated());
@@ -189,7 +188,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$[0].deck.deckId", is(lobby.getDeck().getDeckId())))
-                .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
+                .andExpect(jsonPath("$[0].players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$[0].players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
@@ -229,7 +228,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
-                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
+                .andExpect(jsonPath("$.players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$.players[0].role", is(lobby.getPlayers().iterator().next().getRole().name())))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))

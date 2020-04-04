@@ -49,6 +49,6 @@ public class PlayerService {
      */
     public Player getPlayerById(Long id)
     {
-        return playerRepository.findPlayerById(id);
+        return playerRepository.findByPlayerId(id);
     }
 }

@@ -167,4 +167,22 @@ public class LobbyService
         lobbyRepository.flush();
     }
 
+    /**
+     * this method is to   end the Lobby, only the creator can end the Lobby.
+     *
+     * @param lobbyId - the Lobby of the game
+     * @param creator - the creator of the lobby
+     *
+     * @return true if Lobby could be successfully ended, otherwise false
+     */
+
+    public boolean endLobby(Long lobbyId, User creator ){
+        boolean result = false;
+        if(isUserLobbyCreator(lobbyId, creator)) {
+            Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyRepository.delete(lobby);
+            result = true;
+        }
+        return result;
+    }
 }
