@@ -77,7 +77,10 @@ public class LobbyController {
     @GetMapping("/lobbies")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<LobbyGetDTO> getAllLobbies() {
+    public List<LobbyGetDTO> getAllLobbies(@RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        userService.checkUserToken(token);
+
         // get all lobbies
         List<Lobby> lobbies = lobbyService.getLobbies();
 
@@ -98,7 +101,10 @@ public class LobbyController {
     @GetMapping("/lobbies/{lobbyId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyGetDTO getLobbyById(@PathVariable long lobbyId) {
+    public LobbyGetDTO getLobbyById(@RequestHeader(name = "Token", required = false) String token,
+                                    @PathVariable long lobbyId) {
+        //check Access rights via token
+        User creator = userService.checkUserToken(token);
         // get the requested lobby; send message to the LobbyService
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 

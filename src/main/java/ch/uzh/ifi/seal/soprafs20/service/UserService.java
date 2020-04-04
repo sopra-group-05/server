@@ -176,6 +176,6 @@ public class UserService {
         if (userByToken == null) {
             throw new UnauthorizedException("You are not allowed to access this page");
         }
-        return userByToken;
+        throw  new UnauthorizedException("You are not allowed to access this page");
     }
 }
