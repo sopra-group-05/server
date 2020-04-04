@@ -257,9 +257,7 @@ public class LobbyControllerTest {
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testUser);
         User testUser2 = new User();
-        testUser.setId(2L);
-        testUser2.setToken("1");
-        Player testPlayer2 = new Player(testUser2);
+        testUser2.setToken("2");
 
         given(lobbyService.addPlayerToLobby(Mockito.any(), Mockito.any())).willReturn(lobby);
 
@@ -272,6 +270,41 @@ public class LobbyControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+    }
+
+    /**
+     * Tests GET /lobbies
+     * Valid input, but not allowed to view page (no Token / wrong token)
+     */
+    @Test
+    public void getLobbies_wrongToken_exceptionReturned() throws Exception {
+        // given
+        String exceptionMsg = "You are not allowed to access this page";
+
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        Deck testDeck = new Deck();
+        lobby.setDeck(testDeck);
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        lobby.addPlayer(testPlayer);
+        lobby.setCreator(testUser);
+
+        given(userService.checkUserToken(Mockito.anyString())).willThrow(new UnauthorizedException(exceptionMsg));
+
+        // when/then -> do the request + validate the result
+        MockHttpServletRequestBuilder getRequest = get("/lobbies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", "wrongToken");
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$", is(exceptionMsg)))
                 .andDo(print());
     }
 
