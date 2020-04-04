@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.entity;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
@@ -33,6 +34,7 @@ public class Lobby
     private LobbyStatus lobbyStatus;
 
     @ElementCollection
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Set<Player> players = new HashSet<>();
 
     @Column(nullable = false)

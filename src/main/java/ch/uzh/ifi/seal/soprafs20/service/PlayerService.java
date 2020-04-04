@@ -1,22 +1,14 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
-import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.PlayerRepository;
-import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Player Service
@@ -42,10 +34,21 @@ public class PlayerService {
      * @return Player
      */
     public Player convertUserToPlayer(User user, PlayerRole playerRole) {
-        Player player = new Player(user);
-        player.setRole(playerRole);
-         player = playerRepository.save(player);
-         playerRepository.flush();
-        return player;
+            Player player = new Player(user);
+            player.setRole(playerRole);
+            player = playerRepository.save(player);
+            playerRepository.flush();
+            return player;
+    }
+
+    /**
+     * This method will get a specific Player by ID from the Player Repository
+     *
+     * @return The requested Player
+     * @see ch.uzh.ifi.seal.soprafs20.entity.Player
+     */
+    public Player getPlayerById(Long id)
+    {
+        return playerRepository.findPlayerById(id);
     }
 }

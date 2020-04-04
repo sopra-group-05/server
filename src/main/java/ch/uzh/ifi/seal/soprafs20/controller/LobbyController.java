@@ -125,4 +125,20 @@ public class LobbyController {
         // return with status code 204
     }
 
+    @PutMapping("/lobbies/{lobbyId}/leave")
+    @ResponseBody
+    public ResponseEntity<?> leaveLobbyById(@PathVariable long lobbyId, @PathVariable long throwOutPlayerId,
+                              @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User lobbyCreator = userService.checkUserToken(token);
+
+        //verify if the throwing out player is the lobby creator
+        if(lobbyService.kickOutPlayer(lobbyCreator, throwOutPlayerId, lobbyId)) {
+            return new ResponseEntity<>("", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Unauthorized (invalid Token", HttpStatus.UNAUTHORIZED);
+        }
+
+    }
+
 }
