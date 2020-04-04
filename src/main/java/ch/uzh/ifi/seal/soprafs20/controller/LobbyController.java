@@ -106,4 +106,23 @@ public class LobbyController {
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
 
+    /**
+     * PUT Update a specific Lobby by a Player joining the lobby
+     * @param lobbyId
+     * @return Status Code 204
+     */
+    @PutMapping("/lobbies/{lobbyId}/join")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void joinLobbyById(@PathVariable long lobbyId,
+                                       @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User userToJoin = userService.checkUserToken(token);
+        // convert the User to Player
+        Player player = playerService.convertUserToPlayer(userToJoin, PlayerRole.CLUE_CREATOR);
+        // get the requested Lobby and add the Player to the Lobby
+        lobbyService.addPlayerToLobby(lobbyId, player);
+        // return with status code 204
+    }
+
 }

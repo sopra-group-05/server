@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import org.slf4j.Logger;
@@ -72,6 +73,21 @@ public class LobbyService
     public Lobby getLobbyById(Long id)
     {
         return lobbyRepository.findByLobbyId(id);
+    }
+
+    /**
+     * Main Goal: Will update the Lobby with the added Player
+     * First it Checks the Token (Does it belong to any User? Does the token belong to the user you're trying to edit?)
+     * Checks the User ID (Does it even exist?)
+     * @param lobbyId
+     * @return Lobby
+     */
+    public Lobby addPlayerToLobby(Long lobbyId, Player playerToAdd) {
+        Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+        lobby.addPlayer(playerToAdd);
+        lobby = lobbyRepository.save(lobby);
+        lobbyRepository.flush();
+        return lobby;
     }
 
 

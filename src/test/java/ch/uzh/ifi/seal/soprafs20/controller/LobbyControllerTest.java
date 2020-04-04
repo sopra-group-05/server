@@ -226,9 +226,47 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
                 .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
-                .andExpect(jsonPath("$.players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
+                .andExpect(jsonPath("$.players[0].role", is(lobby.getPlayers().iterator().next().getRole().name())))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))));
+    }
+
+    /**
+     * Tests joining lobbies/{lobbyId}/join
+     * Valid Input, adds the User that sends the request to the Lobby
+     */
+    @Test
+    public void joinSpecificLobby_validInput_playerAdded() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        Deck testDeck = new Deck();
+        lobby.setDeck(testDeck);
+        User testUser = new User();
+        testUser.setId(1L);
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testUser);
+        User testUser2 = new User();
+        testUser.setId(2L);
+        testUser2.setToken("1");
+        Player testPlayer2 = new Player(testUser2);
+
+        given(lobbyService.addPlayerToLobby(Mockito.any(), Mockito.any())).willReturn(lobby);
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder putRequest = put("/lobbies/" + lobby.getId() + "/join")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser2.getToken());
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
     }
 
     /**
