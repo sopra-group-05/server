@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -166,6 +168,7 @@ public class LobbyControllerTest {
         User testUser = new User();
         testUser.setId(1L);
         Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testUser);
@@ -185,9 +188,47 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())))
                 .andExpect(jsonPath("$[0].deck.deckId", is(lobby.getDeck().getDeckId())))
                 .andExpect(jsonPath("$[0].players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
+                .andExpect(jsonPath("$[0].players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
         ;
+    }
+
+    /**
+     * Tests getting lobbies/{lobbyId}
+     * Valid Input, returns the Lobby data
+     */
+    @Test
+    public void getSpecificLobby_validInput_lobbyReturned() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        Deck testDeck = new Deck();
+        lobby.setDeck(testDeck);
+        User testUser = new User();
+        testUser.setId(1L);
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testUser);
+
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId()).contentType(MediaType.APPLICATION_JSON);
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
+                .andExpect(jsonPath("$.lobbyName", is(lobby.getLobbyName())))
+                .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
+                .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
+                .andExpect(jsonPath("$.players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
+                .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
+                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))));
     }
 
     /**
