@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.rest.mapper;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
@@ -10,6 +11,8 @@ import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
+
+import java.util.List;
 
 /**
  * DTOMapper
@@ -89,6 +92,7 @@ public interface DTOMapper {
     @Mapping(source = "creator", target = "creator")
     @Mapping(source = "language", target = "language")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby createdLobby);
+
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "username", target = "username")
