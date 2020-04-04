@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
@@ -172,6 +173,7 @@ public class LobbyControllerTest {
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testUser);
+        lobby.setLanguage(Language.DE);
 
         List<Lobby> allLobbies = Collections.singletonList(lobby);
 
@@ -191,6 +193,7 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$[0].players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
                 .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
+                .andExpect(jsonPath("$[0].language", is((lobby.getLanguage().toString()))))
         ;
     }
 
@@ -213,6 +216,7 @@ public class LobbyControllerTest {
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testUser);
+        lobby.setLanguage(Language.DE);
 
         given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
 
@@ -228,7 +232,9 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.players[0].id", is(toIntExact(lobby.getPlayers().iterator().next().getId()))))
                 .andExpect(jsonPath("$.players[0].role", is(lobby.getPlayers().iterator().next().getRole().name())))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
-                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))));
+                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
+                .andExpect(jsonPath("$.language", is((lobby.getLanguage().toString()))))
+                ;
     }
 
     /**

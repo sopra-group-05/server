@@ -17,6 +17,7 @@ public class LobbyGetDTO {
     private List<Player> players;
     private GameModeStatus gameMode;
     private User creator;
+    private String language;
 
     public Long getId() {
         return id;
@@ -72,5 +73,13 @@ public class LobbyGetDTO {
 
     public void setCreator(User creator) {
         this.creator = creator;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getLanguage() {
+        return language;
     }
 }
