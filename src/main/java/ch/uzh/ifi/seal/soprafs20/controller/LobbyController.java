@@ -150,4 +150,37 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
+
+    @PutMapping("/lobbies/{lobbyId}/leave")
+    @ResponseBody
+    public ResponseEntity<?> leaveLobbyById(@PathVariable long lobbyId, @PathVariable long userId,
+                                            @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User lobbyCreator = userService.checkUserToken(token);
+
+        //verify if the throwing out player is the lobby creator
+        if(lobbyService.kickOutPlayer(lobbyCreator, userId, lobbyId)) {
+            return new ResponseEntity<>("", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
+        }
+
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/stop")
+    @ResponseBody
+    public ResponseEntity<?> stopLobbyById(@PathVariable long lobbyId,
+                                            @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User lobbyCreator = userService.checkUserToken(token);
+
+        //verify if the throwing out player is the lobby creator
+        if(lobbyService.endLobby(lobbyId , lobbyCreator)) {
+            return new ResponseEntity<>("", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
+        }
+
+    }
+
 }

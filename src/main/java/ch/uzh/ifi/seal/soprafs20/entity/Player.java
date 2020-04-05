@@ -2,13 +2,10 @@ package ch.uzh.ifi.seal.soprafs20.entity;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * Internal Player Representation
@@ -27,7 +24,7 @@ public class Player {
     }
 
     public Player(User user) {
-        this.id = user.getId();
+        this.playerId = user.getId();
         this.username = user.getUsername();
         this.token = user.getToken();
         this.status = PlayerStatus.JOINED;
@@ -35,7 +32,7 @@ public class Player {
 
 	@Id
     @Column(nullable = false, unique = true)
-	private Long id;
+	private Long playerId;
 	
 	@Column(nullable = false, unique = true) 
 	private String username;
@@ -49,8 +46,8 @@ public class Player {
     @Column(nullable = false)
     private PlayerRole role;
 
-	public Long getId() {
-		return id;
+	public Long getPlayerId() {
+		return playerId;
 	}
 
 	public String getUsername() {

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
 
@@ -27,6 +28,9 @@ public class LobbyService
     //private static final java.util.UUID UUID = ;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
+
+    @Autowired
+    private PlayerService playerService;
 
     @Autowired
     public LobbyService(LobbyRepository lobbyRepository) {
@@ -127,5 +131,70 @@ public class LobbyService
                     "Lobby Name Conflict",
                     new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
         }
+    }
+
+    /**
+     *
+     * Verify whether the user is lobby creator
+     *
+     * @param lobbyId - the Lobby to check the creator against
+     * @param user - the user to verify against the lobby
+     *
+     * @return true if the user is the creator of the Lobby
+     * */
+    public boolean isUserLobbyCreator(Long lobbyId, User user) {
+        Lobby lobby = this.getLobbyById(lobbyId);
+        return user.equals(lobby.getCreator());
+    }
+
+    /**
+     * this method is to remove playerId from the Lobby, only the creator can kick the player out
+     *
+     * @param lobbyId - the Lobby of the game
+     * @param throwOutPlayerId - the player to kick out
+     * @param creator - the creator of the lobby
+     *
+     * @return true if player could be successfully kickedout, otherwise false
+     */
+    public boolean kickOutPlayer(User creator, Long throwOutPlayerId, Long lobbyId) {
+        boolean result = false;
+        if(isUserLobbyCreator(lobbyId, creator)) {
+            removePlayerFromLobby(lobbyId, throwOutPlayerId);
+            result = true;
+        }
+        return result;
+    }
+
+    /**
+     * this method is to remove playerId from the Lobby
+     *
+     * @param lobbyId - the Lobby of the game
+     * @param playerId - the player to kick out
+     */
+    private void removePlayerFromLobby(Long lobbyId, Long playerId) {
+        Player player = playerService.getPlayerById(playerId);
+        Lobby lobby = this.getLobbyById(lobbyId);
+        lobby.leave(player);
+        lobby = lobbyRepository.save(lobby);
+        lobbyRepository.flush();
+    }
+
+    /**
+     * this method is to   end the Lobby, only the creator can end the Lobby.
+     *
+     * @param lobbyId - the Lobby of the game
+     * @param creator - the creator of the lobby
+     *
+     * @return true if Lobby could be successfully ended, otherwise false
+     */
+
+    public boolean endLobby(Long lobbyId, User creator ){
+        boolean result = false;
+        if(isUserLobbyCreator(lobbyId, creator)) {
+            Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyRepository.delete(lobby);
+            result = true;
+        }
+        return result;
     }
 }
