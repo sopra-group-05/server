@@ -81,6 +81,7 @@ public class LobbyControllerTest {
         lobbyPostDTO.setGameMode(0);
         lobbyPostDTO.setLanguage("EN");
 
+        given(playerService.checkPlayerToken(Mockito.any())).willReturn(true);
         given(userService.createUser(Mockito.any())).willReturn(testUser);
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
 
@@ -115,6 +116,7 @@ public class LobbyControllerTest {
         lobbyPostDTO.setGameMode(0);
         lobbyPostDTO.setLanguage("EN");
 
+        given(playerService.checkPlayerToken(Mockito.any())).willReturn(true);
         given(lobbyService.createLobby(Mockito.any())).willThrow(new UnauthorizedException(exceptionMsg));
 
         // when/then -> do the request + validate the result
@@ -144,6 +146,7 @@ public class LobbyControllerTest {
         lobbyPostDTO.setGameMode(0);
         lobbyPostDTO.setLanguage("EN");
 
+        given(playerService.checkPlayerToken(Mockito.any())).willReturn(true);
         given(lobbyService.createLobby(Mockito.any())).willThrow(new ConflictException(exceptionMsg));
 
         // when/then -> do the request + validate the result
