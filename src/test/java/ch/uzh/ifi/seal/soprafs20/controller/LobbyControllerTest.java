@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
@@ -97,7 +98,6 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.deck.deckId", is(lobby.getDeck().getDeckId())))
                 .andExpect(jsonPath("$.players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
-                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(status().isCreated());
     }
 
@@ -192,7 +192,6 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$[0].players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$[0].players[0].role", is((lobby.getPlayers().iterator().next().getRole().name()))))
                 .andExpect(jsonPath("$[0].gameMode", is(lobby.getGameMode().toString())))
-                .andExpect(jsonPath("$[0].creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(jsonPath("$[0].language", is((lobby.getLanguage().toString()))))
         ;
     }
@@ -241,7 +240,6 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.players[0].playerId", is(toIntExact(lobby.getPlayers().iterator().next().getPlayerId()))))
                 .andExpect(jsonPath("$.players[0].role", is(lobby.getPlayers().iterator().next().getRole().name())))
                 .andExpect(jsonPath("$.gameMode", is(lobby.getGameMode().toString())))
-                .andExpect(jsonPath("$.creator.id", is(toIntExact(lobby.getCreator().getId()))))
                 .andExpect(jsonPath("$.language", is((lobby.getLanguage().toString()))))
                 ;
     }
