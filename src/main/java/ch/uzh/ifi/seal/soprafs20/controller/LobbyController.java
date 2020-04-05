@@ -58,21 +58,25 @@ public class LobbyController {
     @ResponseBody
     public LobbyGetDTO createLobby(@RequestHeader(name = "Token", required = false) String token,
                                    @RequestBody LobbyPostDTO lobbyPostDTO) {
+
+        //check if User is already Player in another Lobby/Game
+        Boolean isPlayerToJoin = playerService.checkPlayerToken(token);
         //check Access rights via token
         User creator = userService.checkUserToken(token);
-        Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
 
-        // convert API lobby to internal representation
-        Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
-        lobbyInput.setCreator(player);
-        lobbyInput.addPlayer(player);
-
-        // create lobby
-        Lobby createdLobby = lobbyService.createLobby(lobbyInput);
-
-        // convert internal representation of lobby back to API
-        // return with status code 201 created the Location and user object
-        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(createdLobby);
+        if (isPlayerToJoin) {
+            Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
+            // convert API lobby to internal representation
+            Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+            lobbyInput.setCreator(player);
+            lobbyInput.addPlayer(player);
+            // create lobby
+            Lobby createdLobby = lobbyService.createLobby(lobbyInput);
+            // convert internal representation of lobby back to API
+            // return with status code 201 created the Location and user object
+            return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(createdLobby);
+        }
+        else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
     /**
@@ -131,12 +135,12 @@ public class LobbyController {
     public void joinLobbyById(@PathVariable long lobbyId,
                                        @RequestHeader(name = "Token", required = false) String token) {
         //check if User is already Player in another Lobby/Game
-        Boolean playerToJoin = playerService.checkPlayerToken(token);
+        Boolean isPlayerToJoin = playerService.checkPlayerToken(token);
         //check Access rights via token
         User userToJoin = userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        if (playerToJoin) {
+        if (isPlayerToJoin) {
             String forbiddenExceptionMsg = "The requested Lobby is already " + lobby.getLobbyStatus();
             if (lobby.getLobbyStatus() == LobbyStatus.WAITING) {
                 // convert the User to Player

@@ -50,7 +50,7 @@ public class LobbyService
         checkIfLobbyExists(lobbyInput);
 
         lobbyInput.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
-        lobbyInput.setLobbyStatus(LobbyStatus.RUNNING);
+        lobbyInput.setLobbyStatus(LobbyStatus.WAITING);
         //TODO: function to generate a Deck Object and set it to lobbyInput
 
         // saves the given entity but data is only persisted in the database once flush() is called
