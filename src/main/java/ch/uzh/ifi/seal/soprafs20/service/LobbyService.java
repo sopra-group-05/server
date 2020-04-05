@@ -11,6 +11,7 @@ import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class LobbyService
     private PlayerService playerService;
 
     @Autowired
-    public LobbyService(LobbyRepository lobbyRepository) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
         this.lobbyRepository = lobbyRepository;
     }
 
@@ -43,7 +44,7 @@ public class LobbyService
      *
      * @param lobbyInput
      * @return The created Lobby
-     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     * @see Lobby
      */
     public Lobby createLobby(Lobby lobbyInput)
     {
@@ -66,7 +67,7 @@ public class LobbyService
      * This method will get all lobbies from the lobby repository
      *
      * @return A List of all Lobbies
-     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     * @see Lobby
      */
     public List<Lobby> getLobbies()
     {
@@ -77,7 +78,7 @@ public class LobbyService
      * This method will get a specific Lobby by ID from the Lobby Repository
      *
      * @return The requested Lobby
-     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     * @see Lobby
      */
     public Lobby getLobbyById(Long id)
     {
@@ -89,7 +90,7 @@ public class LobbyService
 
     public boolean isUsernameInLobby(String username, Lobby lobby) {
         for (Player player : lobby.getPlayers()) {
-            if (username == player.getUsername()) {
+            if (username.equals(player.getUsername())) {
                 return true;
             }
         }
@@ -116,7 +117,7 @@ public class LobbyService
      *
      * @param lobbyToBeCreated
      * @throws ConflictException
-     * @see ch.uzh.ifi.seal.soprafs20.entity.Lobby
+     * @see Lobby
      */
     private void checkIfLobbyExists(Lobby lobbyToBeCreated) {
         Lobby lobbyByLobbyName = lobbyRepository.findByLobbyName(lobbyToBeCreated.getLobbyName());

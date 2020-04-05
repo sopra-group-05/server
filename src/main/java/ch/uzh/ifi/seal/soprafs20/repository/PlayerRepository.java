@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface PlayerRepository extends JpaRepository<Player, Long> {
 	Player findByUsername(String username);
 	Player findByToken(String token);
-	Player findByPlayerId(long id);
+	Player findById(long id);
 	// also haves delete, and findAll (see JPA Slides from Tutorial, page 25)
 }

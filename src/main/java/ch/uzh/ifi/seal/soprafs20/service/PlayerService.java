@@ -3,14 +3,18 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.repository.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+
+import java.util.Optional;
 
 /**
  * Player Service
@@ -26,7 +30,7 @@ public class PlayerService {
     private final PlayerRepository playerRepository;
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(@Qualifier("playerRepository") PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
     }
 
@@ -51,15 +55,13 @@ public class PlayerService {
      */
     public Player getPlayerById(Long id)
     {
-        return playerRepository.findByPlayerId(id);
+        Optional<Player> player = playerRepository.findById(id);
+        return player.orElseThrow(()->new NotFoundException("Player not found"));
     }
 
     public Boolean checkPlayerToken(String token) {
         Player playerByToken = playerRepository.findByToken(token);
-        if (playerByToken != null) {
-            return false;
-        }
-        return true;
+        return playerByToken == null;
     }
 
     /**

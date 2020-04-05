@@ -24,7 +24,7 @@ public class Player {
     }
 
     public Player(User user) {
-        this.playerId = user.getId();
+        this.id = user.getId();
         this.username = user.getUsername();
         this.token = user.getToken();
         this.status = PlayerStatus.JOINED;
@@ -32,7 +32,7 @@ public class Player {
 
 	@Id
     @Column(nullable = false, unique = true)
-	private Long playerId;
+	private Long id;
 	
 	@Column(nullable = false, unique = true) 
 	private String username;
@@ -46,8 +46,8 @@ public class Player {
     @Column(nullable = false)
     private PlayerRole role;
 
-	public Long getPlayerId() {
-		return playerId;
+	public Long getId() {
+		return id;
 	}
 
 	public String getUsername() {

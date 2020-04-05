@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.soprafs20.rest.dto;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ public class LobbyGetDTO {
 
     public List<Player> getPlayers() {
         List<Player> playersAsList = new ArrayList<>(players);
-        playersAsList.sort(Comparator.comparing(Player::getPlayerId));
+        playersAsList.sort(Comparator.comparing(Player::getId));
         return playersAsList;
     }
 
