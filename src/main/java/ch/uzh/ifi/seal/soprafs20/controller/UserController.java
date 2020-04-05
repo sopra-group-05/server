@@ -75,14 +75,14 @@ public class UserController {
      */
     @PutMapping("/users/{userId}")
     @ResponseBody
-    public ResponseEntity updateUser(@RequestHeader(name = "Token", required = false) String token, @RequestBody UserPutDTO userPutDTO) {
+    public ResponseEntity updateUser(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId,  @RequestBody UserPutDTO userPutDTO) {
         userService.checkUserToken(token);
 
         // convert API input to internal representation
         User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
 
         // update user in database
-        userService.updateUser(userInput, token);
+        userService.updateUser(userInput, token, userId);
 
         return ResponseEntity.noContent().build(); // status code 204 noContent
     }
