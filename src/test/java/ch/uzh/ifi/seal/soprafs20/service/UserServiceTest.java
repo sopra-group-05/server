@@ -2,10 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -281,7 +278,7 @@ public class UserServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser2);
         String exceptionMessage = "You're not supposed to delete this user Profile";
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.deleteUser(1L, "wrong", testUser), exceptionMessage);
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> userService.deleteUser(1L, "wrong", testUser), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 

@@ -67,7 +67,7 @@ public class UserService {
      * @param user
      * @return User
      */
-    public User updateUser(User user, String token) {
+    public User updateUser(User user, String token, long id) {
         User userByToken = userRepository.findByToken(token);
         User userById = this.getUserByID(user.getId());
         if (null == userByToken) {
@@ -76,6 +76,10 @@ public class UserService {
         } else if(null == userById) {
             // Profile does not exist
             throw new NotFoundException("The provided User ID does not belong to any user");
+        }
+
+        if (!user.getId().equals(id)) {
+            throw new UnauthorizedException("Id's of URL and Request do not match");
         }
 
         if (!userById.equals(userByToken)) {
@@ -171,7 +175,7 @@ public class UserService {
 
         if (!userById.equals(userByToken)) {
             // UserProfile should be the one from the User with the token
-            throw new UnauthorizedException("You're not supposed to delete this user Profile");
+            throw new ForbiddenException("You're not supposed to delete this user Profile");
         }  else if (!toDeleteUser.getPassword().equals(userById.getPassword())){
             //password should correct
             throw new ConflictException("Wrong Password");
