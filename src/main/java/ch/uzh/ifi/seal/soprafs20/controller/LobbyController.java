@@ -154,19 +154,32 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
-
     @PutMapping("/lobbies/{lobbyId}/leave")
     @ResponseBody
-    public ResponseEntity<?> leaveLobbyById(@PathVariable long lobbyId, @PathVariable long userId,
-                                            @RequestHeader(name = "Token", required = false) String token) {
+    public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
+                                           @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User lobbyCreator = userService.checkUserToken(token);
 
         //verify if the throwing out player is the lobby creator
-        if(lobbyService.kickOutPlayer(lobbyCreator, userId, lobbyId)) {
-            return new ResponseEntity<>("", HttpStatus.OK);
+        lobbyService.removePlayerFromLobby(lobbyId, lobbyCreator.getId());
+        return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
+
+
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/kick/{userID}")
+    @ResponseBody
+    public ResponseEntity<?> kickPlayerOut(@PathVariable long lobbyId, @PathVariable long userID,
+                                           @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User lobbyCreator = userService.checkUserToken(token);
+
+        //verify if the throwing out player is the lobby creator
+        if(lobbyService.kickOutPlayer(lobbyCreator, userID, lobbyId)) {
+            return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Forbidden: User is not creator of lobby or is not even in the lobby", HttpStatus.FORBIDDEN);
         }
 
     }
