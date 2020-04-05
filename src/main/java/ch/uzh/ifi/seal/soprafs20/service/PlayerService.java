@@ -48,4 +48,12 @@ public class PlayerService {
          playerRepository.flush();
         return player;
     }
+
+    public Boolean checkPlayerToken(String token) {
+        Player playerByToken = playerRepository.findByToken(token);
+        if (playerByToken != null) {
+            return false;
+        }
+        return true;
+    }
 }

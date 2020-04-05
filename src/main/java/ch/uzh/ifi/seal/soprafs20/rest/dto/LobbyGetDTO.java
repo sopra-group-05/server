@@ -16,7 +16,7 @@ public class LobbyGetDTO {
     private LobbyStatus lobbyStatus;
     private List<Player> players;
     private GameModeStatus gameMode;
-    private User creator;
+    private Player creator;
     private String language;
 
     public Long getId() {
@@ -67,11 +67,11 @@ public class LobbyGetDTO {
         this.gameMode = gameMode;
     }
 
-    public User getCreator() {
+    public Player getCreator() {
         return creator;
     }
 
-    public void setCreator(User creator) {
+    public void setCreator(Player creator) {
         this.creator = creator;
     }
 

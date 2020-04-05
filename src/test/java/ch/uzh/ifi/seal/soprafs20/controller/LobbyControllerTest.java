@@ -20,6 +20,7 @@ import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -73,7 +74,7 @@ public class LobbyControllerTest {
         Player testPlayer = new Player(testUser);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testUser);
+        lobby.setCreator(testPlayer);
 
         LobbyPostDTO lobbyPostDTO = new LobbyPostDTO();
         lobbyPostDTO.setLobbyName("testName");
@@ -172,7 +173,7 @@ public class LobbyControllerTest {
         testPlayer.setRole(PlayerRole.GUESSER);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testUser);
+        lobby.setCreator(testPlayer);
         lobby.setLanguage(Language.DE);
 
         List<Lobby> allLobbies = Collections.singletonList(lobby);
@@ -206,22 +207,31 @@ public class LobbyControllerTest {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
-        lobby.setLobbyName("testName");
         Deck testDeck = new Deck();
         lobby.setDeck(testDeck);
         User testUser = new User();
         testUser.setId(1L);
+        testUser.setUsername("testName");
+        testUser.setToken("1");
         Player testPlayer = new Player(testUser);
         testPlayer.setRole(PlayerRole.GUESSER);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testUser);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        lobby.setCreator(testPlayer);
         lobby.setLanguage(Language.DE);
 
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(true);
+        given(lobbyService.isUsernameInLobby(Mockito.anyString(), Mockito.any())).willReturn(true);
+        given(lobbyService.addPlayerToLobby(Mockito.any(), Mockito.any())).willReturn(lobby);
         given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
 
+
         // make get Request to Lobby with id
-        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId()).contentType(MediaType.APPLICATION_JSON);
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", "1");
 
         // then
         mockMvc.perform(getRequest)
@@ -251,15 +261,22 @@ public class LobbyControllerTest {
         lobby.setDeck(testDeck);
         User testUser = new User();
         testUser.setId(1L);
+        testUser.setUsername("testUser");
         Player testPlayer = new Player(testUser);
         testPlayer.setRole(PlayerRole.GUESSER);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
-        lobby.setCreator(testUser);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
         User testUser2 = new User();
+        testUser2.setUsername("testUser2");
         testUser2.setToken("2");
 
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(true);
+        given(lobbyService.isUsernameInLobby(Mockito.anyString(), Mockito.any())).willReturn(true);
         given(lobbyService.addPlayerToLobby(Mockito.any(), Mockito.any())).willReturn(lobby);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
 
         // make get Request to Lobby with id
         MockHttpServletRequestBuilder putRequest = put("/lobbies/" + lobby.getId() + "/join")
@@ -292,8 +309,10 @@ public class LobbyControllerTest {
         testUser.setToken("1");
         Player testPlayer = new Player(testUser);
         lobby.addPlayer(testPlayer);
-        lobby.setCreator(testUser);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
 
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(true);
         given(userService.checkUserToken(Mockito.anyString())).willThrow(new UnauthorizedException(exceptionMsg));
 
         // when/then -> do the request + validate the result

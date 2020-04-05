@@ -7,6 +7,9 @@ import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
@@ -18,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -59,7 +64,7 @@ public class LobbyController {
 
         // convert API lobby to internal representation
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
-        lobbyInput.setCreator(creator);
+        lobbyInput.setCreator(player);
         lobbyInput.addPlayer(player);
 
         // create lobby
@@ -104,12 +109,15 @@ public class LobbyController {
     public LobbyGetDTO getLobbyById(@RequestHeader(name = "Token", required = false) String token,
                                     @PathVariable long lobbyId) {
         //check Access rights via token
-        User creator = userService.checkUserToken(token);
+        User user = userService.checkUserToken(token);
         // get the requested lobby; send message to the LobbyService
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
-
-        // return with status code 200
-        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+            if (lobbyService.isUsernameInLobby(user.getUsername(), lobby)) {
+                // return with status code 200
+                return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+            }
+            else throw new ForbiddenException(
+                    "You are not in the requested Lobby. Therefore access is Forbidden.");
     }
 
     /**
@@ -122,13 +130,24 @@ public class LobbyController {
     @ResponseBody
     public void joinLobbyById(@PathVariable long lobbyId,
                                        @RequestHeader(name = "Token", required = false) String token) {
+        //check if User is already Player in another Lobby/Game
+        Boolean playerToJoin = playerService.checkPlayerToken(token);
         //check Access rights via token
         User userToJoin = userService.checkUserToken(token);
-        // convert the User to Player
-        Player player = playerService.convertUserToPlayer(userToJoin, PlayerRole.CLUE_CREATOR);
-        // get the requested Lobby and add the Player to the Lobby
-        lobbyService.addPlayerToLobby(lobbyId, player);
-        // return with status code 204
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        if (playerToJoin) {
+            String forbiddenExceptionMsg = "The requested Lobby is already " + lobby.getLobbyStatus();
+            if (lobby.getLobbyStatus() == LobbyStatus.WAITING) {
+                // convert the User to Player
+                Player player = playerService.convertUserToPlayer(userToJoin, PlayerRole.CLUE_CREATOR);
+                // get the requested Lobby and add the Player to the Lobby
+                lobbyService.addPlayerToLobby(lobby, player);
+                // return with status code 204
+            }
+            else throw new ForbiddenException(forbiddenExceptionMsg);
+        }
+        else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
 }

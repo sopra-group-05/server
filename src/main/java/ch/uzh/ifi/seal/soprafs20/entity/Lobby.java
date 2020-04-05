@@ -39,7 +39,7 @@ public class Lobby
     private GameModeStatus gameMode;
 
     @OneToOne
-    private User creator;
+    private Player creator;
 
     @Column(nullable = false)
     private Language language;
@@ -92,11 +92,11 @@ public class Lobby
         this.gameMode = gameMode;
     }
 
-    public User getCreator() {
+    public Player getCreator() {
         return creator;
     }
 
-    public void setCreator(User creator) {
+    public void setCreator(Player creator) {
         this.creator = creator;
     }
 
