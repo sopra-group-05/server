@@ -6,6 +6,8 @@ import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class LobbyGetDTO {
@@ -16,7 +18,7 @@ public class LobbyGetDTO {
     private LobbyStatus lobbyStatus;
     private List<Player> players;
     private GameModeStatus gameMode;
-    private User creator;
+    private Player creator;
     private String language;
 
     public Long getId() {
@@ -52,7 +54,9 @@ public class LobbyGetDTO {
     }
 
     public List<Player> getPlayers() {
-        return players;
+        List<Player> playersAsList = new ArrayList<>(players);
+        playersAsList.sort(Comparator.comparing(Player::getPlayerId));
+        return playersAsList;
     }
 
     public void setPlayers(List<Player> players) {
@@ -67,11 +71,11 @@ public class LobbyGetDTO {
         this.gameMode = gameMode;
     }
 
-    public User getCreator() {
+    public Player getCreator() {
         return creator;
     }
 
-    public void setCreator(User creator) {
+    public void setCreator(Player creator) {
         this.creator = creator;
     }
 

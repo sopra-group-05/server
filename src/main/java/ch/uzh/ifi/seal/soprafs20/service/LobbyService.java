@@ -5,6 +5,8 @@ import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.DataFormatException;
 
 @Service
 @Transactional
@@ -77,22 +80,32 @@ public class LobbyService
      */
     public Lobby getLobbyById(Long id)
     {
-        return lobbyRepository.findByLobbyId(id);
+        if (lobbyRepository.findByLobbyId(id) != null) {
+            return lobbyRepository.findByLobbyId(id);
+        }
+        else  { throw new NotFoundException("The requested Lobby does not exist."); }
     }
 
+    public boolean isUsernameInLobby(String username, Lobby lobby) {
+        for (Player player : lobby.getPlayers()) {
+            if (username == player.getUsername()) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Main Goal: Will update the Lobby with the added Player
      * First it Checks the Token (Does it belong to any User? Does the token belong to the user you're trying to edit?)
      * Checks the User ID (Does it even exist?)
-     * @param lobbyId
+     * @param lobby
      * @return Lobby
      */
-    public Lobby addPlayerToLobby(Long lobbyId, Player playerToAdd) {
-        Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
-        lobby.addPlayer(playerToAdd);
-        lobby = lobbyRepository.save(lobby);
-        lobbyRepository.flush();
-        return lobby;
+    public Lobby addPlayerToLobby(Lobby lobby, Player playerToAdd) {
+                lobby.addPlayer(playerToAdd);
+                lobby = lobbyRepository.save(lobby);
+                lobbyRepository.flush();
+                return lobby;
     }
 
 
@@ -118,7 +131,6 @@ public class LobbyService
                     "Lobby Name Conflict",
                     new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
         }
-
     }
 
     /**

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.context.request.WebRequest;
@@ -45,15 +44,22 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class) // 409
-    public ResponseEntity handleConflict(ConflictException ex) {
+    public ResponseEntity handleConflictException(ConflictException ex) {
         log.error(String.format("ConflictException raised:%s", ex));
         return new ResponseEntity(ex.getMessage(), HttpStatus.CONFLICT);
     }
+
 
     @ExceptionHandler(TransactionSystemException.class)
     public ResponseEntity handleTransactionSystemException(Exception ex, HttpServletRequest request) {
         log.error(String.format("Request: %s raised %s", request.getRequestURL(), ex));
         return new ResponseEntity(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ForbiddenException.class) // 403
+    public ResponseEntity handleForbiddenException(ForbiddenException ex) {
+        log.error(String.format("ForbiddenException raised:%s", ex));
+        return new ResponseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     // Keep this one disable for all testing purposes -> it shows more detail with this one disabled

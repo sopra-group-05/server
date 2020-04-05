@@ -106,4 +106,13 @@ public class DTOMapperTest {
         assertEquals(Language.DE, lobby.getLanguage());
 
     }
+
+    @Test
+    public void CreateUserFromDeleteUserDTO(){
+        UserDeleteDTO userDeleteDTO = new UserDeleteDTO();
+        userDeleteDTO.setPassword("password");
+
+        User user = DTOMapper.INSTANCE.convertUserDeleteDTOToEntity(userDeleteDTO);
+        assertEquals(user.getPassword(), "password");
+    }
 }
