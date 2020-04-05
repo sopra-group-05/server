@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 /**
  * Player Service
  * This class is the "worker" and responsible for all functionality related to the Player
@@ -58,5 +60,27 @@ public class PlayerService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Removes the player from Player repository
+     *
+     * @param - the Player to be removed from the Player repository
+     * */
+    public void deletePlayer(Player player) {
+        if(player != null) {
+            playerRepository.delete(player);
+        }
+    }
+
+    /**
+     * Removes the list of given players from Player repository
+     *
+     * @param - set of players to be removed from the Player repository
+     * */
+    public void deletePlayers(Set<Player> playersSet) {
+        if(playersSet != null) {
+            playerRepository.deleteAll(playersSet);
+        }
     }
 }

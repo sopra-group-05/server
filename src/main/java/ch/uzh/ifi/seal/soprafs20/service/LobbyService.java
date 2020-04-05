@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
 
@@ -176,6 +177,7 @@ public class LobbyService
         Lobby lobby = this.getLobbyById(lobbyId);
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
+        playerService.deletePlayer(player);
         lobbyRepository.flush();
     }
 
@@ -191,7 +193,9 @@ public class LobbyService
         boolean result = false;
         if(isUserLobbyCreator(lobbyId, creator)) {
             Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+            Set<Player> playersSet = lobby.getPlayers();
             lobbyRepository.delete(lobby);
+            playerService.deletePlayers(playersSet);
             result = true;
         }
         return result;

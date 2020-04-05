@@ -34,7 +34,7 @@ public class Lobby
     private LobbyStatus lobbyStatus;
 
     @ElementCollection
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN})
     private Set<Player> players = new HashSet<>();
 
     @Column(nullable = false)
