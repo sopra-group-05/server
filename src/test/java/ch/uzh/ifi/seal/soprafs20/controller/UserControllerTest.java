@@ -194,7 +194,7 @@ public class UserControllerTest {
         user.setToken("1");
         user.setPassword("pw");
         user.setStatus(UserStatus.ONLINE);
-        given(userService.updateUser(Mockito.any(), Mockito.anyString())).willReturn(user);
+        given(userService.updateUser(Mockito.any(), Mockito.anyString(), Mockito.anyLong())).willReturn(user);
 
         // generate put Request
         MockHttpServletRequestBuilder putRequest = put("/users/" + user.getId())
@@ -225,7 +225,7 @@ public class UserControllerTest {
 
         // given updateUser throws a NotFound error and checkUserToken is valid
         String exceptionMsg = "User not found";
-        given(userService.updateUser(Mockito.any(), Mockito.anyString())).willThrow(new NotFoundException(exceptionMsg));
+        given(userService.updateUser(Mockito.any(), Mockito.anyString(), Mockito.anyLong())).willThrow(new NotFoundException(exceptionMsg));
         given(userService.checkUserToken(Mockito.anyString())).willReturn(new User());
 
         // generate put Request

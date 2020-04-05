@@ -197,7 +197,7 @@ public class UserServiceTest {
         // try changing username and birthday
         testUser.setUsername("flo");
         testUser.setBirthday("01.01.2020");
-        User updatedUser = userService.updateUser(testUser, testUser.getToken());
+        User updatedUser = userService.updateUser(testUser, testUser.getToken(), testUser.getId());
 
         // asserts
         assertEquals(testUser.getId(), updatedUser.getId());
@@ -222,7 +222,7 @@ public class UserServiceTest {
         testUser.setBirthday("01.01.2020");
 
         String exceptionMessage = "Token does not belong to any user";
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, Mockito.anyString()), exceptionMessage);
+        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, Mockito.anyString(), testUser.getId()), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
@@ -250,7 +250,7 @@ public class UserServiceTest {
         testUser.setBirthday("01.01.2020");
 
         String exceptionMessage = "You're not supposed to edit this user Profile";
-        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, testUser.getToken()), exceptionMessage);
+        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, testUser.getToken(), testUser.getId()), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
