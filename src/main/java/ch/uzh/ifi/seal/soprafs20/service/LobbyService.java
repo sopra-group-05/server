@@ -159,7 +159,7 @@ public class LobbyService
      * @param lobbyId - the Lobby of the game
      * @param playerId - the player to kick out
      */
-    private void removePlayerFromLobby(Long lobbyId, Long playerId) {
+    public void removePlayerFromLobby(Long lobbyId, Long playerId) {
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
         lobby.leave(player);
@@ -175,7 +175,6 @@ public class LobbyService
      *
      * @return true if Lobby could be successfully ended, otherwise false
      */
-
     public boolean endLobby(Long lobbyId, User creator ){
         boolean result = false;
         if(isUserLobbyCreator(lobbyId, creator)) {
