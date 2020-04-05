@@ -1,7 +1,10 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.entity.User;
-import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.UserGetDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.UserLoginGetDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPostDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPutDTO;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -83,22 +86,6 @@ public class UserController {
 
         // update user in database
         userService.updateUser(userInput, token);
-
-        return ResponseEntity.noContent().build(); // status code 204 noContent
-    }
-
-    /**
-     * Delete Profile of User (username and birthday)
-     * @param
-     */
-    @DeleteMapping("/users/{userId}")
-    @ResponseBody
-    public ResponseEntity deleteUser(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @RequestBody UserDeleteDTO userDeleteDTO) {
-        userService.checkUserToken(token);
-
-        User toDeleteUser = DTOMapper.INSTANCE.convertUserDeleteDTOToEntity(userDeleteDTO);
-        // delete User
-        userService.deleteUser(userId, token, toDeleteUser);
 
         return ResponseEntity.noContent().build(); // status code 204 noContent
     }

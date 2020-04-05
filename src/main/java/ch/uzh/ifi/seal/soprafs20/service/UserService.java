@@ -155,33 +155,6 @@ public class UserService {
         }
         return userById;
     }
-    /*
-    Delete User
-    * @param token
-    * @param id
-    */
-    public void deleteUser(long id , String token, User toDeleteUser) {
-        User userByToken = userRepository.findByToken(token);
-        User userById = userRepository.findById(id);
-
-        if (null == userById){
-            // Profile does not exist
-            throw new NotFoundException("The provided User ID does not belong to any user");
-        }
-
-        if (!userById.equals(userByToken)) {
-            // UserProfile should be the one from the User with the token
-            throw new UnauthorizedException("You're not supposed to delete this user Profile");
-        }  else if (!toDeleteUser.getPassword().equals(userById.getPassword())){
-            //password should correct
-            throw new ConflictException("Wrong Password");
-        } else {
-            userRepository.delete(userById);
-            userRepository.flush();
-        }
-
-
-    }
 
     /**
      * This is a helper method that will check the uniqueness criteria of the username

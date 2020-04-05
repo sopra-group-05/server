@@ -99,7 +99,4 @@ public interface DTOMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "role", target = "role")
     PlayerGetDTO convertEntityToPlayerGetDTO(PlayerGetDTO convertedPlayer);
-
-    @Mapping(source = "password", target = "password")
-    User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
 }
