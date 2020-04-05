@@ -1,5 +1,5 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
-
+//test
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
