@@ -148,7 +148,8 @@ public class LobbyService
      * */
     public boolean isUserLobbyCreator(Long lobbyId, User user) {
         Lobby lobby = this.getLobbyById(lobbyId);
-        return user.equals(lobby.getCreator());
+        Player player = playerService.getPlayerById(user.getId());
+        return player.equals(lobby.getCreator());
     }
 
     /**
