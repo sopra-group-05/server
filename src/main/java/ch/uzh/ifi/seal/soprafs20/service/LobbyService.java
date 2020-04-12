@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -201,5 +202,35 @@ public class LobbyService
             result = true;
         }
         return result;
+    }
+
+    /**
+     * this method checks whether all Players are ready
+     *
+     * @param players - the Set of Players of the Lobby
+     *
+     * @return true if all Players are ready, false otherwise
+     */
+    public boolean areAllPlayersReady(Set<Player> players){
+        for (Player player : players) {
+            if (player.getStatus() != PlayerStatus.READY) {return false;}
+        }
+        return true;
+    }
+
+    /**
+     * this method is to start the Lobby, only the creator can start the Lobby.
+     *
+     * @param lobbyId - the Lobby of the game
+     *
+     * @return true if Lobby could be successfully started, otherwise false
+     */
+    public boolean startGame(Long lobbyId){
+        try {
+            Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            return true;
+        }
+        catch (Exception e) {return false;}
     }
 }
