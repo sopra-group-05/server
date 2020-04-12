@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
@@ -231,5 +232,46 @@ public class LobbyService
             return true;
         }
         catch (Exception e) {return false;}
+    }
+
+    /**
+     * This method is to stop the Lobby, the requesting Player leaves the Game.
+     * In all cases the requesting Player is deleted from the Lobby and the Player Repository
+     * Additionally, the game will be stopped as follows:
+     * - The lobby contains at least 3 Human Players and the Game Mode is Bots
+     *      --> The Game will resume with (#HumanPlayers-1 and #Bots+1)
+     * - The Lobby contains at least 4 Human Players and the Game Mode is Humans
+     *      --> The Game will resume with (#HumanPlayers-1)
+     * - In ALL other cases, the Game Status is changed to STOPPED and the frontend directs back to the lobby
+     *      --> The Lobby contains (#HumanPlayers-1) and is stopped
+     *
+     * @param lobbyId,player - the Lobby of the game and the leaving Player
+     *
+     * @return LobbyStatus
+     * (RUNNING if the game can be continued, STOPPED if the game cannot be continued)
+     */
+    public Lobby stopGame(Long lobbyId, Player player) {
+        LobbyStatus lobbyStatus = LobbyStatus.RUNNING;
+        Lobby lobby = getLobbyById(lobbyId);
+        Set<Player> players = lobby.getPlayers();
+        int numberOfPlayers = players.size();
+        GameModeStatus gameMode = lobby.getGameMode();
+        if (gameMode == GameModeStatus.HUMANS && numberOfPlayers < 4) {
+            lobbyStatus = LobbyStatus.STOPPED;
+        }
+        else if (gameMode == GameModeStatus.BOTS) {
+            if (numberOfPlayers < 3) {
+                lobbyStatus = LobbyStatus.STOPPED;
+            }
+            else {//TODO: Add one Bot as a replacement for the leaving Human Player
+                //TODO: this.addPlayerToLobby(lobbyId, BOT.getId())
+            }
+        }
+        lobby.setLobbyStatus(lobbyStatus);
+        this.removePlayerFromLobby(lobbyId, player.getId());
+        playerService.deletePlayer(player);
+        //If the response of the API call is "STOPPED" the frontend must redirect back to the lobby!
+        //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
+        return lobby;
     }
 }

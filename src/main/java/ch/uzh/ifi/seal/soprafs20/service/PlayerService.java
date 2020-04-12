@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.repository.PlayerRepository;
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class PlayerService {
     public Player getPlayerById(Long id)
     {
         Optional<Player> player = playerRepository.findById(id);
-        return player.orElseThrow(()->new NotFoundException("Player not found"));
+        return player.orElseThrow(()->new ForbiddenException("Player not found"));
     }
 
     public Boolean checkPlayerToken(String token) {

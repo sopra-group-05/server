@@ -209,8 +209,8 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void startLobbyById(@PathVariable long lobbyId,
-                              @RequestHeader(name = "Token", required = false) String token) {
-        //check if User is already Player in another Lobby/Game
+                               @RequestHeader(name = "Token", required = false) String token) {
+        //check if Player is the Host of the lobby and therefore allowed to start the game
         Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
         //check Access rights via token
         User userToJoin = userService.checkUserToken(token);
@@ -226,5 +226,25 @@ public class LobbyController {
             else throw new ForbiddenException(forbiddenExceptionMsg);
         }
         else throw new ForbiddenException("You are no Host of the Lobby or not even in the lobby.");
+    }
+
+    /**
+     * PUT Stop the Game (A Player leaves the Game)
+     * @param lobbyId
+     * @return Status Code 204
+     */
+    @PutMapping("/lobbies/{lobbyId}/stop2")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public LobbyGetDTO stopLobbyById2(@PathVariable long lobbyId,
+                               @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User userToJoin = userService.checkUserToken(token);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        Player player = playerService.getPlayerById(userToJoin.getId());
+
+        LobbyStatus response = lobbyService.stopGame(lobbyId, player);
+
+        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
 }

@@ -28,6 +28,7 @@ public class Player {
         this.username = user.getUsername();
         this.token = user.getToken();
         this.status = PlayerStatus.JOINED;
+        //TODO: this.type = can be HUMAN or BOT
     }
 
 	@Id
