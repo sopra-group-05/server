@@ -65,6 +65,21 @@ public class PlayerService {
     }
 
     /**
+     * Checks if token belongs to the lobby creator and therefore is allowed to start the game
+     *
+     * @param token ,the Token of the Player that needs to be checked.
+     * */
+    public Boolean isAllowedToStart(String token) {
+        boolean bool = false;
+        Player playerByToken = playerRepository.findByToken(token);
+        if (playerByToken != null) {
+            PlayerRole role = playerByToken.getRole();
+            bool = (role == PlayerRole.GUESSER);
+        }
+        return bool;
+    }
+
+    /**
      * Removes the player from Player repository
      *
      * @param - the Player to be removed from the Player repository

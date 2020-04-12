@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User Controller
@@ -197,7 +198,33 @@ public class LobbyController {
         } else {
             return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
         }
-
     }
 
+    /**
+     * PUT Start the game
+     * @param lobbyId
+     * @return Status Code 204
+     */
+    @PutMapping("/lobbies/{lobbyId}/start")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void startLobbyById(@PathVariable long lobbyId,
+                              @RequestHeader(name = "Token", required = false) String token) {
+        //check if User is already Player in another Lobby/Game
+        Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
+        //check Access rights via token
+        User userToJoin = userService.checkUserToken(token);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        if (isPlayerAllowedToStart) {
+            String forbiddenExceptionMsg = "Not all players in the Lobby are ready yet.";
+            Set<Player> players = lobby.getPlayers();
+            boolean areAllPlayersReady = lobbyService.areAllPlayersReady(players);
+            if (areAllPlayersReady) {
+                lobbyService.startGame(lobbyId);
+            }
+            else throw new ForbiddenException(forbiddenExceptionMsg);
+        }
+        else throw new ForbiddenException("You are no Host of the Lobby or not even in the lobby.");
+    }
 }
