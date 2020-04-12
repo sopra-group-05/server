@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
-import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -143,7 +140,7 @@ public class LobbyController {
 
         if (isPlayerToJoin) {
             String forbiddenExceptionMsg = "The requested Lobby is already " + lobby.getLobbyStatus();
-            if (lobby.getLobbyStatus() == LobbyStatus.WAITING) {
+            if (lobby.getLobbyStatus() != LobbyStatus.RUNNING) {
                 // convert the User to Player
                 Player player = playerService.convertUserToPlayer(userToJoin, PlayerRole.CLUE_CREATOR);
                 // get the requested Lobby and add the Player to the Lobby
@@ -213,12 +210,13 @@ public class LobbyController {
         //check if Player is the Host of the lobby and therefore allowed to start the game
         Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
         //check Access rights via token
-        User userToJoin = userService.checkUserToken(token);
+        userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
         if (isPlayerAllowedToStart) {
             String forbiddenExceptionMsg = "Not all players in the Lobby are ready yet.";
             Set<Player> players = lobby.getPlayers();
+
             boolean areAllPlayersReady = lobbyService.areAllPlayersReady(players);
             if (areAllPlayersReady) {
                 lobbyService.startGame(lobbyId);
@@ -234,7 +232,7 @@ public class LobbyController {
      * @return Status Code 204
      */
     @PutMapping("/lobbies/{lobbyId}/stop2")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public LobbyGetDTO stopLobbyById2(@PathVariable long lobbyId,
                                @RequestHeader(name = "Token", required = false) String token) {
