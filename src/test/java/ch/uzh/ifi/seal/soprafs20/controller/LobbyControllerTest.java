@@ -27,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
@@ -339,5 +340,56 @@ public class LobbyControllerTest {
         catch (JsonProcessingException e) {
             throw new SopraServiceException(String.format("The request body could not be created.%s", e.toString()));
         }
+    }
+
+    /**
+     * Tests creator kickPlayerOut lobbies/{lobbyId}/kick/{UserId}
+     * Valid Input, adds the User that sends the request to the Lobby
+     */
+    @Test
+    public void kickPlayerOut_validInput() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        User testUser2 = new User();
+        testUser2.setUsername("testUser2");
+        testUser2.setToken("2");
+        testUser2.setId(2L);
+        Player testPlayer2 = new Player(testUser2);
+        testPlayer2.setRole(PlayerRole.CLUE_CREATOR);
+        lobby.addPlayer(testPlayer2);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(true);
+        given(lobbyService.isUsernameInLobby(Mockito.anyString(), Mockito.any())).willReturn(true);
+        given(lobbyService.kickOutPlayer(Mockito.any(), Mockito.any(),Mockito.any())).willReturn(true);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(lobbyService.isUserLobbyCreator(Mockito.any(),Mockito.any())).willReturn(true);
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder putRequest = put("/lobbies/" + lobby.getId() + "/kick/" + testPlayer2.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+
+        Assert.isNull(playerService.getPlayerById(2L));
+        Assert.isTrue(playerService.getPlayerById(1L).getId()!=null);
     }
 }
