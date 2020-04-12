@@ -240,10 +240,10 @@ public class LobbyController {
                                @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User userToJoin = userService.checkUserToken(token);
-        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.getLobbyById(lobbyId);
         Player player = playerService.getPlayerById(userToJoin.getId());
 
-        LobbyStatus response = lobbyService.stopGame(lobbyId, player);
+        Lobby lobby = lobbyService.stopGame(lobbyId, player);
 
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }

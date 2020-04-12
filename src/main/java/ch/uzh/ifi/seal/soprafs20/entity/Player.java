@@ -47,6 +47,9 @@ public class Player {
     @Column(nullable = false)
     private PlayerRole role;
 
+    @Column(nullable = false)
+    private int points = 0;
+
 	public Long getId() {
 		return id;
 	}
@@ -75,4 +78,11 @@ public class Player {
         this.role = role;
     }
 
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int getPoints() {
+        return points;
+    }
 }

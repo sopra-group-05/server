@@ -46,6 +46,9 @@ public class User implements Serializable {
     @Column(nullable = true)
     private String birthday;
 
+    @Column (nullable = false)
+    private int points = 0;
+
 	public Long getId() {
 		return id;
 	}
@@ -93,6 +96,19 @@ public class User implements Serializable {
 	public void setToken(String token) {
 		this.token = token;
 	}
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int addPoints(int points) {
+	    this.points = this.points + points;
+	    return this.points;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -210,4 +210,16 @@ public class UserService {
         }
         return userByToken;
     }
+
+    /**
+     * This method will add the achieved InGame Points of a Player to the Points balance of a User
+     *
+     * @param user,points - the to be updated User and the Points he earned at the time of the function call
+     *
+     * @return the new Balance of the Points of a User
+     */
+    public int updatePoints(User user, int points){
+        return user.addPoints(points);
+    }
+
 }

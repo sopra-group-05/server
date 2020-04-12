@@ -35,6 +35,8 @@ public class LobbyService
 
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
@@ -268,8 +270,16 @@ public class LobbyService
                 //TODO: this.addPlayerToLobby(lobbyId, BOT.getId())
             }
         }
+        //Update Points of the Player in the User Repository
+        int currentPoints = player.getPoints();
+        User user = userService.getUserByID(player.getId());
+        userService.updatePoints(user, currentPoints);
+
+        //Set Lobby Status to what is defined within the function
         lobby.setLobbyStatus(lobbyStatus);
+        //Remove the Player from the Lobby
         this.removePlayerFromLobby(lobbyId, player.getId());
+        //Remove the Player form the Player Repository
         playerService.deletePlayer(player);
         //If the response of the API call is "STOPPED" the frontend must redirect back to the lobby!
         //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
