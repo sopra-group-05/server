@@ -3,12 +3,11 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
-import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
-import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +36,10 @@ public class LobbyService
     private PlayerService playerService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private DeckService deckService;
+    @Autowired
+    private CardService cardService;
 
     @Autowired
     public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
@@ -284,4 +287,42 @@ public class LobbyService
         //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
         return lobby;
     }
+
+    /**
+     *
+     * to get the list of Mystery word from the Lobby
+     *
+     * @param lobbyId - the current lobbyId
+     * */
+    public List<MysteryWord> getMysteryWordsFromLobby(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        Deck deck = lobby.getDeck();
+        if(deck == null) {
+            throw new SopraServiceException("Lobby has no Deck assigned!");
+        }
+        List<Card> cards = deck.getCards();
+
+        if(!cards.isEmpty()) {
+            Card card = cards.remove(0);
+            card.setDrawn(true);
+            deckService.save(deck);
+            cardService.save(card);
+            return card.getMysteryWords();
+        } else {
+            throw new SopraServiceException("No more cards to play!!");
+        }
+    }
+
+    /**
+     * updates the selected index of the currently played card
+     * */
+    public void updateSelectedMysteryWord(Long lobbyId, Integer selectedIndex) {
+        Lobby lobby = getLobbyById(lobbyId);
+        Deck deck = lobby.getDeck();
+        if(deck == null) {
+            throw new SopraServiceException("Lobby has no Deck assigned!");
+        }
+
+    }
+
 }

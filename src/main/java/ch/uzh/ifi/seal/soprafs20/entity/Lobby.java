@@ -27,7 +27,7 @@ public class Lobby
     @Column(nullable = false)
     private String lobbyName;
 
-    @Column(nullable = true)
+    @OneToOne
     private Deck deck;
 
     @Column(nullable = false)

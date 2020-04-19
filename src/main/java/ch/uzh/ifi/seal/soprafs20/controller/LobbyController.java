@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
@@ -245,4 +246,43 @@ public class LobbyController {
 
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
+
+    /**
+     * API to get list of mystery words for the current game play
+     *
+     * */
+    @GetMapping("/lobbies/{lobbyId}/card")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<MysteryWord> getMysteryWords(@PathVariable long lobbyId,
+                                             @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        if (!lobbyService.isUsernameInLobby(user.getUsername(), lobby) || PlayerRole.GUESSER == playerService.getPlayerById(user.getId()).getRole()) {
+            throw new ForbiddenException(
+                "You are not in this lobby or is the active player");
+        }
+
+        return lobbyService.getMysteryWordsFromLobby(lobbyId);
+    }
+
+    /**
+     * API to post the selected number from the guesser from the current game play
+     *
+     * */
+    @PostMapping("/lobbies/{lobbyId}/number")
+    @ResponseBody
+    public ResponseEntity<?> updateSelectedMysteryWord(@PathVariable long lobbyId,
+                                          @RequestBody Integer selectedMysteryWordIndex,
+                                             @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via toke
+        User user = userService.checkUserToken(token);
+        lobbyService.getLobbyById(lobbyId);
+        if(selectedMysteryWordIndex < 1 || selectedMysteryWordIndex > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
 }
