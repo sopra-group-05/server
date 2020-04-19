@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Clue;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -42,7 +43,6 @@ public class LobbyService
     public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
         this.lobbyRepository = lobbyRepository;
     }
-
     /**
      * This method will create a lobby in the lobby repository
      *
@@ -284,4 +284,5 @@ public class LobbyService
         //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
         return lobby;
     }
+
 }

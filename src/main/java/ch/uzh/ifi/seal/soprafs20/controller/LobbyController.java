@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
+import ch.uzh.ifi.seal.soprafs20.entity.Clue;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
@@ -9,6 +10,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
+import ch.uzh.ifi.seal.soprafs20.service.ClueService;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
@@ -38,12 +40,14 @@ public class LobbyController {
     private final LobbyService lobbyService;
     private final UserService userService;
     private final PlayerService playerService;
+    private final ClueService clueService;
 
     @Autowired
-    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService) {
+    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService) {
         this.lobbyService = lobbyService;
         this.userService = userService;
         this.playerService = playerService;
+        this.clueService = clueService;
     }
 
     /**
@@ -244,5 +248,34 @@ public class LobbyController {
         Lobby lobby = lobbyService.stopGame(lobbyId, player);
 
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+    }
+
+    @PostMapping("/lobbies/{lobbyId}/clues")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void addClue(@PathVariable long lobbyId,
+                                     @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
+        Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
+        clueService.addClue(clue, lobbyId, token);
+    }
+
+    @GetMapping("/lobbies/{lobbyId}/clues")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<ClueGetDTO> getClues(@PathVariable long lobbyId,
+                                   @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
+        List<Clue> clues= clueService.getCluesForChecking(lobbyId, token);
+        List<ClueGetDTO> clueGetDTOs= new ArrayList<ClueGetDTO>();
+        for (Clue clue:clues){
+            clueGetDTOs.add(DTOMapper.INSTANCE.convertClueToClueGetDTO(clue));
+        }
+        return clueGetDTOs;
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/clues/{clueId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void flagClue(@PathVariable long lobbyId, @PathVariable long clueId, @RequestHeader(name = "Token", required = false) String token){
+        clueService.flagClue(clueId, token, lobbyId);
     }
 }

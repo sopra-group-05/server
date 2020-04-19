@@ -101,4 +101,10 @@ public class PlayerService {
             playerRepository.deleteAll(playersSet);
         }
     }
+
+    public Player getPlayerByToken(String token)
+    {
+        Optional<Player> player = Optional.ofNullable(playerRepository.findByToken(token));
+        return player.orElseThrow(()->new ForbiddenException("Player not found"));
+    }
 }

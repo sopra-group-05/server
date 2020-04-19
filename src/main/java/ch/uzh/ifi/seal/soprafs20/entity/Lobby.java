@@ -46,6 +46,10 @@ public class Lobby
     @Column(nullable = false)
     private Language language;
 
+    @OneToMany(mappedBy = "lobby")
+    @Column
+    private List<Clue> clues = new ArrayList<>();
+
     public Long getId() {
         return lobbyId;
     }
@@ -116,5 +120,8 @@ public class Lobby
     public void leave(Player player){
         this.players.remove(player);
     }
+
+    public void addClue(Clue clue){this.clues.add(clue); }
+    public List<Clue> getClues(){return this.clues;}
 
 }

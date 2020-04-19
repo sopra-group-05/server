@@ -6,6 +6,8 @@ import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Internal Player Representation
@@ -50,6 +52,10 @@ public class Player {
     @Column(nullable = false)
     private int points = 0;
 
+    @OneToMany(mappedBy = "player")
+    @Column
+    private List<Clue> clues = new ArrayList<>();
+
 	public Long getId() {
 		return id;
 	}
@@ -85,4 +91,8 @@ public class Player {
     public int getPoints() {
         return points;
     }
+
+    public List<Clue> getClues(){return this.clues;}
+
+    public void setClue(Clue clue){this.clues.add(clue);}
 }
