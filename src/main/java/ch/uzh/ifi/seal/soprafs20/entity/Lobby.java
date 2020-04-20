@@ -47,7 +47,6 @@ public class Lobby
     private Language language;
 
     @OneToMany(mappedBy = "lobby")
-    @Column
     private List<Clue> clues = new ArrayList<>();
 
     public Long getId() {

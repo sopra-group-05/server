@@ -53,7 +53,6 @@ public class Player {
     private int points = 0;
 
     @OneToMany(mappedBy = "player")
-    @Column
     private List<Clue> clues = new ArrayList<>();
 
 	public Long getId() {

@@ -11,6 +11,8 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.ClueRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,15 @@ import java.util.List;
 @Service
 @Transactional
 public class ClueService {
+    private final Logger log = LoggerFactory.getLogger(ClueService.class);
     private final ClueRepository clueRepository;
 
-    @Autowired UserService userService;
 
-    @Autowired LobbyService lobbyService;
+    @Autowired
+    private LobbyService lobbyService;
 
-    @Autowired PlayerService playerService;
+    @Autowired
+    private PlayerService playerService;
 
     public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository) {
         this.clueRepository = clueRepository;

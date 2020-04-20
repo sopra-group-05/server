@@ -20,11 +20,9 @@ public class Clue {
     @Column
     private String hint;
 
-    @Column
     @ManyToOne
     private Player player;
 
-    @Column
     @ManyToOne
     private Lobby lobby;
 
