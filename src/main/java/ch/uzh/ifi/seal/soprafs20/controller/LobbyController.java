@@ -183,7 +183,7 @@ public class LobbyController {
 
     }
 
-    @PutMapping("/lobbies/{lobbyId}/stop")
+    @PutMapping("/lobbies/{lobbyId}/terminate")
     @ResponseBody
     public ResponseEntity<?> stopLobbyById(@PathVariable long lobbyId,
                                             @RequestHeader(name = "Token", required = false) String token) {
@@ -232,7 +232,7 @@ public class LobbyController {
      * @param lobbyId
      * @return Status Code 204
      */
-    @PutMapping("/lobbies/{lobbyId}/stop2")
+    @PutMapping("/lobbies/{lobbyId}/stop")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public LobbyGetDTO stopLobbyById2(@PathVariable long lobbyId,
