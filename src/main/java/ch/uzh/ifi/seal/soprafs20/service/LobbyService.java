@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
@@ -40,6 +41,8 @@ public class LobbyService
     private DeckService deckService;
     @Autowired
     private CardService cardService;
+    @Autowired
+    private MysteryWordService mysteryWordService;
 
     @Autowired
     public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
@@ -305,6 +308,7 @@ public class LobbyService
         if(!cards.isEmpty()) {
             Card card = cards.remove(0);
             card.setDrawn(true);
+            deck.setActiveCard(card);
             deckService.save(deck);
             cardService.save(card);
             return card.getMysteryWords();
@@ -316,11 +320,17 @@ public class LobbyService
     /**
      * updates the selected index of the currently played card
      * */
-    public void updateSelectedMysteryWord(Long lobbyId, Integer selectedIndex) {
+    public void updateSelectedMysteryWord(Long lobbyId, int selectedIndex) {
         Lobby lobby = getLobbyById(lobbyId);
         Deck deck = lobby.getDeck();
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
+        }
+        Card activeCard = deck.getActiveCard();
+        if(activeCard != null) {
+            MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
+            word.setStatus(MysteryWordStatus.IN_USE);
+            mysteryWordService.save(word);
         }
 
     }

@@ -18,6 +18,9 @@ public class Deck implements Serializable
     @ElementCollection
     private List<Card> cards;
 
+    @OneToOne
+    private Card activeCard;
+
     public Long getDeckId() {
         return deckId;
     }
@@ -37,5 +40,13 @@ public class Deck implements Serializable
             throw new SopraServiceException("the maximum number of cards has been reached for this deck");
         }
 
+    }
+
+    public Card getActiveCard() {
+        return activeCard;
+    }
+
+    public void setActiveCard(Card activeCard) {
+        this.activeCard = activeCard;
     }
 }

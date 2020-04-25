@@ -274,14 +274,15 @@ public class LobbyController {
     @PostMapping("/lobbies/{lobbyId}/number")
     @ResponseBody
     public ResponseEntity<?> updateSelectedMysteryWord(@PathVariable long lobbyId,
-                                          @RequestBody Integer selectedMysteryWordIndex,
+                                          @RequestBody int selectedMysteryWordIndex,
                                              @RequestHeader(name = "Token", required = false) String token) {
-        //check Access rights via toke
+        //check Access rights via token
         User user = userService.checkUserToken(token);
         lobbyService.getLobbyById(lobbyId);
         if(selectedMysteryWordIndex < 1 || selectedMysteryWordIndex > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+        lobbyService.updateSelectedMysteryWord(lobbyId, selectedMysteryWordIndex);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
