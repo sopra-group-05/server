@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.DataFormatException;
 
 @Service
@@ -33,20 +30,21 @@ public class LobbyService
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
 
-    @Autowired
+
     private PlayerService playerService;
-    @Autowired
     private UserService userService;
-    @Autowired
     private DeckService deckService;
-    @Autowired
     private CardService cardService;
     @Autowired
     private MysteryWordService mysteryWordService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService) {
         this.lobbyRepository = lobbyRepository;
+        this.playerService = playerService;
+        this.userService = userService;
+        this.deckService = deckService;
+        this.cardService = cardService;
     }
 
     /**
@@ -330,6 +328,7 @@ public class LobbyService
         if(activeCard != null) {
             MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
             word.setStatus(MysteryWordStatus.IN_USE);
+            word.setTimedrawn(new Date());
             mysteryWordService.save(word);
         }
 

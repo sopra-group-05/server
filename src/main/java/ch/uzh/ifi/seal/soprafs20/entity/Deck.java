@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +17,7 @@ public class Deck implements Serializable
     private Long deckId;
 
     @ElementCollection
-    private List<Card> cards;
+    private List<Card> cards = new ArrayList<>();
 
     @OneToOne
     private Card activeCard;
