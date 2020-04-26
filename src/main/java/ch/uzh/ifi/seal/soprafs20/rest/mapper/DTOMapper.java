@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.entity.Clue;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import org.mapstruct.*;
@@ -102,4 +103,11 @@ public interface DTOMapper {
 
     @Mapping(source = "password", target = "password")
     User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
+
+    @Mapping(source = "hint", target = "hint")
+    Clue convertCluePOSTDTOToEntity(CluePostDTO cluePostDTO);
+
+    @Mapping(source = "hint", target= "hint")
+    @Mapping(source = "id", target = "id")
+    ClueGetDTO convertClueToClueGetDTO(Clue clue);
 }

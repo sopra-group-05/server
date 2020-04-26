@@ -14,6 +14,7 @@ import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 //import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
+import ch.uzh.ifi.seal.soprafs20.service.ClueService;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
@@ -55,6 +56,8 @@ public class LobbyControllerTest {
     private UserService userService;
     @MockBean
     private PlayerService playerService;
+    @MockBean
+    private ClueService clueService;
 
 
     /**

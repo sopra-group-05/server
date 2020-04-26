@@ -46,7 +46,6 @@ public class LobbyService
         this.deckService = deckService;
         this.cardService = cardService;
     }
-
     /**
      * This method will create a lobby in the lobby repository
      *
