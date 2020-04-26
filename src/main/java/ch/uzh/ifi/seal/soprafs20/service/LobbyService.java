@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.DataFormatException;
 
 @Service
@@ -32,18 +30,21 @@ public class LobbyService
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
 
-    @Autowired
+
     private PlayerService playerService;
-    @Autowired
     private UserService userService;
-    @Autowired
     private DeckService deckService;
-    @Autowired
     private CardService cardService;
+    @Autowired
+    private MysteryWordService mysteryWordService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService) {
         this.lobbyRepository = lobbyRepository;
+        this.playerService = playerService;
+        this.userService = userService;
+        this.deckService = deckService;
+        this.cardService = cardService;
     }
 
     /**
@@ -305,6 +306,7 @@ public class LobbyService
         if(!cards.isEmpty()) {
             Card card = cards.remove(0);
             card.setDrawn(true);
+            deck.setActiveCard(card);
             deckService.save(deck);
             cardService.save(card);
             return card.getMysteryWords();
@@ -316,11 +318,18 @@ public class LobbyService
     /**
      * updates the selected index of the currently played card
      * */
-    public void updateSelectedMysteryWord(Long lobbyId, Integer selectedIndex) {
+    public void updateSelectedMysteryWord(Long lobbyId, int selectedIndex) {
         Lobby lobby = getLobbyById(lobbyId);
         Deck deck = lobby.getDeck();
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
+        }
+        Card activeCard = deck.getActiveCard();
+        if(activeCard != null) {
+            MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
+            word.setStatus(MysteryWordStatus.IN_USE);
+            word.setTimedrawn(new Date());
+            mysteryWordService.save(word);
         }
 
     }

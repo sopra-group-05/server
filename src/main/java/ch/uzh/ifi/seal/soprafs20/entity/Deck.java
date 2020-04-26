@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +17,10 @@ public class Deck implements Serializable
     private Long deckId;
 
     @ElementCollection
-    private List<Card> cards;
+    private List<Card> cards = new ArrayList<>();
+
+    @OneToOne
+    private Card activeCard;
 
     public Long getDeckId() {
         return deckId;
@@ -37,5 +41,13 @@ public class Deck implements Serializable
             throw new SopraServiceException("the maximum number of cards has been reached for this deck");
         }
 
+    }
+
+    public Card getActiveCard() {
+        return activeCard;
+    }
+
+    public void setActiveCard(Card activeCard) {
+        this.activeCard = activeCard;
     }
 }

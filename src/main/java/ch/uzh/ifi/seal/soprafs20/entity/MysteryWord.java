@@ -23,7 +23,7 @@ public class MysteryWord implements Serializable {
     private String word;
 
     @Column(nullable = false)
-    private MysteryWordStatus status;
+    private MysteryWordStatus status = MysteryWordStatus.NOT_USED;
 
     @Column(nullable = false)
     private Boolean guessedCorrectly;

@@ -167,6 +167,21 @@ public class LobbyController {
 
     }
 
+    @PutMapping("/lobbies/{lobbyId}/terminate")
+    @ResponseBody
+    public ResponseEntity<?> stopLobbyById(@PathVariable long lobbyId,
+                                           @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User lobbyCreator = userService.checkUserToken(token);
+
+        //verify if the throwing out player is the lobby creator
+        if(lobbyService.endLobby(lobbyId , lobbyCreator)) {
+            return new ResponseEntity<>("", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
     @PutMapping("/lobbies/{lobbyId}/kick/{userID}")
     @ResponseBody
     public ResponseEntity<?> kickPlayerOut(@PathVariable long lobbyId, @PathVariable long userID,
@@ -183,20 +198,6 @@ public class LobbyController {
 
     }
 
-    @PutMapping("/lobbies/{lobbyId}/stop")
-    @ResponseBody
-    public ResponseEntity<?> stopLobbyById(@PathVariable long lobbyId,
-                                            @RequestHeader(name = "Token", required = false) String token) {
-        //check Access rights via token
-        User lobbyCreator = userService.checkUserToken(token);
-
-        //verify if the throwing out player is the lobby creator
-        if(lobbyService.endLobby(lobbyId , lobbyCreator)) {
-            return new ResponseEntity<>("", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Unauthorized (invalid Token)", HttpStatus.UNAUTHORIZED);
-        }
-    }
 
     /**
      * PUT Start the game
@@ -232,7 +233,7 @@ public class LobbyController {
      * @param lobbyId
      * @return Status Code 204
      */
-    @PutMapping("/lobbies/{lobbyId}/stop2")
+    @PutMapping("/lobbies/{lobbyId}/stop")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public LobbyGetDTO stopLobbyById2(@PathVariable long lobbyId,
@@ -274,14 +275,15 @@ public class LobbyController {
     @PostMapping("/lobbies/{lobbyId}/number")
     @ResponseBody
     public ResponseEntity<?> updateSelectedMysteryWord(@PathVariable long lobbyId,
-                                          @RequestBody Integer selectedMysteryWordIndex,
+                                          @RequestBody int selectedMysteryWordIndex,
                                              @RequestHeader(name = "Token", required = false) String token) {
-        //check Access rights via toke
+        //check Access rights via token
         User user = userService.checkUserToken(token);
         lobbyService.getLobbyById(lobbyId);
         if(selectedMysteryWordIndex < 1 || selectedMysteryWordIndex > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+        lobbyService.updateSelectedMysteryWord(lobbyId, selectedMysteryWordIndex);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
