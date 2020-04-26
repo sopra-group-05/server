@@ -159,6 +159,22 @@ public class LobbyService
     }
 
     /**
+     *
+     * Verify whether the user is in this lobby
+     *
+     * @param lobbyId - the Lobby to check the Players against
+     * @param user - the user to verify against the lobby
+     *
+     * @return true if the user is in this Lobby
+     * */
+    public Boolean isUserInLobby(User user, long lobbyId) {
+        Lobby lobby = this.getLobbyById(lobbyId);
+        Player player = playerService.getPlayerById(user.getId());
+        return lobby.getPlayers().contains(player);
+
+    }
+
+    /**
      * this method is to remove playerId from the Lobby, only the creator can kick the player out
      *
      * @param lobbyId - the Lobby of the game

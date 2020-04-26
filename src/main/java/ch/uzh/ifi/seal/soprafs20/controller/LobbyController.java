@@ -182,6 +182,26 @@ public class LobbyController {
         }
     }
 
+    @PutMapping("/lobbies/{lobbyId}/ready")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public Boolean readyLobbyById(@PathVariable long lobbyId,
+                                           @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        //check whether User is in this Lobby
+        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+
+        Player player = playerService.getPlayerById(user.getId());
+
+        if(!isInThisLobby) {
+            throw new ForbiddenException("The user is not in this Lobby.");
+        }
+        playerService.setPlayerReady(player);
+        return true;
+    }
+
     @PutMapping("/lobbies/{lobbyId}/kick/{userID}")
     @ResponseBody
     public ResponseEntity<?> kickPlayerOut(@PathVariable long lobbyId, @PathVariable long userID,

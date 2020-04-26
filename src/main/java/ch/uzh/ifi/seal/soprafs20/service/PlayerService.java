@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -63,6 +64,11 @@ public class PlayerService {
     public Boolean checkPlayerToken(String token) {
         Player playerByToken = playerRepository.findByToken(token);
         return playerByToken == null;
+    }
+
+    public Boolean setPlayerReady(Player player) {
+        player.setStatus(PlayerStatus.READY);
+        return true;
     }
 
     /**
