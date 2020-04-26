@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -65,6 +66,11 @@ public class PlayerService {
         return playerByToken == null;
     }
 
+    public Boolean setPlayerReady(Player player) {
+        player.setStatus(PlayerStatus.READY);
+        return true;
+    }
+
     /**
      * Checks if token belongs to the lobby creator and therefore is allowed to start the game
      *
@@ -100,5 +106,11 @@ public class PlayerService {
         if(playersSet != null) {
             playerRepository.deleteAll(playersSet);
         }
+    }
+
+    public Player getPlayerByToken(String token)
+    {
+        Optional<Player> player = Optional.ofNullable(playerRepository.findByToken(token));
+        return player.orElseThrow(()->new ForbiddenException("Player not found"));
     }
 }
