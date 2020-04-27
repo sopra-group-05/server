@@ -1,10 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
-import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
-import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
-import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
@@ -13,17 +10,15 @@ import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import javax.persistence.Table;
+import javax.persistence.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -307,4 +302,67 @@ public class LobbyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
+    /**
+     * GUESS the Mystery Word
+     * @param lobbyId the active Lobby
+     * @param guess the Mystery Word guess of the active Player
+     * @return Status Code 204
+     */
+    @PostMapping("/lobbies/{lobbyId}/guess")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public ResponseEntity<?> guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
+                                   @PathVariable long lobbyId,
+                                   @RequestBody String guess) {
+
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        //check whether User is in this Lobby
+        //check whether User is the Guesser
+        Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
+
+        if (!isGuesserOfLobby) {
+            throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
+        }
+        Player player = playerService.getPlayerById(user.getId());
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        if(guess.equals(lobby.getMysteryWord().getWord())) {
+            player.addPoints(1);
+            lobby.nextRound();
+            return new ResponseEntity<>("Player " +
+                    player.getUsername() +
+                    "scored a Point for correctly guessing the Mystery Word.",
+                    HttpStatus.NO_CONTENT);
+        }
+        else {
+            lobby.nextRound();
+            return new ResponseEntity<>("The guess is not correct.",
+                    HttpStatus.NO_CONTENT);
+        }
+    }
+
+    /**
+     * GET the current scores of the Lobby
+     * There are points for each Player individually and for the group as a whole
+     * @param lobbyId the active Lobby
+     * @return Status Code 200
+     */
+    @GetMapping("/lobbies/{lobbyId}/stats")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public StatsGetDTO createLobby(@RequestHeader(name = "Token", required = false) String token,
+                                  @PathVariable long lobbyId) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        //check whether User is in this Lobby
+        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+
+        if (!isInThisLobby) {
+            throw new ForbiddenException("Player is not in this Lobby.");
+        }
+        return DTOMapper.INSTANCE.convertEntityToStatsGetDTO(lobbyService.getStatistics(lobbyId));
+    }
 }
+

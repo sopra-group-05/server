@@ -1,19 +1,20 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -175,6 +176,23 @@ public class LobbyService
     }
 
     /**
+     *
+     * Verify whether the user is the Guesser of this Lobby
+     *
+     * @param lobbyId - the Lobby to check the Players against
+     * @param user - the user to verify against the lobby
+     *
+     * @return true if the user is Guesser of this Lobby
+     * */
+    public Boolean isGuesserOfLobby(User user, long lobbyId) {
+        if(isUserInLobby(user, lobbyId)) {
+            Player player = playerService.getPlayerById(user.getId());
+            return player.getRole() == PlayerRole.GUESSER;
+        }
+        else return false;
+    }
+
+    /**
      * this method is to remove playerId from the Lobby, only the creator can kick the player out
      *
      * @param lobbyId - the Lobby of the game
@@ -252,6 +270,7 @@ public class LobbyService
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            nextRound(lobbyId);
             return true;
         }
         catch (Exception e) {return false;}
@@ -291,9 +310,7 @@ public class LobbyService
             }
         }
         //Update Points of the Player in the User Repository
-        int currentPoints = player.getPoints();
-        User user = userService.getUserByID(player.getId());
-        userService.updatePoints(user, currentPoints);
+        updateUserStatistics(lobbyId, player);
 
         //Set Lobby Status to what is defined within the function
         lobby.setLobbyStatus(lobbyStatus);
@@ -346,8 +363,144 @@ public class LobbyService
             word.setStatus(MysteryWordStatus.IN_USE);
             word.setTimedrawn(new Date());
             mysteryWordService.save(word);
+            lobby.setMysteryWord(word);
         }
 
     }
 
+    /**
+ * returns the active Mystery Word
+ * */
+public MysteryWord getActiveMysteryWord(Long lobbyId) {
+    Lobby lobby = getLobbyById(lobbyId);
+    Deck deck = lobby.getDeck();
+    if(deck == null) {
+        throw new SopraServiceException("Lobby has no Deck assigned!");
+    }
+
+    return lobby.getMysteryWord();
+}
+
+    /**
+     * updates the Roles of all Players in the Lobby
+     * */
+    private Player updatePlayerRoles(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        ArrayList<Player> players = new ArrayList<>(lobby.getPlayers());
+        int currentIndex = 0;
+        Player nextGuesser;
+        for (Player player : players) {
+            if (player.getRole() == PlayerRole.GUESSER) {
+                player.setRole(PlayerRole.CLUE_CREATOR);
+                currentIndex = players.indexOf(player);
+            }
+        }
+        if (players.get(currentIndex + 1) != null) {
+            nextGuesser = players.get(currentIndex + 1);
+        }
+        else {
+            nextGuesser = players.get(0);
+        }
+        return nextGuesser;
+    }
+
+    /**
+     * updates the Points/Statistics of a Player to its User balance after a Game or when leaving a Game
+     * */
+    private void updateUserStatistics(Long lobbyId, Player player) {
+        Lobby lobby = getLobbyById(lobbyId);
+        //Update Points of the Player in the User Repository
+        int currentPoints = player.getPoints();
+        User user = userService.getUserByID(player.getId());
+        userService.updatePoints(user, currentPoints);
+    }
+
+    /**
+     * Reset the Roles of all Players in the Lobby to initial setup
+     * */
+    private Player resetPlayerRoles(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        Player creator = lobby.getCreator();
+        Set<Player> players = lobby.getPlayers();
+        for (Player player : players) {
+            player.setRole(PlayerRole.CLUE_CREATOR);
+        }
+        creator.setRole(PlayerRole.GUESSER);
+        return creator;
+    }
+
+    /**
+     * Reset the Status of all Players in the Lobby to JOINED
+     * */
+    private void resetPlayerStatus(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        Set<Player> players = lobby.getPlayers();
+        for (Player player : players) {
+            player.setStatus(PlayerStatus.JOINED);
+        }
+    }
+
+    /**
+     * Reset the Statistics of all Players in the lobby to 0
+     * */
+    private void resetPlayerStatistics(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        Set<Player> players = lobby.getPlayers();
+        for (Player player : players) {
+            updateUserStatistics(lobbyId, player);
+            player.setPoints(0);
+        }
+    }
+
+    /**
+     * Reset the Lobby to get back to it in order to:
+     * play a new Game or to leave the lobby afterwards alternatively
+     * */
+    private void resetLobby(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        lobby.setRoundCount(0);
+        lobby.setMysteryWord(null);
+        resetPlayerRoles(lobbyId);
+        resetPlayerStatistics(lobbyId);
+        resetPlayerStatus(lobbyId);
+    }
+
+    /**
+     * "starts" a new Round
+     * return true when it was not Round 13 and false if the game is over.
+     * */
+    public boolean nextRound(Long lobbyId) {
+        Lobby lobby = getLobbyById(lobbyId);
+        if (lobby.getRoundCount() < 13) {
+            lobby.nextRound();
+            if (lobby.getRoundCount() != 0) {
+                updatePlayerRoles(lobbyId);
+            }
+            return true;
+        }
+        else {
+            resetLobby(lobbyId);
+            return false;
+        }
+    }
+
+    /**
+     * collects statistics of the players individually and the total sum of the group
+     * returns the stats in a json object
+     * */
+    public Statistics getStatistics(Long lobbyId) throws JSONException {
+        Lobby lobby = getLobbyById(lobbyId);
+        Statistics allStats = new Statistics();
+        ArrayList<Pair<String, Integer>> playerStats = new ArrayList<>();
+        int total = 0;
+        Set<Player> players = lobby.getPlayers();
+        for (Player player : players) {
+            total += player.getPoints();
+            playerStats.add(Pair.of(player.getUsername(), player.getPoints()));
+        }
+        allStats.setGroupStats(total);
+        allStats.setPlayerStats(playerStats);
+        return allStats;
+    }
 }

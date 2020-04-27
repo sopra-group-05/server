@@ -82,6 +82,10 @@ public class Player {
         this.points = points;
     }
 
+    public void addPoints(int points) {
+        this.points = this.points + points;
+    }
+
     public int getPoints() {
         return points;
     }

@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
+import ch.uzh.ifi.seal.soprafs20.entity.Statistics;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
@@ -102,4 +103,8 @@ public interface DTOMapper {
 
     @Mapping(source = "password", target = "password")
     User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
+
+    @Mapping(source = "groupStats", target = "groupStats")
+    @Mapping(source = "playerStats", target = "playerStats")
+    StatsGetDTO convertEntityToStatsGetDTO(Statistics statistics);
 }

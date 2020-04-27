@@ -46,6 +46,11 @@ public class Lobby
     @Column(nullable = false)
     private Language language;
 
+    @Column MysteryWord mysteryWord;
+
+    @Column
+    private int roundCount = 0;
+
     public Long getId() {
         return lobbyId;
     }
@@ -117,4 +122,23 @@ public class Lobby
         this.players.remove(player);
     }
 
+    public MysteryWord getMysteryWord() {
+        return mysteryWord;
+    }
+
+    public void setMysteryWord(MysteryWord mysteryWord) {
+        this.mysteryWord = mysteryWord;
+    }
+
+    public int getRoundCount() {
+        return roundCount;
+    }
+
+    public void nextRound() {
+        this.roundCount = this.roundCount + 1;
+    }
+
+    public void setRoundCount(int roundCount) {
+        this.roundCount = roundCount;
+    }
 }
