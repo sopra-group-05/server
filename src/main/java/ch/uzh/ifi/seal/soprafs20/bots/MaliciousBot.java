@@ -12,7 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-public class MalicousBot implements Bot{
+public class MaliciousBot implements Bot{
     private URL url;
 
     RestTemplate restTemplate = new RestTemplate();
@@ -21,11 +21,11 @@ public class MalicousBot implements Bot{
 
     private HashMap<Language, String> urls = new HashMap<Language, String>(){{
         put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
-        put(Language.DE, "http:german-api");
+        put(Language.DE, "german-api");//TODO:add german api
     }};
 
 
-    public MalicousBot(Language language){
+    public MaliciousBot(Language language){
         try {
             this.url = new URL(urls.get(language));
         } catch (MalformedURLException e){

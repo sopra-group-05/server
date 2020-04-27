@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
@@ -28,9 +29,14 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private PlayerService playerService;
+    private LobbyService lobbyService;
+
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, PlayerService playerService, LobbyService lobbyService) {
         this.userRepository = userRepository;
+        this.playerService = playerService;
+        this.lobbyService = lobbyService;
     }
 
     /**
@@ -181,6 +187,12 @@ public class UserService {
             //password should correct
             throw new ConflictException("Wrong Password");
         } else {
+            List<Lobby> lobbies = lobbyService.getLobbies();
+            for (Lobby lobby:lobbies){
+                if (lobbyService.isUserInLobby(userById, lobby.getId())){
+                    lobbyService.removePlayerFromLobby(userById.getId(), lobby.getId());
+                }
+            }
             userRepository.delete(userById);
             userRepository.flush();
         }
