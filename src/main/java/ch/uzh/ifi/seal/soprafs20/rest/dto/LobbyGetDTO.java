@@ -13,7 +13,6 @@ public class LobbyGetDTO {
 
     private Long id;
     private String lobbyName;
-    private Deck deck;
     private LobbyStatus lobbyStatus;
     private List<Player> players;
     private GameModeStatus gameMode;
@@ -34,14 +33,6 @@ public class LobbyGetDTO {
 
     public void setLobbyName(String lobbyName) {
         this.lobbyName = lobbyName;
-    }
-
-    public Deck getDeck() {
-        return deck;
-    }
-
-    public void setDeck(Deck deck) {
-        this.deck = deck;
     }
 
     public LobbyStatus getLobbyStatus() {
