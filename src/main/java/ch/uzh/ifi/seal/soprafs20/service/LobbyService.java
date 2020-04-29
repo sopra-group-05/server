@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -252,6 +249,15 @@ public class LobbyService
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
             lobbyToBeStarted.setDeck(deckService.constructDeckForNewGame());
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            Set<Player> players = lobbyToBeStarted.getPlayers();
+            for (Player player : players) {
+                // set Roles of Players
+                if (player.getRole() == PlayerRole.GUESSER) {
+                    player.setStatus(PlayerStatus.PICKING_NUMBER);
+                } else {
+                    player.setStatus(PlayerStatus.WAITING_FOR_NUMBER);
+                }
+            }
             return true;
         }
         catch (Exception e) {return false;}
