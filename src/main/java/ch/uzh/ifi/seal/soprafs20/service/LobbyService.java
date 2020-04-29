@@ -249,18 +249,29 @@ public class LobbyService
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
             lobbyToBeStarted.setDeck(deckService.constructDeckForNewGame());
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
-            Set<Player> players = lobbyToBeStarted.getPlayers();
-            for (Player player : players) {
-                // set Roles of Players
-                if (player.getRole() == PlayerRole.GUESSER) {
-                    player.setStatus(PlayerStatus.PICKING_NUMBER);
-                } else {
-                    player.setStatus(PlayerStatus.WAITING_FOR_NUMBER);
-                }
-            }
+            this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
         }
         catch (Exception e) {return false;}
+    }
+
+    /**
+     * Sets the status of ALL players according to the input params!
+     * @param guesserStatus to what should the status of the player that guesses change? PlayerStatus Enum
+     * @param cluesStatus to what should the status of the player that writes clues change? PlayerStatus Enum
+     */
+    private void setNewPlayersStatus(Set<Player> players, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+        log.debug("Inside Chaning Player Status");
+        for (Player player : players) {
+            // set Roles of Players
+            if (player.getRole() == PlayerRole.GUESSER) {
+                player.setStatus(guesserStatus);
+                log.debug("Changed Guess Status");
+            } else {
+                player.setStatus(cluesStatus);
+                log.debug("Changed Cluer Status");
+            }
+        }
     }
 
     /**
@@ -346,6 +357,7 @@ public class LobbyService
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
+        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
             MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
