@@ -52,7 +52,7 @@ public class ClueService {
         String hint = clue.getHint();
         int len = hint.length();
         for (int i = 0; i < len; i++){
-            if(Character.isLetter(hint.charAt(i))){
+            if(!Character.isLetter(hint.charAt(i))){
                 throw new BadRequestException("Clue is not a single word of only letters");
             }
         }

@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "PLAYER")
-@JsonIgnoreProperties(value = {"token"})
+@JsonIgnoreProperties(value = {"token", "clues"})
 public class Player {
 
     public Player(){
