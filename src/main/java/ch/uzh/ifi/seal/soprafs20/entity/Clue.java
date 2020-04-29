@@ -32,7 +32,8 @@ public class Clue {
     //TODO:connect to mysterywords
 
     /*
-    @ManyToMany
+    @
+    @Column
     private Mysteryword mysteryword;
     */
 

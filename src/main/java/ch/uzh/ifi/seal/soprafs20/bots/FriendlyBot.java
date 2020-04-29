@@ -22,7 +22,7 @@ public class FriendlyBot implements Bot {
 
     private HashMap<Language, String> urls = new HashMap<Language, String>(){{
         put(Language.EN, "https://api.datamuse.com/words?ml=");
-        put(Language.DE, "http:german-api"); //TODO:add german api
+        put(Language.DE, "http:german-api");
     }};
 
 
