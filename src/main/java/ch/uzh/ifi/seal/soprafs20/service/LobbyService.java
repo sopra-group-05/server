@@ -260,45 +260,18 @@ public class LobbyService
      * @param guesserStatus to what should the status of the player that guesses change? PlayerStatus Enum
      * @param cluesStatus to what should the status of the player that writes clues change? PlayerStatus Enum
      */
-    public void setNewPlayersStatus(Set<Player> players, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+    private void setNewPlayersStatus(Set<Player> players, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+        log.debug("Inside Chaning Player Status");
         for (Player player : players) {
             // set Roles of Players
             if (player.getRole() == PlayerRole.GUESSER) {
                 player.setStatus(guesserStatus);
+                log.debug("Changed Guess Status");
             } else {
                 player.setStatus(cluesStatus);
+                log.debug("Changed Cluer Status");
             }
         }
-    }
-
-    /**
-     * Set status of this player according to input params
-     * If all other players with already set their status to the new one, update the Guesser to his next status
-     */
-
-    public void setNewStatusToPlayer(Set<Player> players, Player thisPlayer, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
-        // change status of individual player (thisPlayer)
-        thisPlayer.setStatus(cluesStatus);
-
-        // count how many players have this new status
-        int playersSize = players.size();
-        int newStatusSize = 0;
-        for (Player player : players) {
-            if(player.getStatus() == cluesStatus) {
-                newStatusSize += newStatusSize;
-            }
-        }
-
-        // change Status of Guesser when all other players changed to new status
-        if (playersSize-1 == newStatusSize) {
-            for (Player player : players) {
-                // set Roles of Players
-                if (player.getRole() == PlayerRole.GUESSER) {
-                    player.setStatus(guesserStatus);
-                }
-            }
-        }
-
     }
 
     /**

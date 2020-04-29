@@ -324,11 +324,6 @@ public class LobbyController {
     public void addClue(@PathVariable long lobbyId,
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
-
-        Lobby lobby = lobbyService.getLobbyById(lobbyId);
-        Player thisPlayer = playerService.getPlayerByToken(token);
-        lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
-
         clueService.addClue(clue, lobbyId, token);
     }
 
