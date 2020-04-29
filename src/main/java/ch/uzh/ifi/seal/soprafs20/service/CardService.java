@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.entity.Card;
+import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.repository.CardRepository;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,9 +28,12 @@ public class CardService {
 
     private final CardRepository cardRepository;
 
+    private final MysteryWordService mysteryWordService;
+
     @Autowired
-    public CardService(@Qualifier("cardRepository") CardRepository cardRepository) {
+    public CardService(@Qualifier("cardRepository") CardRepository cardRepository, MysteryWordService mysteryWordService) {
         this.cardRepository = cardRepository;
+        this.mysteryWordService = mysteryWordService;
     }
 
     /**
@@ -85,6 +90,41 @@ public class CardService {
         if(cards != null && !cards.isEmpty()) {
             cardRepository.saveAll(cards);
         }
+    }
+
+    /***
+     *
+     * Generates 13 cards for one deck
+     * */
+    public List<Card> generate13Cards() {
+        List<Card> cards = new ArrayList<>();
+        List<MysteryWord> mysteryWordsList = mysteryWordService.getMysteryWordsRandomly();
+        int count = 0;
+        Card card = null;
+        for (MysteryWord word : mysteryWordsList) {
+            if(count % 5 == 0) {
+                card = Card.getInstance();
+                cards.add(card);
+                card.setDrawn(Boolean.FALSE);
+            }
+            card.addMysteryWord(word);
+            word.setCard(card);
+            count++;
+            if(count == 65) {
+                break;
+            }
+        }
+        cardRepository.saveAll(cards);
+        mysteryWordService.saveAll(mysteryWordsList);
+        return cards;
+    }
+
+    /***
+     *
+     * Generates 13 cards for one deck
+     * */
+    public List<Card> get13Cards() {
+        return cardRepository.findLimit13Words();
     }
 
 }

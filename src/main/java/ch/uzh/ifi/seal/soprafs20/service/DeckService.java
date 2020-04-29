@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.entity.Card;
 import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.repository.DeckRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,9 +27,12 @@ public class DeckService {
 
     private final DeckRepository deckRepository;
 
+    private final CardService cardService;
+
     @Autowired
-    public DeckService(@Qualifier("deckRepository") DeckRepository deckRepository) {
+    public DeckService(@Qualifier("deckRepository") DeckRepository deckRepository, CardService cardService) {
         this.deckRepository = deckRepository;
+        this.cardService = cardService;
     }
 
     /**
@@ -62,6 +67,17 @@ public class DeckService {
         if(deck != null) {
             deckRepository.save(deck);
         }
+    }
+
+    /**
+     * Constructs cards and deck for a new game
+     * */
+    public Deck constructDeckForNewGame() {
+        Deck deck = new Deck();
+        List<Card> cards = cardService.get13Cards();
+        deck.clearAndAddCards(cards);
+        deck = deckRepository.save(deck);
+        return deck;
     }
 
 }

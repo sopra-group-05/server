@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -250,10 +247,31 @@ public class LobbyService
     public boolean startGame(Long lobbyId){
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyToBeStarted.setDeck(deckService.constructDeckForNewGame());
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
         }
         catch (Exception e) {return false;}
+    }
+
+    /**
+     * Sets the status of ALL players according to the input params!
+     * @param guesserStatus to what should the status of the player that guesses change? PlayerStatus Enum
+     * @param cluesStatus to what should the status of the player that writes clues change? PlayerStatus Enum
+     */
+    private void setNewPlayersStatus(Set<Player> players, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+        log.debug("Inside Chaning Player Status");
+        for (Player player : players) {
+            // set Roles of Players
+            if (player.getRole() == PlayerRole.GUESSER) {
+                player.setStatus(guesserStatus);
+                log.debug("Changed Guess Status");
+            } else {
+                player.setStatus(cluesStatus);
+                log.debug("Changed Cluer Status");
+            }
+        }
     }
 
     /**
@@ -320,8 +338,8 @@ public class LobbyService
 
         if(!cards.isEmpty()) {
             Card card = cards.remove(0);
-            card.setDrawn(true);
-            deck.setActiveCard(card);
+            //card.setDrawn(true);
+            deck.setActiveCard(card);;
             deckService.save(deck);
             cardService.save(card);
             return card.getMysteryWords();
@@ -339,6 +357,7 @@ public class LobbyService
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
+        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
             MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
