@@ -1,8 +1,12 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
-
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +26,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PlayerService playerService;
 
-    UserController(UserService userService) {
+    UserController(UserService userService, PlayerService playerService) {
         this.userService = userService;
+        this.playerService = playerService;
     }
 
     /**
@@ -161,5 +167,23 @@ public class UserController {
 
         // Return Status Code 200 OK with User and Token (!)
         return ResponseEntity.ok(userLoginGetDTO);
+    }
+
+    /**
+     * Is user a Player (is he in the game)
+     *
+     */
+    @GetMapping("/isPlayer")
+    @ResponseBody
+    public ResponseEntity getUserStatus(@RequestHeader(name = "Token", required = false) String token) {
+        userService.checkUserToken(token);
+        if (!playerService.checkPlayerToken(token)) {
+            Player player = playerService.getPlayerByToken(token);
+            PlayerStatus status = player.getStatus();
+
+            return ResponseEntity.ok(status);
+        }
+        return ResponseEntity.noContent().build();
+
     }
 }
