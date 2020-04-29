@@ -16,10 +16,14 @@ public class Deck implements Serializable
     @GeneratedValue
     private Long deckId;
 
-    @ElementCollection
+    //@ElementCollection
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name="Deck_Cards",
+            joinColumns={@JoinColumn(name="deckId")},
+            inverseJoinColumns={@JoinColumn(name="cardId")})
     private List<Card> cards = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne
     private Card activeCard;
 
     public Long getDeckId() {

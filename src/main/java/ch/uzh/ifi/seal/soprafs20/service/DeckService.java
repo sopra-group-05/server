@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Card;
 import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -71,10 +72,11 @@ public class DeckService {
 
     /**
      * Constructs cards and deck for a new game
-     * */
-    public Deck constructDeckForNewGame() {
+     *
+     * @param language*/
+    public Deck constructDeckForLanguage(Language language) {
         Deck deck = new Deck();
-        List<Card> cards = cardService.get13Cards();
+        List<Card> cards = cardService.get13Cards(language);
         deck.clearAndAddCards(cards);
         deck = deckRepository.save(deck);
         return deck;

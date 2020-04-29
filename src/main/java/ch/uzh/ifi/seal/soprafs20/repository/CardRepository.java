@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.repository;
 
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Card;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,6 @@ import java.util.List;
 
 @Repository("cardRepository")
 public interface CardRepository extends JpaRepository<Card, Long> {
-    @Query(value = "SELECT * FROM CARD ORDER BY random() LIMIT 13", nativeQuery = true)
-    List<Card> findLimit13Words();
+    @Query(value = "SELECT * FROM CARD c where c.language = ?1 ORDER BY random() LIMIT 13", nativeQuery = true)
+    List<Card> findLimit13Words(Language language);
 }

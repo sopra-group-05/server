@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.Card;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -122,9 +123,10 @@ public class CardService {
     /***
      *
      * Generates 13 cards for one deck
-     * */
-    public List<Card> get13Cards() {
-        return cardRepository.findLimit13Words();
+     *
+     * @param language*/
+    public List<Card> get13Cards(Language language) {
+        return cardRepository.findLimit13Words(language);
     }
 
 }

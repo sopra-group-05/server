@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.zip.DataFormatException;
 
 @Service
 @Transactional
@@ -247,7 +245,7 @@ public class LobbyService
     public boolean startGame(Long lobbyId){
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
-            lobbyToBeStarted.setDeck(deckService.constructDeckForNewGame());
+            lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
@@ -364,11 +362,11 @@ public class LobbyService
         List<Card> cards = deck.getCards();
 
         if(!cards.isEmpty()) {
-            Card card = cards.remove(0);
+            Card card = cards.get(0);
             //card.setDrawn(true);
-            deck.setActiveCard(card);;
+            deck.setActiveCard(card);
             deckService.save(deck);
-            cardService.save(card);
+            //cardService.save(card);
             return card.getMysteryWords();
         } else {
             throw new SopraServiceException("No more cards to play!!");
