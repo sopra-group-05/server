@@ -250,6 +250,7 @@ public class LobbyService
     public boolean startGame(Long lobbyId){
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyToBeStarted.setDeck(deckService.constructDeckForNewGame());
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
             return true;
         }
@@ -320,8 +321,8 @@ public class LobbyService
 
         if(!cards.isEmpty()) {
             Card card = cards.remove(0);
-            card.setDrawn(true);
-            deck.setActiveCard(card);
+            //card.setDrawn(true);
+            deck.setActiveCard(card);;
             deckService.save(deck);
             cardService.save(card);
             return card.getMysteryWords();
