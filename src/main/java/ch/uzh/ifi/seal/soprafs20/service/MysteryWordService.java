@@ -87,12 +87,4 @@ public class MysteryWordService {
         }
     }
 
-    /**
-     * Returns randomly selected Mystery words
-     * */
-    public List<MysteryWord> getMysteryWordsRandomly() {
-        List<MysteryWord> mysteryWords = mysteryWordRepository.findAllLimit65Words();
-        return mysteryWords;
-    }
-
 }

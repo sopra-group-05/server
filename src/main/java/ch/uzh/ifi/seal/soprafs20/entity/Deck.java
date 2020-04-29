@@ -43,15 +43,6 @@ public class Deck implements Serializable
 
     }
 
-    public void clearAndAddCards(List<Card> cards) {
-        if(cards.size() > 13) {
-            throw new SopraServiceException("the maximum number of cards for a deck is only 13 cards");
-        } else {
-            this.cards.clear();
-            this.cards.addAll(cards);
-        }
-    }
-
     public Card getActiveCard() {
         return activeCard;
     }

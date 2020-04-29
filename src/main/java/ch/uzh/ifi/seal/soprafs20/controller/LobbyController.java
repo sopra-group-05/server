@@ -280,7 +280,7 @@ public class LobbyController {
     @GetMapping("/lobbies/{lobbyId}/card")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<MysteryWordGetDto> getMysteryWords(@PathVariable long lobbyId,
+    public List<MysteryWord> getMysteryWords(@PathVariable long lobbyId,
                                              @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User user = userService.checkUserToken(token);
@@ -290,12 +290,7 @@ public class LobbyController {
                 "You are not in this lobby or is the active player");
         }
 
-        List<MysteryWord> mysteryWordList = lobbyService.getMysteryWordsFromLobby(lobbyId);
-        List<MysteryWordGetDto> mysteryWordGetDtoList = new ArrayList<>();
-        for(MysteryWord mysteryWord : mysteryWordList) {
-            mysteryWordGetDtoList.add(DTOMapper.INSTANCE.convertMysteryWordToMysteryWordGetDTO(mysteryWord));
-        }
-        return mysteryWordGetDtoList;
+        return lobbyService.getMysteryWordsFromLobby(lobbyId);
     }
 
     /**

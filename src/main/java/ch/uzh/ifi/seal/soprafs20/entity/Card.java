@@ -13,14 +13,13 @@ import java.util.*;
 public final class Card implements Serializable {
     @Id
     @Column(nullable = false, unique = true)
-    @GeneratedValue(generator = "card_seq", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "card_seq", sequenceName = "card_seq",allocationSize=1, initialValue = 56)
+    @GeneratedValue
     private Long id;
 
     @Column(nullable = false)
-    private Boolean drawn = Boolean.FALSE;
+    private Boolean drawn;
 
-    @OneToMany(mappedBy = "card")
+    @ElementCollection
     private List<MysteryWord> mysteryWords = new ArrayList<>();
 
     Card(){
