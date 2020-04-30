@@ -279,16 +279,15 @@ public class LobbyService
         thisPlayer.setStatus(cluesStatus);
 
         // count how many players have this new status
-        int playersSize = players.size();
-        int newStatusSize = 0;
+        int playersSize = players.size() - 1; // without the Guesser
         for (Player player : players) {
-            if(player.getStatus() == cluesStatus) {
-                newStatusSize += newStatusSize;
+            if(player.getStatus().equals(cluesStatus)) {
+                playersSize = playersSize-1; // remove 1 for every player
             }
         }
 
         // change Status of Guesser when all other players changed to new status
-        if (playersSize-1 == newStatusSize) {
+        if (playersSize == 0) {
             for (Player player : players) {
                 // set Roles of Players
                 if (player.getRole() == PlayerRole.GUESSER) {
@@ -392,5 +391,4 @@ public class LobbyService
         }
 
     }
-
 }
