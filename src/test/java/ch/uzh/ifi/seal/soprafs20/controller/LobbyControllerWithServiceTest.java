@@ -280,21 +280,22 @@ public class LobbyControllerWithServiceTest {
         Deck deck = new Deck();
         deck.setDeckId(1L);
         Card card = Card.getInstance();
-        card.addMysteryWord(createMysteryWord(1L, "Sun"));
-        card.addMysteryWord(createMysteryWord(2L, "Moon"));
+        card.addMysteryWord(createMysteryWord(1L, "Sun", 1));
+        card.addMysteryWord(createMysteryWord(2L, "Moon", 2));
         deck.addCard(card);
         Card card2 = Card.getInstance();
-        card2.addMysteryWord(createMysteryWord(3L, "Flower"));
-        card2.addMysteryWord(createMysteryWord(4L, "Tree"));
+        card2.addMysteryWord(createMysteryWord(3L, "Flower", 1));
+        card2.addMysteryWord(createMysteryWord(4L, "Tree", 2));
         deck.addCard(card2);
 
         return deck;
     }
 
-    private MysteryWord createMysteryWord(Long id, String word) {
+    private MysteryWord createMysteryWord(Long id, String word, int number) {
         MysteryWord mysteryWord = new MysteryWord();
         mysteryWord.setId(id);
         mysteryWord.setWord(word);
+        mysteryWord.setNumber(number);
         return mysteryWord;
     }
 }
