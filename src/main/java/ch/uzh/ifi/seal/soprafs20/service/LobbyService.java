@@ -154,6 +154,23 @@ public class LobbyService
 
     /**
      *
+     * Verify whether the user is the Guesser of this Lobby
+     *
+     * @param lobbyId - the Lobby to check the Players against
+     * @param user - the user to verify against the lobby
+     *
+     * @return true if the user is Guesser of this Lobby
+     * */
+    public Boolean isGuesserOfLobby(User user, long lobbyId) {
+        if(isUserInLobby(user, lobbyId)) {
+            Player player = playerService.getPlayerById(user.getId());
+            return player.getRole() == PlayerRole.GUESSER;
+        }
+        else return false;
+    }
+
+    /**
+     *
      * Verify whether the user is in this lobby
      *
      * @param lobbyId - the Lobby to check the Players against
