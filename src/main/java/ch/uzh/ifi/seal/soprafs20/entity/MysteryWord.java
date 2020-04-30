@@ -41,6 +41,9 @@ public class MysteryWord implements Serializable {
     @Column(nullable = true)
     private String description;
 
+    @Column(nullable = false)
+    private int number;
+
     public Long getId() {
         return id;
     }
@@ -103,6 +106,14 @@ public class MysteryWord implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     @Override

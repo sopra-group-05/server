@@ -284,6 +284,7 @@ public class LobbyService
                 player.setStatus(cluesStatus);
             }
         }
+        playerService.saveAll(players);
     }
 
     /**
@@ -392,7 +393,7 @@ public class LobbyService
     /**
      * updates the selected index of the currently played card
      * */
-    public void updateSelectedMysteryWord(Long lobbyId, int selectedIndex) {
+    public void updateSelectedMysteryWord(Long lobbyId, int selectedNumber) {
         Lobby lobby = getLobbyById(lobbyId);
         Deck deck = lobby.getDeck();
         if(deck == null) {
@@ -401,10 +402,13 @@ public class LobbyService
         this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
-            MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
-            word.setStatus(MysteryWordStatus.IN_USE);
-            word.setTimedrawn(new Date());
-            mysteryWordService.save(word);
+            for(MysteryWord word : activeCard.getMysteryWords()) {
+                if(word.getNumber() == selectedNumber) {
+                    word.setStatus(MysteryWordStatus.IN_USE);
+                    word.setTimedrawn(new Date());
+                    mysteryWordService.save(word);
+                }
+            }
         }
 
     }

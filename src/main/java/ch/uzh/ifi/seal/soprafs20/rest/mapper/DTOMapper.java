@@ -104,7 +104,7 @@ public interface DTOMapper {
     ClueGetDTO convertClueToClueGetDTO(Clue clue);
 
     @Mapping(source = "word", target= "word")
-    @Mapping(source = "id", target = "id")
+    @Mapping(source = "number", target = "id")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "timedrawn", target = "timedrawn")
     MysteryWordGetDto convertMysteryWordToMysteryWordGetDTO(MysteryWord mysteryWord);

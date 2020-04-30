@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Card Service
@@ -126,7 +128,15 @@ public class CardService {
      *
      * @param language*/
     public List<Card> get13Cards(Language language) {
-        return cardRepository.findLimit13Words(language);
+        //cardRepository.findLimit13Words(language.name());
+        List<Card> cardList = cardRepository.findByLanguage(language);
+        Random rand = new Random();
+        List<Card> wordList = rand.
+                ints(13, 0, cardList.size()).
+                mapToObj(i -> cardList.get(i)).
+                collect(Collectors.toList());
+
+        return wordList;
     }
 
 }
