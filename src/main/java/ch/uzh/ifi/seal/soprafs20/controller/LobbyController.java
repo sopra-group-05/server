@@ -364,7 +364,7 @@ public class LobbyController {
         // todo remove and put at right place, status of players HAVE to be updated somewhere...
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player player = playerService.getPlayerById(userService.checkUserToken(token).getId());
-        lobbyService.setNewStatusToPlayer(lobby.getPlayers(), player, PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
+        lobbyService.setNewStatusToPlayer(lobby.getPlayers(), player, PlayerStatus.GUESSING_WORD, PlayerStatus.WAITING_FOR_GUESS);
     }
 
 
