@@ -11,10 +11,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
-import ch.uzh.ifi.seal.soprafs20.service.ClueService;
-import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
-import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
-import ch.uzh.ifi.seal.soprafs20.service.UserService;
+import ch.uzh.ifi.seal.soprafs20.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,13 +39,15 @@ public class LobbyController {
     private final UserService userService;
     private final PlayerService playerService;
     private final ClueService clueService;
+    private final DefinitionService definitionService;
 
     @Autowired
-    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService) {
+    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, DefinitionService definitionService) {
         this.lobbyService = lobbyService;
         this.userService = userService;
         this.playerService = playerService;
         this.clueService = clueService;
+        this.definitionService = definitionService;
     }
 
     /**
@@ -396,5 +395,21 @@ public class LobbyController {
         lobbyService.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/lobbies/{lobbyId}/definition/{word}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity getWordDefinition (@RequestHeader(name = "Token", required = false) String token,
+                                             @PathVariable long lobbyId, @PathVariable String word) {
+        // check access rights via Token
+        userService.checkUserToken(token);
+
+        // todo: get player and reduce points for retrieving the definition
+        // todo: maybe add german api?
+
+        String definition = this.definitionService.getDefinitionOfWord(word);
+
+        return ResponseEntity.ok(definition);
     }
 }
