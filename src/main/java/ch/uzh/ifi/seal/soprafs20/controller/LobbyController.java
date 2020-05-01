@@ -13,16 +13,11 @@ import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,15 +34,13 @@ public class LobbyController {
     private final UserService userService;
     private final PlayerService playerService;
     private final ClueService clueService;
-    private final DefinitionService definitionService;
 
     @Autowired
-    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, DefinitionService definitionService) {
+    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService) {
         this.lobbyService = lobbyService;
         this.userService = userService;
         this.playerService = playerService;
         this.clueService = clueService;
-        this.definitionService = definitionService;
     }
 
     /**
@@ -408,7 +401,8 @@ public class LobbyController {
         // todo: get player and reduce points for retrieving the definition
         // todo: maybe add german api?
 
-        String definition = this.definitionService.getDefinitionOfWord(word);
+        DefinitionService definitionService = new DefinitionService(new RestTemplateBuilder());
+        String definition = definitionService.getDefinitionOfWord(word);
 
         return ResponseEntity.ok(definition);
     }
