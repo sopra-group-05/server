@@ -108,4 +108,16 @@ public interface DTOMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "timedrawn", target = "timedrawn")
     MysteryWordGetDto convertMysteryWordToMysteryWordGetDTO(MysteryWord mysteryWord);
+    
+    @Mapping(source = "guess", target = "guess")
+    @Mapping(source = "success", target = "success")
+    GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success);
+    
+   
+    @Named("convertString")
+    default String convertGuessPostDTOToEntity(GuessPostDTO guessPostDTO)
+    {
+    	return guessPostDTO.getGuess();
+    };
+    
 }

@@ -367,13 +367,15 @@ public class LobbyController {
     @ResponseBody
     public ResponseEntity<?> guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
                                               @PathVariable long lobbyId,
-                                              @RequestBody String guess) {
+                                              @RequestBody GuessPostDTO guessPostDTO) {
 
         //check Access rights via token
         User user = userService.checkUserToken(token);
 
         //check whether User is in this Lobby and has the role of the Guesser
         Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
+        
+        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToEntity(guessPostDTO);
 
         if (!isGuesserOfLobby) {
             throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
@@ -409,25 +411,7 @@ public class LobbyController {
         
         return DTOMapper.INSTANCE.convertEntityToGuessGETDTO(guess,success);
     }
-
-    @GetMapping("/lobbies/{lobbyId}/definition/{word}")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public ResponseEntity getWordDefinition (@RequestHeader(name = "Token", required = false) String token,
-                                             @PathVariable long lobbyId, @PathVariable String word) {
-        // check access rights via Token
-        userService.checkUserToken(token);
-
-        // todo: get player and reduce points for retrieving the definition
-        // todo: maybe add german api?
-
-        DefinitionService definitionService = new DefinitionService(new RestTemplateBuilder());
-        String definition = definitionService.getDefinitionOfWord(word);
-
-        return ResponseEntity.ok(definition);
-    }
    
-
     @GetMapping("/lobbies/{lobbyId}/definition/{word}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

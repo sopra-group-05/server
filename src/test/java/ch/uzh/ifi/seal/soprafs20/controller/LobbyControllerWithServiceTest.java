@@ -50,6 +50,8 @@ public class LobbyControllerWithServiceTest {
     @MockBean
     private CardService cardService;
     @MockBean
+    private GameService gameService;
+    @MockBean
     private MysteryWordService mysteryWordService;
 
     @MockBean
@@ -63,6 +65,8 @@ public class LobbyControllerWithServiceTest {
     @MockBean
     private CardRepository cardRepository;
     @MockBean
+    private GameRepository gameRepository;
+    @MockBean
     private MysteryWordRepository mysteryWordRepository;
     @MockBean
     private ClueService clueService;
@@ -74,8 +78,9 @@ public class LobbyControllerWithServiceTest {
         mysteryWordService = new MysteryWordService(mysteryWordRepository);
         deckService = new DeckService(deckRepository, cardService);
         cardService = new CardService(cardRepository, mysteryWordService);
-        lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService);
-        LobbyController lc = new LobbyController(userService, lobbyService, playerService, clueService);
+        gameService = new GameService(gameRepository);
+        lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService);
+        LobbyController lc = new LobbyController(userService, lobbyService, playerService, clueService, gameService);
         mockMvc = MockMvcBuilders.standaloneSetup(lc).build();
     }
 
