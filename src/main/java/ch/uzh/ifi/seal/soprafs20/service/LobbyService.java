@@ -30,16 +30,18 @@ public class LobbyService
     private UserService userService;
     private DeckService deckService;
     private CardService cardService;
+    private GameService gameService;
     @Autowired
     private MysteryWordService mysteryWordService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService) {
         this.lobbyRepository = lobbyRepository;
         this.playerService = playerService;
         this.userService = userService;
         this.deckService = deckService;
         this.cardService = cardService;
+        this.gameService = gameService;
     }
     /**
      * This method will create a lobby in the lobby repository
@@ -263,6 +265,7 @@ public class LobbyService
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
             lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
+            lobbyToBeStarted.setGame(gameService.createNewGame());
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;

@@ -48,8 +48,12 @@ public class Lobby
 
     @OneToMany(mappedBy = "lobby")
     private List<Clue> clues = new ArrayList<>();
+    
+    @OneToOne
+    private Game game;
 
-    public Long getId() {
+
+	public Long getId() {
         return lobbyId;
     }
 
@@ -122,5 +126,12 @@ public class Lobby
 
     public void addClue(Clue clue){this.clues.add(clue); }
     public List<Clue> getClues(){return this.clues;}
+	
+    public Game getGame() {
+		return game;
+	}
 
+	public void setGame(Game game) {
+		this.game = game;
+	}
 }

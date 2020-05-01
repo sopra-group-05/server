@@ -11,21 +11,13 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
-import ch.uzh.ifi.seal.soprafs20.service.ClueService;
-import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
-import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
-import ch.uzh.ifi.seal.soprafs20.service.UserService;
+import ch.uzh.ifi.seal.soprafs20.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -42,13 +34,15 @@ public class LobbyController {
     private final UserService userService;
     private final PlayerService playerService;
     private final ClueService clueService;
+    private final GameService gameService;
 
     @Autowired
-    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService) {
+    LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, GameService gameService) {
         this.lobbyService = lobbyService;
         this.userService = userService;
         this.playerService = playerService;
         this.clueService = clueService;
+        this.gameService = gameService;
     }
 
     /**
@@ -373,13 +367,15 @@ public class LobbyController {
     @ResponseBody
     public ResponseEntity<?> guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
                                               @PathVariable long lobbyId,
-                                              @RequestBody String guess) {
+                                              @RequestBody GuessPostDTO guessPostDTO) {
 
         //check Access rights via token
         User user = userService.checkUserToken(token);
 
         //check whether User is in this Lobby and has the role of the Guesser
         Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
+        
+        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToEntity(guessPostDTO);
 
         if (!isGuesserOfLobby) {
             throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
@@ -387,7 +383,7 @@ public class LobbyController {
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        // todo the guess has to be saved and compared to the mystery word
+        gameService.compareGuess(lobby, guess); 
         // todo add points if correct (distribute them)
         // todo move arround roles of players? (Guesser vs Clue maker etc)
         // todo end of game what happens??
@@ -396,5 +392,40 @@ public class LobbyController {
         lobbyService.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
 
         return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/lobbies/{lobbyId}/guess")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GuessGetDTO guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
+                                              @PathVariable long lobbyId) {
+
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        String guess = gameService.getGuess(lobby);
+      
+        boolean success = gameService.getGuessSuccess(lobby);
+        
+        return DTOMapper.INSTANCE.convertEntityToGuessGETDTO(guess,success);
+    }
+   
+    @GetMapping("/lobbies/{lobbyId}/definition/{word}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity getWordDefinition (@RequestHeader(name = "Token", required = false) String token,
+                                             @PathVariable long lobbyId, @PathVariable String word) {
+        // check access rights via Token
+        userService.checkUserToken(token);
+
+        // todo: get player and reduce points for retrieving the definition
+        // todo: maybe add german api?
+
+        DefinitionService definitionService = new DefinitionService(new RestTemplateBuilder());
+        String definition = definitionService.getDefinitionOfWord(word);
+
+        return ResponseEntity.ok(definition);
     }
 }
