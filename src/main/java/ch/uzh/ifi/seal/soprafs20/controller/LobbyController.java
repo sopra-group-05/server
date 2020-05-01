@@ -280,7 +280,7 @@ public class LobbyController {
     @GetMapping("/lobbies/{lobbyId}/card")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<MysteryWord> getMysteryWords(@PathVariable long lobbyId,
+    public List<MysteryWordGetDto> getMysteryWords(@PathVariable long lobbyId,
                                              @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User user = userService.checkUserToken(token);
@@ -290,7 +290,12 @@ public class LobbyController {
                 "You are not in this lobby or is the active player");
         }
 
-        return lobbyService.getMysteryWordsFromLobby(lobbyId);
+        List<MysteryWord> mysteryWordList = lobbyService.getMysteryWordsFromLobby(lobbyId);
+        List<MysteryWordGetDto> mysteryWordGetDtoList = new ArrayList<>();
+        for(MysteryWord mysteryWord : mysteryWordList) {
+            mysteryWordGetDtoList.add(DTOMapper.INSTANCE.convertMysteryWordToMysteryWordGetDTO(mysteryWord));
+        }
+        return mysteryWordGetDtoList;
     }
 
     /**
@@ -300,15 +305,15 @@ public class LobbyController {
     @PostMapping("/lobbies/{lobbyId}/number")
     @ResponseBody
     public ResponseEntity<?> updateSelectedMysteryWord(@PathVariable long lobbyId,
-                                          @RequestBody int selectedMysteryWordIndex,
+                                          @RequestBody int selectedNumber,
                                              @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User user = userService.checkUserToken(token);
         lobbyService.getLobbyById(lobbyId);
-        if(selectedMysteryWordIndex < 1 || selectedMysteryWordIndex > 5) {
+        if(selectedNumber < 1 || selectedNumber > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-        lobbyService.updateSelectedMysteryWord(lobbyId, selectedMysteryWordIndex);
+        lobbyService.updateSelectedMysteryWord(lobbyId, selectedNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
@@ -319,6 +324,11 @@ public class LobbyController {
     public void addClue(@PathVariable long lobbyId,
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
+
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        Player thisPlayer = playerService.getPlayerByToken(token);
+        lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
+
         clueService.addClue(clue, lobbyId, token);
     }
 
@@ -340,5 +350,51 @@ public class LobbyController {
     @ResponseBody
     public void flagClue(@PathVariable long lobbyId, @PathVariable long clueId, @RequestHeader(name = "Token", required = false) String token){
         clueService.flagClue(clueId, token, lobbyId);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/clues/flag")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void flagMultipleClue(@PathVariable long lobbyId, @RequestHeader(name = "Token", required = false) String token){
+
+        // todo add @RequestBody with a List of all Clues that should be flagged.
+        // todo go trough list of Clue IDs and flag all of them => CluesToFlag
+        //clueService.flagClue(clueId, token, lobbyId);
+
+        // todo remove and put at right place, status of players HAVE to be updated somewhere...
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        Player player = playerService.getPlayerById(userService.checkUserToken(token).getId());
+        lobbyService.setNewStatusToPlayer(lobby.getPlayers(), player, PlayerStatus.GUESSING_WORD, PlayerStatus.WAITING_FOR_GUESS);
+    }
+
+
+    @PostMapping("/lobbies/{lobbyId}/guess")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public ResponseEntity<?> guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
+                                              @PathVariable long lobbyId,
+                                              @RequestBody String guess) {
+
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        //check whether User is in this Lobby and has the role of the Guesser
+        Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
+
+        if (!isGuesserOfLobby) {
+            throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
+        }
+
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        // todo the guess has to be saved and compared to the mystery word
+        // todo add points if correct (distribute them)
+        // todo move arround roles of players? (Guesser vs Clue maker etc)
+        // todo end of game what happens??
+
+        // set Status of all Players to End of Turn.
+        lobbyService.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
+
+        return ResponseEntity.noContent().build();
     }
 }

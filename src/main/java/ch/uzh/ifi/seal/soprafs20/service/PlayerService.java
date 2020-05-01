@@ -113,4 +113,11 @@ public class PlayerService {
         Optional<Player> player = Optional.ofNullable(playerRepository.findByToken(token));
         return player.orElseThrow(()->new ForbiddenException("Player not found"));
     }
+
+    /**
+     * Save all players
+     * */
+    public void saveAll(Set<Player> playerSet) {
+        playerRepository.saveAll(playerSet);
+    }
 }

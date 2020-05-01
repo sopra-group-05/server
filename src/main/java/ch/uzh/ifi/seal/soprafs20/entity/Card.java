@@ -1,8 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
+import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
-import net.bytebuddy.implementation.bytecode.Throw;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,13 +12,21 @@ import java.util.*;
 public final class Card implements Serializable {
     @Id
     @Column(nullable = false, unique = true)
-    @GeneratedValue
+    @GeneratedValue(generator = "card_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "card_seq", sequenceName = "card_seq",allocationSize=1, initialValue = 130)
     private Long id;
 
     @Column(nullable = false)
-    private Boolean drawn;
+    private Boolean drawn = Boolean.FALSE;
 
-    @ElementCollection
+    public void setMysteryWords(List<MysteryWord> mysteryWords) {
+        this.mysteryWords = mysteryWords;
+    }
+
+    @Column(nullable = false)
+    private Language language;
+
+    @OneToMany(mappedBy = "card")
     private List<MysteryWord> mysteryWords = new ArrayList<>();
 
     Card(){
@@ -44,6 +51,14 @@ public final class Card implements Serializable {
 
     public List<MysteryWord> getMysteryWords() {
         return Collections.unmodifiableList(mysteryWords);
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 
     public void addMysteryWord(MysteryWord mysteryWord) {

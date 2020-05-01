@@ -1,22 +1,26 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
 import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 @Entity
 @Table(name = "MYSTERYWORD")
 public class MysteryWord implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = IDENTITY)
     @Column(nullable = false, unique = true)
     private Long id;
 
-    @OneToOne
+    @JsonIgnoreProperties
+    @ManyToOne
     private Card card;
 
     @Column(nullable = false)
@@ -25,17 +29,20 @@ public class MysteryWord implements Serializable {
     @Column(nullable = false)
     private MysteryWordStatus status = MysteryWordStatus.NOT_USED;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean guessedCorrectly;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date timedrawn;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date timeForDues;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String description;
+
+    @Column(nullable = false)
+    private int number;
 
     public Long getId() {
         return id;
@@ -99,6 +106,14 @@ public class MysteryWord implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     @Override

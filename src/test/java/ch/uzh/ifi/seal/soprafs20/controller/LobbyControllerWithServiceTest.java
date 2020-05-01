@@ -49,6 +49,8 @@ public class LobbyControllerWithServiceTest {
     private DeckService deckService;
     @MockBean
     private CardService cardService;
+    @MockBean
+    private MysteryWordService mysteryWordService;
 
     @MockBean
     private PlayerRepository playerRepository;
@@ -61,14 +63,17 @@ public class LobbyControllerWithServiceTest {
     @MockBean
     private CardRepository cardRepository;
     @MockBean
+    private MysteryWordRepository mysteryWordRepository;
+    @MockBean
     private ClueService clueService;
 
     @BeforeEach
     public void setup() {
         playerService = new PlayerService(playerRepository);
         userService = new UserService(userRepository);
-        deckService = new DeckService(deckRepository);
-        cardService = new CardService(cardRepository);
+        mysteryWordService = new MysteryWordService(mysteryWordRepository);
+        deckService = new DeckService(deckRepository, cardService);
+        cardService = new CardService(cardRepository, mysteryWordService);
         lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService);
         LobbyController lc = new LobbyController(userService, lobbyService, playerService, clueService);
         mockMvc = MockMvcBuilders.standaloneSetup(lc).build();
@@ -275,21 +280,22 @@ public class LobbyControllerWithServiceTest {
         Deck deck = new Deck();
         deck.setDeckId(1L);
         Card card = Card.getInstance();
-        card.addMysteryWord(createMysteryWord(1L, "Sun"));
-        card.addMysteryWord(createMysteryWord(2L, "Moon"));
+        card.addMysteryWord(createMysteryWord(1L, "Sun", 1));
+        card.addMysteryWord(createMysteryWord(2L, "Moon", 2));
         deck.addCard(card);
         Card card2 = Card.getInstance();
-        card2.addMysteryWord(createMysteryWord(3L, "Flower"));
-        card2.addMysteryWord(createMysteryWord(4L, "Tree"));
+        card2.addMysteryWord(createMysteryWord(3L, "Flower", 1));
+        card2.addMysteryWord(createMysteryWord(4L, "Tree", 2));
         deck.addCard(card2);
 
         return deck;
     }
 
-    private MysteryWord createMysteryWord(Long id, String word) {
+    private MysteryWord createMysteryWord(Long id, String word, int number) {
         MysteryWord mysteryWord = new MysteryWord();
         mysteryWord.setId(id);
         mysteryWord.setWord(word);
+        mysteryWord.setNumber(number);
         return mysteryWord;
     }
 }

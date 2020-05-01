@@ -1,12 +1,8 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -20,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.zip.DataFormatException;
 
 @Service
 @Transactional
@@ -159,6 +154,23 @@ public class LobbyService
 
     /**
      *
+     * Verify whether the user is the Guesser of this Lobby
+     *
+     * @param lobbyId - the Lobby to check the Players against
+     * @param user - the user to verify against the lobby
+     *
+     * @return true if the user is Guesser of this Lobby
+     * */
+    public Boolean isGuesserOfLobby(User user, long lobbyId) {
+        if(isUserInLobby(user, lobbyId)) {
+            Player player = playerService.getPlayerById(user.getId());
+            return player.getRole() == PlayerRole.GUESSER;
+        }
+        else return false;
+    }
+
+    /**
+     *
      * Verify whether the user is in this lobby
      *
      * @param lobbyId - the Lobby to check the Players against
@@ -250,10 +262,58 @@ public class LobbyService
     public boolean startGame(Long lobbyId){
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
+            lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
         }
         catch (Exception e) {return false;}
+    }
+
+    /**
+     * Sets the status of ALL players according to the input params!
+     * @param guesserStatus to what should the status of the player that guesses change? PlayerStatus Enum
+     * @param cluesStatus to what should the status of the player that writes clues change? PlayerStatus Enum
+     */
+    public void setNewPlayersStatus(Set<Player> players, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+        for (Player player : players) {
+            // set Roles of Players
+            if (player.getRole() == PlayerRole.GUESSER) {
+                player.setStatus(guesserStatus);
+            } else {
+                player.setStatus(cluesStatus);
+            }
+        }
+        playerService.saveAll(players);
+    }
+
+    /**
+     * Set status of this player according to input params
+     * If all other players with already set their status to the new one, update the Guesser to his next status
+     */
+
+    public void setNewStatusToPlayer(Set<Player> players, Player thisPlayer, PlayerStatus guesserStatus, PlayerStatus cluesStatus) {
+        // change status of individual player (thisPlayer)
+        thisPlayer.setStatus(cluesStatus);
+
+        // count how many players have this new status
+        int playersSize = players.size() - 1; // without the Guesser
+        for (Player player : players) {
+            if(player.getStatus().equals(cluesStatus)) {
+                playersSize = playersSize-1; // remove 1 for every player
+            }
+        }
+
+        // change Status of Guesser when all other players changed to new status
+        if (playersSize == 0) {
+            for (Player player : players) {
+                // set Roles of Players
+                if (player.getRole() == PlayerRole.GUESSER) {
+                    player.setStatus(guesserStatus);
+                }
+            }
+        }
+
     }
 
     /**
@@ -319,11 +379,11 @@ public class LobbyService
         List<Card> cards = deck.getCards();
 
         if(!cards.isEmpty()) {
-            Card card = cards.remove(0);
-            card.setDrawn(true);
+            Card card = cards.get(0);
+            //card.setDrawn(true);
             deck.setActiveCard(card);
             deckService.save(deck);
-            cardService.save(card);
+            //cardService.save(card);
             return card.getMysteryWords();
         } else {
             throw new SopraServiceException("No more cards to play!!");
@@ -333,20 +393,23 @@ public class LobbyService
     /**
      * updates the selected index of the currently played card
      * */
-    public void updateSelectedMysteryWord(Long lobbyId, int selectedIndex) {
+    public void updateSelectedMysteryWord(Long lobbyId, int selectedNumber) {
         Lobby lobby = getLobbyById(lobbyId);
         Deck deck = lobby.getDeck();
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
+        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
-            MysteryWord word = activeCard.getMysteryWords().get(selectedIndex-1);
-            word.setStatus(MysteryWordStatus.IN_USE);
-            word.setTimedrawn(new Date());
-            mysteryWordService.save(word);
+            for(MysteryWord word : activeCard.getMysteryWords()) {
+                if(word.getNumber() == selectedNumber) {
+                    word.setStatus(MysteryWordStatus.IN_USE);
+                    word.setTimedrawn(new Date());
+                    mysteryWordService.save(word);
+                }
+            }
         }
 
     }
-
 }

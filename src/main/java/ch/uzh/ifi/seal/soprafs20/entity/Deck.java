@@ -16,10 +16,14 @@ public class Deck implements Serializable
     @GeneratedValue
     private Long deckId;
 
-    @ElementCollection
+    //@ElementCollection
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name="Deck_Cards",
+            joinColumns={@JoinColumn(name="deckId")},
+            inverseJoinColumns={@JoinColumn(name="cardId")})
     private List<Card> cards = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne
     private Card activeCard;
 
     public Long getDeckId() {
@@ -41,6 +45,15 @@ public class Deck implements Serializable
             throw new SopraServiceException("the maximum number of cards has been reached for this deck");
         }
 
+    }
+
+    public void clearAndAddCards(List<Card> cards) {
+        if(cards.size() > 13) {
+            throw new SopraServiceException("the maximum number of cards for a deck is only 13 cards");
+        } else {
+            this.cards.clear();
+            this.cards.addAll(cards);
+        }
     }
 
     public Card getActiveCard() {
