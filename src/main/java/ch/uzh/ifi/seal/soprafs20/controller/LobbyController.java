@@ -16,14 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -432,6 +426,22 @@ public class LobbyController {
 
         return ResponseEntity.ok(definition);
     }
-    
-    
+   
+
+    @GetMapping("/lobbies/{lobbyId}/definition/{word}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity getWordDefinition (@RequestHeader(name = "Token", required = false) String token,
+                                             @PathVariable long lobbyId, @PathVariable String word) {
+        // check access rights via Token
+        userService.checkUserToken(token);
+
+        // todo: get player and reduce points for retrieving the definition
+        // todo: maybe add german api?
+
+        DefinitionService definitionService = new DefinitionService(new RestTemplateBuilder());
+        String definition = definitionService.getDefinitionOfWord(word);
+
+        return ResponseEntity.ok(definition);
+    }
 }
