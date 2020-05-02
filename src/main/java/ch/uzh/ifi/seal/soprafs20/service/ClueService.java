@@ -195,6 +195,7 @@ public class ClueService {
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
+            player.setStatus(PlayerStatus.REVIEWING_CLUES);
 
         }
     }
