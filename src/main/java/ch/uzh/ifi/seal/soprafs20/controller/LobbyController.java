@@ -232,6 +232,7 @@ public class LobbyController {
                                @RequestHeader(name = "Token", required = false) String token) {
         //check if Player is the Host of the lobby and therefore allowed to start the game
         Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
+        lobbyService.addBots(lobbyId);
         //check Access rights via token
         userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);

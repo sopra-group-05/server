@@ -74,7 +74,7 @@ public class ClueService {
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        int numPlayers = lobby.getPlayers().size();
+        int numPlayers = this.getHumanPlayersExceptActivePlayer(lobby).size();
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
             throw new BadRequestException("Clue not in Repository");
@@ -140,7 +140,7 @@ public class ClueService {
                 activeClues.add(clue);
             }
         }
-        if(activeClues.size() == this.getHumanPlayersExceptAvtivePlayer(lobby).size()) {
+        if(activeClues.size() == this.getHumanPlayersExceptActivePlayer(lobby).size()) {
             return activeClues;
         } else{
             throw new BadRequestException("Not all Clues are annotated");
@@ -203,11 +203,11 @@ public class ClueService {
     private boolean comparingFinished(Lobby lobby){
         Game game = lobby.getGame();
         int compared = game.getComparingGuessCounter();
-        int humanPlayersNotActive = this.getHumanPlayersExceptAvtivePlayer(lobby).size();
+        int humanPlayersNotActive = this.getHumanPlayersExceptActivePlayer(lobby).size();
         return compared == humanPlayersNotActive;
     }
 
-    private List<Player> getHumanPlayersExceptAvtivePlayer(Lobby lobby){
+    private List<Player> getHumanPlayersExceptActivePlayer(Lobby lobby){
         Set<Player> players= lobby.getPlayers();
         List<Player> humanPlayers= new ArrayList<>();
         for(Player player:players){

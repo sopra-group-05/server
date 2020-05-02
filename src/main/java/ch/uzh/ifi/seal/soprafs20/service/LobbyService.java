@@ -267,17 +267,6 @@ public class LobbyService
             lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
             lobbyToBeStarted.setGame(gameService.createNewGame(lobbyToBeStarted));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
-            if(lobbyToBeStarted.getGameMode().equals(GameModeStatus.BOTS)){
-                while(lobbyToBeStarted.getPlayers().size() < 4){
-                    if(lobbyToBeStarted.getNumBots() == 0) {
-                        this.addPlayerToLobby(lobbyToBeStarted, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
-                        lobbyToBeStarted.setNumBots(1);
-                    } else{
-                        this.addPlayerToLobby(lobbyToBeStarted, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
-                        lobbyToBeStarted.setNumBots(2);
-                    }
-                }
-            }
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
         }
@@ -299,6 +288,27 @@ public class LobbyService
             }
         }
         playerService.saveAll(players);
+    }
+
+    public void addBots(Long lobbyId){
+        if(this.getLobbyById(lobbyId).getGameMode().equals(GameModeStatus.BOTS)) {
+            Lobby lobby = this.getLobbyById(lobbyId);
+            if (lobby.getPlayers().size() < 3) {
+                throw new UnsupportedOperationException("Not enough Players");
+            }
+            if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+                while (lobby.getPlayers().size() < 4) {
+                    if (lobby.getNumBots() == 0) {
+                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+                        lobby.setNumBots(1);
+                    }
+                    else {
+                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
+                        lobby.setNumBots(2);
+                    }
+                }
+            }
+        }
     }
 
     /**
