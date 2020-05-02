@@ -19,10 +19,6 @@ public final class Card implements Serializable {
     @Column(nullable = false)
     private Boolean drawn = Boolean.FALSE;
 
-    public void setMysteryWords(List<MysteryWord> mysteryWords) {
-        this.mysteryWords = mysteryWords;
-    }
-
     @Column(nullable = false)
     private Language language;
 
@@ -51,6 +47,10 @@ public final class Card implements Serializable {
 
     public List<MysteryWord> getMysteryWords() {
         return Collections.unmodifiableList(mysteryWords);
+    }
+
+    public void setMysteryWords(List<MysteryWord> mysteryWords) {
+        this.mysteryWords = mysteryWords;
     }
 
     public Language getLanguage() {

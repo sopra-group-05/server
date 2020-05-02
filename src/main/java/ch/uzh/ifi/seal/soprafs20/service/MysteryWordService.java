@@ -44,28 +44,6 @@ public class MysteryWordService {
     }
 
     /**
-     * Removes the mysteryWord from MysteryWord repository
-     *
-     * @param - the mysteryWord to be removed from the MysteryWord repository
-     * */
-    public void delete(MysteryWord mysteryWord) {
-        if(mysteryWord != null) {
-            mysteryWordRepository.delete(mysteryWord);
-        }
-    }
-
-    /**
-     * Removes the mysteryWords from MysteryWord repository
-     *
-     * @param - the mysteryWords to be removed from the MysteryWord repository
-     * */
-    public void deleteAll(List<MysteryWord> mysteryWords) {
-        if(mysteryWords != null && !mysteryWords.isEmpty()) {
-            mysteryWordRepository.deleteAll(mysteryWords);
-        }
-    }
-
-    /**
      * Saves the mysteryWord using MysteryWord repository
      *
      * @param - the mysteryWord to be updated to the MysteryWord repository
@@ -85,14 +63,6 @@ public class MysteryWordService {
         if(mysteryWords != null && !mysteryWords.isEmpty()) {
             mysteryWordRepository.saveAll(mysteryWords);
         }
-    }
-
-    /**
-     * Returns randomly selected Mystery words
-     * */
-    public List<MysteryWord> getMysteryWordsRandomly() {
-        List<MysteryWord> mysteryWords = mysteryWordRepository.findAllLimit65Words();
-        return mysteryWords;
     }
 
 }
