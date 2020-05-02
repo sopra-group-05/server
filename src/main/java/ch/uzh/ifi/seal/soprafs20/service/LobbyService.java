@@ -32,19 +32,17 @@ public class LobbyService
     private DeckService deckService;
     private CardService cardService;
     private GameService gameService;
-    private ClueService clueService;
     @Autowired
     private MysteryWordService mysteryWordService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService, ClueService clueService) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService) {
         this.lobbyRepository = lobbyRepository;
         this.playerService = playerService;
         this.userService = userService;
         this.deckService = deckService;
         this.cardService = cardService;
         this.gameService = gameService;
-        this.clueService = clueService;
     }
     /**
      * This method will create a lobby in the lobby repository
@@ -216,7 +214,6 @@ public class LobbyService
      */
     public void removePlayerFromLobby(Long lobbyId, Long playerId) {
         Player player = playerService.getPlayerById(playerId);
-        clueService.deleteCluesForPlayer(player);
         Lobby lobby = this.getLobbyById(lobbyId);
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
