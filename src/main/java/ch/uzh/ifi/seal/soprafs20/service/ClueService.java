@@ -4,10 +4,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.bots.Bot;
 import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.MalicousBot;
-import ch.uzh.ifi.seal.soprafs20.constant.ClueStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.Language;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -46,29 +43,32 @@ public class ClueService {
     public void addClue(Clue newClue, Lobby lobby, String token){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        checkClue(newClue);
+        checkClue(newClue, lobby);
         newClue.setClueStatus(ClueStatus.ACTIVE);
         newClue.setPlayer(playerService.getPlayerByToken(token));
-        //newClue.setMysteryword(mysteryWord);
+        newClue.setCard(lobby.getDeck().getActiveCard());
         newClue.setGame(lobby.getGame());
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
     }
 
-    private void checkClue(Clue clue){
+    private void checkClue(Clue clue, Lobby lobby){
         String hint = clue.getHint();
+        List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
         int len = hint.length();
         for (int i = 0; i < len; i++){
-            if(!Character.isLetter(hint.charAt(i))){
-                throw new BadRequestException("Clue is not a single word of only letters");
+            if(Character.isWhitespace(hint.charAt(i))){
+                throw new BadRequestException("Clue can not contain any white spaces");
             }
         }
-        /*
-        if(hint.toLowerCase().equals(clue.getMysteryword().getWord().toLowerCase())){
-            throw new BadRequestException("Clue can not be the same as Mysteryword");
+        for(MysteryWord mysteryWord:mysteryWords) {
+            if (mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE)) {
+                if (hint.toLowerCase().equals(mysteryWord.getWord().toLowerCase())) {
+                    throw new BadRequestException("Clue can not be the same as Mysteryword");
+                }
+            }
         }
-         */
     }
 
     public void flagClue(long clueId, String token, Lobby lobby){
@@ -121,7 +121,6 @@ public class ClueService {
             for (Clue clue : clues) {
                 if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
                     activeClues.add(clue);
-                    clue.setClueStatus(ClueStatus.INACTIVE);
                 }
             }
             return activeClues;
@@ -130,9 +129,12 @@ public class ClueService {
         }
     }
 
-    private List<Clue> getCluesForComparing(Lobby lobby){
+    synchronized private List<Clue> getCluesForComparing(Lobby lobby){
         List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
+        if(!haveBotPlayersAnnotatedClues(lobby)){
+            createBotClues(lobby);
+        }
         for(Clue clue:clues){
             if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
                 activeClues.add(clue);
@@ -145,10 +147,37 @@ public class ClueService {
         }
     }
 
-    /*
+    private boolean haveBotPlayersAnnotatedClues(Lobby lobby){
+        boolean haveBotPlayersAnnotatedClues = true;
+        List<Player> botPlayers = this.getBotPlayers(lobby);
+        List<Player> playersWhoAnnotated = new ArrayList<>();
+        List<Clue> clues = lobby.getGame().getClues();
+        List<Clue> activeClues = new ArrayList<>();
+        for (Clue clue : clues) {
+            if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
+                activeClues.add(clue);
+            }
+        }
+        for(Player player:botPlayers){
+            if(!playersWhoAnnotated.contains(player)){
+                haveBotPlayersAnnotatedClues = false;
+            }
+        }
+        return haveBotPlayersAnnotatedClues;
+
+    }
+
     private void createBotClues(Lobby lobby){
         List<Player> botPlayers = this.getBotPlayers(lobby);
         Language language = lobby.getLanguage();
+        MysteryWord activeMysteryWord = null;
+        List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
+        for(MysteryWord mysteryWord:mysteryWords){
+            if(mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE)){
+                activeMysteryWord = mysteryWord;
+                break;
+            }
+        }
         Bot friendlyBot = new FriendlyBot(language);
         Bot maliciousBot = new MalicousBot(language);
         HashMap<PlayerType, Bot> botHashMap = new HashMap<PlayerType, Bot>(){{
@@ -158,11 +187,18 @@ public class ClueService {
         for(Player player:botPlayers){
             Bot bot = botHashMap.get(player.getPlayerType());
             Clue botClue = new Clue();
-            botClue.setHint(bot.getClue());
-            player.setClue(;
+            botClue.setHint(bot.getClue(activeMysteryWord));
+            botClue.setPlayer(player);
+            botClue.setClueStatus(ClueStatus.ACTIVE);
+            botClue.setCard(lobby.getDeck().getActiveCard());
+            botClue.setGame(lobby.getGame());
+            clueRepository.save(botClue);
+            clueRepository.flush();
+            lobby.getGame().addClue(botClue);
+
         }
     }
-    */
+
 
     private boolean comparingFinished(Lobby lobby){
         Game game = lobby.getGame();
