@@ -27,7 +27,7 @@ public class Clue {
     private int flagCounter;
 
     @ManyToOne
-    private MysteryWord mysteryword;
+    private Card card;
 
     @ManyToOne
     private Game game;
@@ -64,12 +64,12 @@ public class Clue {
 
     public int getFlagCounter(){return this.flagCounter;}
 
-    public MysteryWord getMysteryword() {
-        return mysteryword;
+    public Card getCard() {
+        return this.card;
     }
 
-    public void setMysteryword(MysteryWord mysteryword) {
-        this.mysteryword = mysteryword;
+    public void setCard(Card card) {
+        this.card = card;
     }
 
     public void setGame(Game game) {

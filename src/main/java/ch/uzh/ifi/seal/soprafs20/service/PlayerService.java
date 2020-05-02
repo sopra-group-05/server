@@ -117,6 +117,10 @@ public class PlayerService {
         return player.orElseThrow(()->new ForbiddenException("Player not found"));
     }
 
+    public Boolean doesPlayerWithTokenExist(String token) {
+        return playerRepository.findByToken(token) != null;
+    }
+
     /**
      * Save all players
      * */
@@ -128,22 +132,30 @@ public class PlayerService {
         if (!playerType.equals(PlayerType.HUMAN)) {
             Player botPlayer = new Player();
             botPlayer.setPlayerType(playerType);
-            botPlayer.setStatus(PlayerStatus.JOINED);
+            botPlayer.setStatus(PlayerStatus.READY);
+            botPlayer.setRole(PlayerRole.CLUE_CREATOR);
             String name = "";
             String token = "";
             Random random = new Random();
-            while (name.equals("") | playerRepository.findByUsername(name) == null) {
-                String randomAddition = random.ints(3).toString();
+            Long id = random.nextLong();
+            while (name.equals("") | playerRepository.findByUsername(name) != null) {
+                String randomAddition = Integer.toString(random.nextInt(100));
                 name = playerType.toString() + "_" + randomAddition;
-
             }
-            while (name.equals("") | playerRepository.findByToken(token) == null) {
-                String randomAddition = random.ints(5).toString();
-                name = playerType.toString() + "_" + randomAddition;
 
+            while (token.equals("") | playerRepository.findByToken(token) != null) {
+                token = Integer.toString(random.nextInt(1000000));
             }
+
+            /*
+            while (playerRepository.findById(id) != null) {
+                id = random.nextLong();
+            }
+
+             */
             botPlayer.setUsername(name);
             botPlayer.setToken(token);
+            botPlayer.setId(id);
             botPlayer = playerRepository.save(botPlayer);
             return botPlayer;
         }
