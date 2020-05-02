@@ -135,8 +135,8 @@ public class PlayerService {
             botPlayer.setStatus(PlayerStatus.READY);
             String name = "";
             String token = "";
-            Long id = null;
             Random random = new Random();
+            Long id = random.nextLong();
             while (name.equals("") | playerRepository.findByUsername(name) != null) {
                 String randomAddition = random.ints(3).toString();
                 name = playerType.toString() + "_" + randomAddition;
@@ -146,9 +146,12 @@ public class PlayerService {
                 token = random.ints(7).toString();
             }
 
-            while (id == null | playerRepository.findById(id) != null) {
+            /*
+            while (playerRepository.findById(id) != null) {
                 id = random.nextLong();
             }
+
+             */
             botPlayer.setUsername(name);
             botPlayer.setToken(token);
             botPlayer.setId(id);
