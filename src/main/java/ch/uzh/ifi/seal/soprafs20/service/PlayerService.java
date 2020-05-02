@@ -133,21 +133,29 @@ public class PlayerService {
             Player botPlayer = new Player();
             botPlayer.setPlayerType(playerType);
             botPlayer.setStatus(PlayerStatus.READY);
+            botPlayer.setRole(PlayerRole.CLUE_CREATOR);
             String name = "";
             String token = "";
             Random random = new Random();
+            Long id = random.nextLong();
             while (name.equals("") | playerRepository.findByUsername(name) != null) {
-                String randomAddition = random.ints(3).toString();
+                String randomAddition = Integer.toString(random.nextInt(100));
                 name = playerType.toString() + "_" + randomAddition;
-
             }
+
             while (token.equals("") | playerRepository.findByToken(token) != null) {
-                String randomAddition = random.ints(5).toString();
-                token = playerType.toString() + "_" + randomAddition;
-
+                token = Integer.toString(random.nextInt(1000000));
             }
+
+            /*todo: make shûre no ID is used twice
+            while (playerRepository.findById(id) != null) {
+                id = random.nextLong();
+            }
+
+             */
             botPlayer.setUsername(name);
             botPlayer.setToken(token);
+            botPlayer.setId(id);
             botPlayer = playerRepository.save(botPlayer);
             return botPlayer;
         }

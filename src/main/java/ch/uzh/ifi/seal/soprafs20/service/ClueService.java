@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.ClueRepository;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class ClueService {
         newClue.setPlayer(playerService.getPlayerByToken(token));
         newClue.setCard(lobby.getDeck().getActiveCard());
         newClue.setGame(lobby.getGame());
+        newClue.setFlagCounter(0);
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
@@ -59,13 +61,13 @@ public class ClueService {
         int len = hint.length();
         for (int i = 0; i < len; i++){
             if(Character.isWhitespace(hint.charAt(i))){
-                throw new BadRequestException("Clue can not contain any white spaces");
+                throw new SopraServiceException("Clue can not contain any white spaces");
             }
         }
         for(MysteryWord mysteryWord:mysteryWords) {
             if (mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE)) {
                 if (hint.toLowerCase().equals(mysteryWord.getWord().toLowerCase())) {
-                    throw new BadRequestException("Clue can not be the same as Mysteryword");
+                    throw new SopraServiceException("Clue can not be the same as Mysteryword");
                 }
             }
         }
@@ -74,13 +76,13 @@ public class ClueService {
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        int numPlayers = this.getHumanPlayersExceptActivePlayer(lobby).size();
+        float numPlayersbyTwo = (float)this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
             throw new BadRequestException("Clue not in Repository");
         }
         clue.setFlagCounter(1 + clue.getFlagCounter());
-        if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayers/2){
+        if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
         }
         clueRepository.save(clue);
@@ -140,7 +142,7 @@ public class ClueService {
                 activeClues.add(clue);
             }
         }
-        if(activeClues.size() == this.getHumanPlayersExceptActivePlayer(lobby).size()) {
+        if(activeClues.size() == lobby.getPlayers().size()-1) {
             return activeClues;
         } else{
             throw new BadRequestException("Not all Clues are annotated");
@@ -161,6 +163,7 @@ public class ClueService {
         for(Player player:botPlayers){
             if(!playersWhoAnnotated.contains(player)){
                 haveBotPlayersAnnotatedClues = false;
+                break;
             }
         }
         return haveBotPlayersAnnotatedClues;
@@ -195,6 +198,7 @@ public class ClueService {
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
+            player.setStatus(PlayerStatus.REVIEWING_CLUES);
 
         }
     }
@@ -227,6 +231,11 @@ public class ClueService {
             }
         }
         return humanPlayers;
+    }
+
+    public void deleteCluesForPlayer(Player player){
+        List<Clue> clues= player.getClues();
+        clueRepository.deleteAll(clues);
     }
 
 }
