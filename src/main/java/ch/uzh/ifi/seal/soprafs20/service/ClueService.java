@@ -155,7 +155,7 @@ public class ClueService {
         List<Clue> activeClues = new ArrayList<>();
         for (Clue clue : clues) {
             if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
-                activeClues.add(clue);
+                playersWhoAnnotated.add(clue.getPlayer());
             }
         }
         for(Player player:botPlayers){

@@ -267,6 +267,17 @@ public class LobbyService
             lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
             lobbyToBeStarted.setGame(gameService.createNewGame(lobbyToBeStarted));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
+            if(lobbyToBeStarted.getGameMode().equals(GameModeStatus.BOTS)){
+                while(lobbyToBeStarted.getPlayers().size() < 4){
+                    if(lobbyToBeStarted.getNumBots() == 0) {
+                        this.addPlayerToLobby(lobbyToBeStarted, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+                        lobbyToBeStarted.setNumBots(1);
+                    } else{
+                        this.addPlayerToLobby(lobbyToBeStarted, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
+                        lobbyToBeStarted.setNumBots(2);
+                    }
+                }
+            }
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;
         }
@@ -345,11 +356,12 @@ public class LobbyService
             lobbyStatus = LobbyStatus.STOPPED;
         }
         else if (gameMode == GameModeStatus.BOTS) {
-            if (numberOfPlayers < 3) {
-                lobbyStatus = LobbyStatus.STOPPED;
-            }
-            else {//TODO: Add one Bot as a replacement for the leaving Human Player
-                //TODO: this.addPlayerToLobby(lobbyId, BOT.getId())
+            if(this.getLobbyById(lobbyId).getNumBots() == 0) {
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+            } else{
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
+                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
             }
         }
         //Update Points of the Player in the User Repository
