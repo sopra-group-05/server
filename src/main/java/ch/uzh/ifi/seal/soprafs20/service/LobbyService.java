@@ -446,4 +446,15 @@ public class LobbyService
             }
         }
     }
+
+    public void nextRound(long lobbyId, String token){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        Game game = lobby.getGame();
+        List<Clue> clues = game.getClues();
+        for(Clue clue:clues){
+            clue.setClueStatus(ClueStatus.INACTIVE);
+        }
+        game.setComparingGuessCounter(0);
+        //todo: add other next Round functionality
+    }
 }

@@ -147,6 +147,13 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
+    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
+                                  @RequestHeader(name = "Token", required = false) String token){
+        // TODO: invite functionality
+    }
+
     @PutMapping("/lobbies/{lobbyId}/leave")
     @ResponseBody
     public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
@@ -433,5 +440,15 @@ public class LobbyController {
         String definition = definitionService.getDefinitionOfWord(word);
 
         return ResponseEntity.ok(definition);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/nextRound")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity nextRound(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.nextRound(lobbyId, token);
+
+        return new ResponseEntity("next Round", HttpStatus.OK);
     }
 }

@@ -132,7 +132,7 @@ public class PlayerService {
         if (!playerType.equals(PlayerType.HUMAN)) {
             Player botPlayer = new Player();
             botPlayer.setPlayerType(playerType);
-            botPlayer.setStatus(PlayerStatus.JOINED);
+            botPlayer.setStatus(PlayerStatus.READY);
             String name = "";
             String token = "";
             Random random = new Random();
