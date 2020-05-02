@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -151,7 +152,35 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
-        // TODO: invite functionality
+        // check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // check whether User is in this Lobby
+        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+
+        // 401 Unauthorized
+        if (!isInThisLobby)
+            throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // Get Lobby from lobbyId
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        // Get to be invited User from userId
+        User invitedUser = userService.getUserByID(userId);
+
+        // User is OFFLINE
+        if (invitedUser.getStatus()==UserStatus.OFFLINE)
+            throw new ForbiddenException("Requested User is offline!");
+
+        // User is already playing
+        try {
+            Player invitedPlayer = playerService.getPlayerById(userId);
+            if (invitedPlayer.getStatus() != PlayerStatus.JOINED)
+                throw new ForbiddenException("Requested User is playing in another lobby!");
+        }
+        catch (NotFoundException e){
+            lobbyService.inviteUserToLobby(invitedUser, lobby);
+        }
     }
 
     @PutMapping("/lobbies/{lobbyId}/leave")

@@ -117,6 +117,10 @@ public class PlayerService {
         return player.orElseThrow(()->new ForbiddenException("Player not found"));
     }
 
+    public Boolean doesPlayerWithTokenExist(String token) {
+        return playerRepository.findByToken(token) != null;
+    }
+
     /**
      * Save all players
      * */

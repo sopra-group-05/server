@@ -440,19 +440,21 @@ public class LobbyService
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
-        Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
-        Lobby lobbyToRemovePlayer = null;
-        List<Lobby> lobbies= this.getLobbies();
-        for(Lobby lobby:lobbies){
-            Set<Player> players = lobby.getPlayers();
-            if(players.contains(player)){
-                lobbyToRemovePlayer = lobby;
-                break;
+        if (playerService.doesPlayerWithTokenExist(toDeleteUser.getToken())) {
+            Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
+            Lobby lobbyToRemovePlayer = null;
+            List<Lobby> lobbies= this.getLobbies();
+            for(Lobby lobby:lobbies){
+                Set<Player> players = lobby.getPlayers();
+                if(players.contains(player)){
+                    lobbyToRemovePlayer = lobby;
+                    break;
+                }
             }
-        }
-        if(!lobbyToRemovePlayer.equals(null)) {
-            this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
-            playerService.deletePlayer(player);
+            if(!lobbyToRemovePlayer.equals(null)) {
+                this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
+                playerService.deletePlayer(player);
+            }
         }
     }
 
@@ -465,5 +467,16 @@ public class LobbyService
         }
         game.setComparingGuessCounter(0);
         //todo: add other next Round functionality
+    }
+
+    /**
+     * This method will invite the user to given lobby
+     *
+     * @param lobby lobby user is invited to
+     * @param user invited user
+     *
+     */
+    public void inviteUserToLobby(User user, Lobby lobby){
+        // TODO: implement invite user
     }
 }
