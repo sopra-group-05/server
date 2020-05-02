@@ -374,6 +374,7 @@ public class LobbyController {
         return clueGetDTOs;
     }
 
+    /*
     @PutMapping("/lobbies/{lobbyId}/clues/{clueId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -382,17 +383,23 @@ public class LobbyController {
         clueService.flagClue(clueId, token, lobby);
     }
 
+     */
+
     @PutMapping("/lobbies/{lobbyId}/clues/flag")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public void flagMultipleClue(@PathVariable long lobbyId, @RequestHeader(name = "Token", required = false) String token){
+    public void flagMultipleClue(@PathVariable long lobbyId, @RequestHeader(name = "Token", required = false) String token, @RequestBody List<Long> ids){
 
         // todo add @RequestBody with a List of all Clues that should be flagged.
         // todo go trough list of Clue IDs and flag all of them => CluesToFlag
-        //clueService.flagClue(clueId, token, lobbyId);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        for(long clueId:ids){
+            clueService.flagClue(clueId, token, lobby);
+        }
+
 
         // todo remove and put at right place, status of players HAVE to be updated somewhere...
-        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
         Game game = lobby.getGame();
         game.setComparingGuessCounter(1 + game.getComparingGuessCounter());
         Player player = playerService.getPlayerById(userService.checkUserToken(token).getId());
