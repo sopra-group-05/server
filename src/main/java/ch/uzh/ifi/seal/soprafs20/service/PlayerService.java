@@ -139,12 +139,12 @@ public class PlayerService {
             Random random = new Random();
             Long id = random.nextLong();
             while (name.equals("") | playerRepository.findByUsername(name) != null) {
-                String randomAddition = Integer.toString(random.nextInt());
+                String randomAddition = Integer.toString(random.nextInt(100));
                 name = playerType.toString() + "_" + randomAddition;
             }
 
             while (token.equals("") | playerRepository.findByToken(token) != null) {
-                token = Integer.toString(random.nextInt());
+                token = Integer.toString(random.nextInt(1000000));
             }
 
             /*
