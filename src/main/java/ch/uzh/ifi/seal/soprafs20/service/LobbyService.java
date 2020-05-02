@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -290,6 +291,27 @@ public class LobbyService
         playerService.saveAll(players);
     }
 
+    public void addBots(Long lobbyId){
+        if(this.getLobbyById(lobbyId).getGameMode().equals(GameModeStatus.BOTS)) {
+            Lobby lobby = this.getLobbyById(lobbyId);
+            if (lobby.getPlayers().size() < 2) {
+                throw new ForbiddenException("Not enough Players");
+            }
+            if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+                while (lobby.getPlayers().size() < 4) {
+                    if (lobby.getNumBots() == 0) {
+                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+                        lobby.setNumBots(1);
+                    }
+                    else {
+                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
+                        lobby.setNumBots(2);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Set status of this player according to input params
      * If all other players with already set their status to the new one, update the Guesser to his next status
@@ -345,11 +367,12 @@ public class LobbyService
             lobbyStatus = LobbyStatus.STOPPED;
         }
         else if (gameMode == GameModeStatus.BOTS) {
-            if (numberOfPlayers < 3) {
-                lobbyStatus = LobbyStatus.STOPPED;
-            }
-            else {//TODO: Add one Bot as a replacement for the leaving Human Player
-                //TODO: this.addPlayerToLobby(lobbyId, BOT.getId())
+            if(this.getLobbyById(lobbyId).getNumBots() == 0) {
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+            } else{
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
+                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
             }
         }
         //Update Points of the Player in the User Repository
@@ -417,19 +440,44 @@ public class LobbyService
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
-        Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
-        Lobby lobbyToRemovePlayer = null;
-        List<Lobby> lobbies= this.getLobbies();
-        for(Lobby lobby:lobbies){
-            Set<Player> players = lobby.getPlayers();
-            if(players.contains(player)){
-                lobbyToRemovePlayer = lobby;
-                break;
+        if (playerService.doesPlayerWithTokenExist(toDeleteUser.getToken())) {
+            Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
+            Lobby lobbyToRemovePlayer = null;
+            List<Lobby> lobbies= this.getLobbies();
+            for(Lobby lobby:lobbies){
+                Set<Player> players = lobby.getPlayers();
+                if(players.contains(player)){
+                    lobbyToRemovePlayer = lobby;
+                    break;
+                }
+            }
+            if(!lobbyToRemovePlayer.equals(null)) {
+                this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
+                playerService.deletePlayer(player);
             }
         }
-        if(!lobbyToRemovePlayer.equals(null)) {
-            this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
-            playerService.deletePlayer(player);
+    }
+
+    public void nextRound(long lobbyId, String token){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        Game game = lobby.getGame();
+        List<Clue> clues = game.getClues();
+        for(Clue clue:clues){
+            clue.setClueStatus(ClueStatus.INACTIVE);
         }
+        game.setComparingGuessCounter(0);
+        //todo: add other next Round functionality
+    }
+
+    /**
+     * This method will invite the user to given lobby
+     *
+     * @param lobby lobby user is invited to
+     * @param user invited user
+     *
+     */
+    public void inviteUserToLobby(User user, Lobby lobby){
+        Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
+        addPlayerToLobby(lobby, player);
     }
 }

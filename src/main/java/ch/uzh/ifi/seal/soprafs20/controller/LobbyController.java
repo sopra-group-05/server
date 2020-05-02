@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -147,6 +148,41 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
+    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
+                                  @RequestHeader(name = "Token", required = false) String token){
+        // check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // check whether User is in this Lobby
+        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+
+        // 401 Unauthorized
+        if (!isInThisLobby)
+            throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // Get Lobby from lobbyId
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        // Get to be invited User from userId
+        User invitedUser = userService.getUserByID(userId);
+
+        // User is OFFLINE
+        if (invitedUser.getStatus()==UserStatus.OFFLINE)
+            throw new ForbiddenException("Requested User is offline!");
+
+        // User is already playing
+        try {
+            Player invitedPlayer = playerService.getPlayerById(userId);
+            if (invitedPlayer.getStatus() != PlayerStatus.JOINED)
+                throw new ForbiddenException("Requested User is playing in another lobby!");
+        }
+        catch (NotFoundException e){
+            lobbyService.inviteUserToLobby(invitedUser, lobby);
+        }
+    }
+
     @PutMapping("/lobbies/{lobbyId}/leave")
     @ResponseBody
     public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
@@ -225,6 +261,7 @@ public class LobbyController {
                                @RequestHeader(name = "Token", required = false) String token) {
         //check if Player is the Host of the lobby and therefore allowed to start the game
         Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
+        lobbyService.addBots(lobbyId);
         //check Access rights via token
         userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -433,5 +470,15 @@ public class LobbyController {
         String definition = definitionService.getDefinitionOfWord(word);
 
         return ResponseEntity.ok(definition);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/nextRound")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity nextRound(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.nextRound(lobbyId, token);
+
+        return new ResponseEntity("next Round", HttpStatus.OK);
     }
 }

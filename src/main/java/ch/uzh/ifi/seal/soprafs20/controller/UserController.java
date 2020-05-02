@@ -103,9 +103,9 @@ public class UserController {
 
         User toDeleteUser = DTOMapper.INSTANCE.convertUserDeleteDTOToEntity(userDeleteDTO);
         // delete User
-        userService.authenticateDeletion(userId, token, toDeleteUser);
-        lobbyService.removeFromLobbyAndDeletePlayer(toDeleteUser);
-        userService.deleteUser(toDeleteUser);
+        User user = userService.authenticateDeletion(userId, token, toDeleteUser);
+        lobbyService.removeFromLobbyAndDeletePlayer(user);
+        userService.deleteUser(user);
 
         return ResponseEntity.noContent().build(); // status code 204 noContent
     }

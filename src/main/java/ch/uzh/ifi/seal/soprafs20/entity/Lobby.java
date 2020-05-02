@@ -52,6 +52,9 @@ public class Lobby
     @OneToOne
     private Game game;
 
+    @Column
+    private int numBots;
+
 
 	public Long getId() {
         return lobbyId;
@@ -134,4 +137,12 @@ public class Lobby
 	public void setGame(Game game) {
 		this.game = game;
 	}
+
+    public int getNumBots() {
+        return numBots;
+    }
+
+    public void setNumBots(int numBots) {
+        this.numBots = numBots;
+    }
 }
