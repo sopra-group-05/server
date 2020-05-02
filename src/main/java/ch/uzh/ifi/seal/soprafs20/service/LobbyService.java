@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
@@ -293,8 +294,8 @@ public class LobbyService
     public void addBots(Long lobbyId){
         if(this.getLobbyById(lobbyId).getGameMode().equals(GameModeStatus.BOTS)) {
             Lobby lobby = this.getLobbyById(lobbyId);
-            if (lobby.getPlayers().size() < 3) {
-                throw new UnsupportedOperationException("Not enough Players");
+            if (lobby.getPlayers().size() < 2) {
+                throw new ForbiddenException("Not enough Players");
             }
             if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
                 while (lobby.getPlayers().size() < 4) {
