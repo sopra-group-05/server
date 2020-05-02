@@ -133,6 +133,7 @@ public class PlayerService {
             Player botPlayer = new Player();
             botPlayer.setPlayerType(playerType);
             botPlayer.setStatus(PlayerStatus.READY);
+            botPlayer.setRole(PlayerRole.CLUE_CREATOR);
             String name = "";
             String token = "";
             Random random = new Random();
