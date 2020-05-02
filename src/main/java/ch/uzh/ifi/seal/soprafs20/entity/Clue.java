@@ -23,19 +23,15 @@ public class Clue {
     @ManyToOne
     private Player player;
 
-    @ManyToOne
-    private Lobby lobby;
-
     @Column
     private int flagCounter;
 
-    //TODO:connect to mysterywords
+    @ManyToOne
+    private MysteryWord mysteryword;
 
-    /*
-    @
-    @Column
-    private Mysteryword mysteryword;
-    */
+    @ManyToOne
+    private Game game;
+
 
     public long getId(){
         return this.id;
@@ -53,10 +49,6 @@ public class Clue {
         return this.player;
     }
 
-    public Lobby getLobby(){
-        return this.lobby;
-    }
-
     public void setClueStatus(ClueStatus clueStatus){
         this.clueStatus = clueStatus;
     }
@@ -68,11 +60,21 @@ public class Clue {
         this.player = player;
     }
 
-    public void setLobby(Lobby lobby){
-        this.lobby = lobby;
-    }
-
     public void setFlagCounter(int i){this.flagCounter = i;}
 
     public int getFlagCounter(){return this.flagCounter;}
+
+    public MysteryWord getMysteryword() {
+        return mysteryword;
+    }
+
+    public void setMysteryword(MysteryWord mysteryword) {
+        this.mysteryword = mysteryword;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public Game getGame(){return this.game;}
 }

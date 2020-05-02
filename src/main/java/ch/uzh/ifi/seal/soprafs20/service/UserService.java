@@ -70,7 +70,6 @@ public class UserService {
      */
     public User updateUser(User user, String token, long id) {
         User userByToken = userRepository.findByToken(token);
-//        User userById = this.getUserByID(user.getId());
         User userById = this.getUserByID(id);
         if (null == userByToken) {
             // authenticate token => not authenticated
@@ -78,10 +77,6 @@ public class UserService {
         } else if(null == userById) {
             // Profile does not exist
             throw new NotFoundException("The provided User ID does not belong to any user");
-        }
-
-        if (!userById.getId().equals(id)) {
-            throw new UnauthorizedException("Id's of URL and Request do not match");
         }
 
         if (!userById.equals(userByToken)) {
@@ -166,7 +161,7 @@ public class UserService {
     * @param token
     * @param id
     */
-    public void deleteUser(long id , String token, User toDeleteUser) {
+    public void authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
         User userById = userRepository.findById(id);
 
@@ -181,12 +176,13 @@ public class UserService {
         }  else if (!toDeleteUser.getPassword().equals(userById.getPassword())){
             //password should correct
             throw new ConflictException("Wrong Password");
-        } else {
-            userRepository.delete(userById);
-            userRepository.flush();
         }
+    }
 
-
+    public void deleteUser(User user){
+        userRepository.delete(user);
+        userRepository.flush();
+        //todo: check if flsuh needed
     }
 
     /**
