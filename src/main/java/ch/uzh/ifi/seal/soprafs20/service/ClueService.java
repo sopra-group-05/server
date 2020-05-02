@@ -75,7 +75,7 @@ public class ClueService {
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        float numPlayersbyTwo = this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
+        float numPlayersbyTwo = (float)this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
             throw new BadRequestException("Clue not in Repository");
