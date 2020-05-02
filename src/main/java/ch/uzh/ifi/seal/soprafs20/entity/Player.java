@@ -114,4 +114,8 @@ public class Player {
     public void setToken(String token){
 	    this.token = token;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
