@@ -477,6 +477,7 @@ public class LobbyService
      *
      */
     public void inviteUserToLobby(User user, Lobby lobby){
-        // TODO: implement invite user
+        Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
+        addPlayerToLobby(lobby, player);
     }
 }
