@@ -53,6 +53,7 @@ public class ClueService {
         newClue.setGame(lobby.getGame());
         clueRepository.save(newClue);
         clueRepository.flush();
+        lobby.getGame().addClue(newClue);
     }
 
     private void checkClue(Clue clue){
@@ -115,7 +116,7 @@ public class ClueService {
 
     private List<Clue> getCluesForGuessing(Lobby lobby){
         if(comparingFinished(lobby)) {
-            List<Clue> clues = lobby.getClues();
+            List<Clue> clues = lobby.getGame().getClues();
             List<Clue> activeClues = new ArrayList<>();
             for (Clue clue : clues) {
                 if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
@@ -130,7 +131,7 @@ public class ClueService {
     }
 
     private List<Clue> getCluesForComparing(Lobby lobby){
-        List<Clue> clues = lobby.getClues();
+        List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
         for(Clue clue:clues){
             if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
