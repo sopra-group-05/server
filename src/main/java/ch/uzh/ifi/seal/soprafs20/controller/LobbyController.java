@@ -384,7 +384,7 @@ public class LobbyController {
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        gameService.compareGuess(lobby, guess); 
+        gameService.compareGuess(lobby, guess, user.getId(),10L); 
         // todo add points if correct (distribute them)
         // todo move arround roles of players? (Guesser vs Clue maker etc)
         // todo end of game what happens??

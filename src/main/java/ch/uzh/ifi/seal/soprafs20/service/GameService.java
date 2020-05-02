@@ -78,7 +78,7 @@ public class GameService {
      * @param - the active lobby
      * @param - the guess from the player
      */
-    public void compareGuess(Lobby lobby, String guess, Player guesser, Long timeToGuess)
+    public void compareGuess(Lobby lobby, String guess, Long guesserId, Long timeToGuess)
     {
     	Game game = lobby.getGame();
     	
@@ -92,7 +92,7 @@ public class GameService {
     			boolean success = guess.toLowerCase().equals(w.getWord().toLowerCase());
     			game.setLastGuessSuccess(success);
     			updateLeftCards(game,success);
-    			updateGuesserStats(success,timeToGuess,guesser.getId());
+    			updateGuesserStats(success,timeToGuess,guesserId);
     			game = gameRepository.save(game);
     		}
     	}
