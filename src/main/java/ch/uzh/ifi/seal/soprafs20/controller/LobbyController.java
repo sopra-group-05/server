@@ -409,7 +409,12 @@ public class LobbyController {
       
         boolean success = gameService.getGuessSuccess(lobby);
         
-        return DTOMapper.INSTANCE.convertEntityToGuessGETDTO(guess,success);
+        int leftCards = gameService.getLeftCards(lobby);
+        int wonCards = gameService.getWonCards(lobby);
+        int lostCards = gameService.getLostCards(lobby);
+        
+        
+        return DTOMapper.INSTANCE.convertEntityToGuessGETDTO(guess,success,leftCards,wonCards,lostCards);
     }
    
     @GetMapping("/lobbies/{lobbyId}/definition/{word}")
