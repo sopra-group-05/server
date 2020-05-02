@@ -140,11 +140,8 @@ public class ClueService {
                 activeClues.add(clue);
             }
         }
-        if(activeClues.size() == this.getHumanPlayersExceptActivePlayer(lobby).size()) {
-            return activeClues;
-        } else{
-            throw new BadRequestException("Not all Clues are annotated");
-        }
+        return activeClues;
+
     }
 
     private boolean haveBotPlayersAnnotatedClues(Lobby lobby){
