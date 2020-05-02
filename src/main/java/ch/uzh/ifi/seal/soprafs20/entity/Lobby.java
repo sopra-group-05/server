@@ -46,7 +46,7 @@ public class Lobby
     @Column(nullable = false)
     private Language language;
 
-    @OneToMany(mappedBy = "lobby")
+    @OneToMany
     private List<Clue> clues = new ArrayList<>();
     
     @OneToOne

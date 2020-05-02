@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.entity;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -55,6 +56,9 @@ public class Player {
     @OneToMany(mappedBy = "player")
     private List<Clue> clues = new ArrayList<>();
 
+    @Column
+    private PlayerType playerType;
+
 	public Long getId() {
 		return id;
 	}
@@ -94,4 +98,20 @@ public class Player {
     public List<Clue> getClues(){return this.clues;}
 
     public void setClue(Clue clue){this.clues.add(clue);}
+
+    public void setPlayerType(PlayerType playerType) {
+        this.playerType = playerType;
+    }
+
+    public PlayerType getPlayerType() {
+        return playerType;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setToken(String token){
+	    this.token = token;
+    }
 }
