@@ -75,13 +75,13 @@ public class ClueService {
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        int numPlayers = this.getHumanPlayersExceptActivePlayer(lobby).size();
+        float numPlayersbyTwo = this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
             throw new BadRequestException("Clue not in Repository");
         }
         clue.setFlagCounter(1 + clue.getFlagCounter());
-        if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayers/2){
+        if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
         }
         clueRepository.save(clue);
