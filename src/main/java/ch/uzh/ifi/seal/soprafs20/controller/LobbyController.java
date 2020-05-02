@@ -434,4 +434,14 @@ public class LobbyController {
 
         return ResponseEntity.ok(definition);
     }
+
+    @PutMapping("/lobbies/{lobbyId}/nextRound")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity nextRound(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.nextRound(lobbyId, token);
+
+        return new ResponseEntity("next Round", HttpStatus.OK);
+    }
 }
