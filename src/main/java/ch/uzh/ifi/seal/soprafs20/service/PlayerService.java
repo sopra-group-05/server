@@ -96,6 +96,7 @@ public class PlayerService {
      * */
     public void deletePlayer(Player player) {
         if(player != null) {
+            player.getClues().clear();
             playerRepository.delete(player);
         }
     }
