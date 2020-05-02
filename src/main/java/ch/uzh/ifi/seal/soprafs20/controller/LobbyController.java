@@ -327,7 +327,7 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<ClueGetDTO> getClues(@PathVariable long lobbyId,
-                                   @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
+                                   @RequestHeader(name = "Token", required = false) String token){
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         List<Clue> clues= clueService.getClues(lobby, token);
         List<ClueGetDTO> clueGetDTOs= new ArrayList<ClueGetDTO>();
