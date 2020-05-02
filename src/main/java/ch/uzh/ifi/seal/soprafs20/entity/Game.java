@@ -24,7 +24,16 @@ public class Game {
 	
 	@Column(nullable = false)
     private String activeGuess;
-    
+	
+	@Column(nullable = false)
+	private int leftCards;
+	
+	@Column(nullable = false)
+	private int wonCards;
+	
+	@Column(nullable = false)
+	private int lostCards;
+	
 	
 	public Long getGameId() {
 		return GameId;
@@ -54,4 +63,36 @@ public class Game {
 	public void setActiveGuess(String activeGuess) {
 		this.activeGuess = activeGuess;
 	}
+
+
+	public int getLeftCards() {
+		return leftCards;
+	}
+
+
+	public void setLeftCards(int leftCards) {
+		this.leftCards = leftCards;
+	}
+
+
+	public int getWonCards() {
+		return wonCards;
+	}
+
+
+	public void setWonCards(int wonCards) {
+		this.wonCards = wonCards;
+	}
+
+
+	public int getLostCards() {
+		return lostCards;
+	}
+
+
+	public void setLostCards(int lostCards) {
+		this.lostCards = lostCards;
+	}
+	
+	
 }

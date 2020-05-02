@@ -111,7 +111,10 @@ public interface DTOMapper {
     
     @Mapping(source = "guess", target = "guess")
     @Mapping(source = "success", target = "success")
-    GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success);
+    @Mapping(source = "leftCards", target = "leftCards")
+    @Mapping(source = "wonCards", target = "wonCards")
+    @Mapping(source = "lostCards", target = "lostCards")
+    GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success,int leftCards, int wonCards, int lostCards);
     
    
     @Named("convertString")

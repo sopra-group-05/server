@@ -265,7 +265,7 @@ public class LobbyService
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
             lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
-            lobbyToBeStarted.setGame(gameService.createNewGame());
+            lobbyToBeStarted.setGame(gameService.createNewGame(lobbyToBeStarted));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
             return true;

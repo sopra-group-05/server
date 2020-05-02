@@ -39,12 +39,39 @@ public class GameService {
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository) {
         this.gameRepository = gameRepository;
     }
+    
+    /**
+     * This method update the deck stats
+     *
+     * @param - the active game
+     * @param - was the guess correct
+     * 
+     */
+    public void updateLeftCards(Game game, boolean success)
+    {
+
+    	game.setLeftCards(game.getLeftCards()-1);
+    	
+    	if (success)
+    	{
+    		game.setWonCards(game.getWonCards()+1);
+    	}
+    	else
+    	{
+    		if (game.getWonCards()>0)
+    		{
+    			game.setWonCards(game.getWonCards()-1);
+    		}
+    		game.setLostCards(game.getLostCards()+1);
+    	}
+    }
+    
 
     /**
-     * This method will get a specific Card by ID from the Card Repository
+     * This method will get a specific will compare the guess with the mystery word and update game repository
      *
-     * @return The requested Card
-     * @see Card
+     * @param - the active lobby
+     * @param - the guess from the player
      */
     public void compareGuess(Lobby lobby, String guess)
     {
@@ -56,7 +83,9 @@ public class GameService {
     		if (w.getStatus() == MysteryWordStatus.IN_USE)
     		{
     			game.setActiveGuess(guess);
-    			game.setLastGuessSuccess(guess.toLowerCase().equals(w.getWord().toLowerCase()));
+    			boolean success = guess.toLowerCase().equals(w.getWord().toLowerCase());
+    			game.setLastGuessSuccess(success);
+    			updateLeftCards(game,success);
     			game = gameRepository.save(game);
     		}
     	}
@@ -71,12 +100,30 @@ public class GameService {
     {
     	return lobby.getGame().getLastGuessSuccess();
     }
+      
+    public int getLeftCards(Lobby lobby)
+    {
+    	return lobby.getGame().getLeftCards();
+    }
     
-    public Game createNewGame()
+    public int getWonCards(Lobby lobby)
+    {
+    	return lobby.getGame().getWonCards();
+    }
+    
+    public int getLostCards(Lobby lobby)
+    {
+    	return lobby.getGame().getLostCards();
+    }  
+        
+    public Game createNewGame(Lobby lobby)
     {
     	Game game = new Game();
     	game.setLastGuessSuccess(false);
     	game.setActiveGuess("");
+    	game.setLeftCards(lobby.getDeck().getCards().size());
+    	game.setWonCards(0);
+    	game.setLostCards(0);
     	game = gameRepository.save(game);
     	return game;
     }
