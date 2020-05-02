@@ -355,9 +355,10 @@ public class LobbyController {
         //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
+        clueService.addClue(clue, lobby, token);
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
 
-        clueService.addClue(clue, lobby, token);
+
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")

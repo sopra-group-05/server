@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.ClueRepository;
 import org.slf4j.Logger;
@@ -60,13 +61,13 @@ public class ClueService {
         int len = hint.length();
         for (int i = 0; i < len; i++){
             if(Character.isWhitespace(hint.charAt(i))){
-                throw new BadRequestException("Clue can not contain any white spaces");
+                throw new SopraServiceException("Clue can not contain any white spaces");
             }
         }
         for(MysteryWord mysteryWord:mysteryWords) {
             if (mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE)) {
                 if (hint.toLowerCase().equals(mysteryWord.getWord().toLowerCase())) {
-                    throw new BadRequestException("Clue can not be the same as Mysteryword");
+                    throw new SopraServiceException("Clue can not be the same as Mysteryword");
                 }
             }
         }
@@ -75,7 +76,7 @@ public class ClueService {
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
-        float numPlayersbyTwo = this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
+        float numPlayersbyTwo = (float)this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
             throw new BadRequestException("Clue not in Repository");
