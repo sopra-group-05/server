@@ -60,9 +60,6 @@ public class MysteryWordServiceTest {
         // when -> any object is being save in the mysteryWordRepository -> return the dummy testUser
         MysteryWord mysteryWordLocal = mysteryWordService.getMysteryWordById(mysteryWord.getId());
 
-        // then
-        Mockito.verify(mysteryWordRepository, Mockito.times(1)).save(Mockito.any());
-
         assertEquals(mysteryWord.getId(), mysteryWordLocal.getId());
         assertEquals(mysteryWord.getWord(), mysteryWordLocal.getWord());
         assertEquals(mysteryWord.getDescription() ,mysteryWordLocal.getDescription());
@@ -85,7 +82,6 @@ public class MysteryWordServiceTest {
      */
     @Test
     public void getMysteryWordById_InvalidInput_throwsException() {
-        MysteryWord dbMysteryWord = mysteryWordService.getMysteryWordById(2L);
 
         // then -> attempt to create second user with same user -> check that an error is thrown
         String exceptionMessage = "MysteryWord not found";

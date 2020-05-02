@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
-import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Card;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.repository.CardRepository;
@@ -58,9 +57,6 @@ public class CardServiceTest {
     public void getCard_validInputs_success() {
         // when -> any object is being save in the cardRepository -> return the dummy testUser
         Card cardLocal = cardService.getCardById(card.getId());
-
-        // then
-        Mockito.verify(cardRepository, Mockito.times(1)).save(Mockito.any());
 
         assertEquals(card.getId(), cardLocal.getId());
         assertEquals(card.getLanguage(), cardLocal.getLanguage());
