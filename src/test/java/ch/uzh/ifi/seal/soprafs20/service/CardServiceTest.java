@@ -107,7 +107,7 @@ public class CardServiceTest {
         // when -> any object is being save in the cardRepository -> return the dummy testUser
         List<Card> cardLocalList = cardService.get13Cards(Language.EN);
 
-        assertEquals(13, cardLocalList.size());
+        assertEquals(cardList.size(), cardLocalList.size());
     }
 
     private Card getCard(long l) {
