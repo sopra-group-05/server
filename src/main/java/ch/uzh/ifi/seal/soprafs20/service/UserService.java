@@ -70,17 +70,13 @@ public class UserService {
      */
     public User updateUser(User user, String token, long id) {
         User userByToken = userRepository.findByToken(token);
-        User userById = this.getUserByID(user.getId());
+        User userById = this.getUserByID(id);
         if (null == userByToken) {
             // authenticate token => not authenticated
             throw new UnauthorizedException("Token does not belong to any user");
         } else if(null == userById) {
             // Profile does not exist
             throw new NotFoundException("The provided User ID does not belong to any user");
-        }
-
-        if (!user.getId().equals(id)) {
-            throw new UnauthorizedException("Id's of URL and Request do not match");
         }
 
         if (!userById.equals(userByToken)) {
