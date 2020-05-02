@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class Player {
     @Column(nullable = false)
     private int points = 0;
 
-    @OneToMany(mappedBy = "player")
+    @OneToMany(mappedBy = "player", orphanRemoval = true)
+    //@Cascade(values = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Clue> clues = new ArrayList<>();
 
     @Column

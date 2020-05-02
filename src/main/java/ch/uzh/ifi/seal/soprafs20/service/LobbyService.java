@@ -395,7 +395,7 @@ public class LobbyService
     }
 
     /**
-     *
+     *todo: check if needed
      * to get the list of Mystery word from the Lobby
      *
      * @param lobbyId - the current lobbyId
@@ -410,6 +410,7 @@ public class LobbyService
 
         if(!cards.isEmpty()) {
             Card card = cards.get(0);
+            //cards.remove(0);
             //card.setDrawn(true);
             deck.setActiveCard(card);
             deckService.save(deck);
@@ -469,8 +470,16 @@ public class LobbyService
         for(Clue clue:clues){
             clue.setClueStatus(ClueStatus.INACTIVE);
         }
+        Deck deck = lobby.getDeck();
+        List<Card> cards = deck.getCards();
         game.setComparingGuessCounter(0);
-        //todo: add other next Round functionality
+        Card card = cards.get(0);
+        cards.remove(0);
+        deck.setActiveCard(card);
+        deckService.save(deck);
+        game.setActiveGuess("");//todo check if needed
+        //this.setNewPlayersStatus();
+        //
     }
 
     /**

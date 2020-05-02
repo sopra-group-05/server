@@ -348,7 +348,7 @@ public class LobbyControllerTest {
      * Tests creator kickPlayerOut lobbies/{lobbyId}/kick/{UserId}
      * Valid Input, adds the User that sends the request to the Lobby
      */
-    /*@Test
+    @Test
     public void kickPlayerOut_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
@@ -392,6 +392,5 @@ public class LobbyControllerTest {
                 .andDo(print());
 
         Assert.isNull(playerService.getPlayerById(2L));
-        Assert.isTrue(playerService.getPlayerById(1L).getId()!=null);
-    }*/
+    }
 }
