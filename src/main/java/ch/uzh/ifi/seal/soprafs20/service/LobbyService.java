@@ -322,8 +322,12 @@ public class LobbyService
         thisPlayer.setStatus(cluesStatus);
 
         // count how many players have this new status
+        // also change status of Bots to new Status!
         int playersSize = players.size() - 1; // without the Guesser
         for (Player player : players) {
+            if(player.getPlayerType() != PlayerType.HUMAN) {
+                player.setStatus(cluesStatus);
+            }
             if(player.getStatus().equals(cluesStatus)) {
                 playersSize = playersSize-1; // remove 1 for every player
             }
