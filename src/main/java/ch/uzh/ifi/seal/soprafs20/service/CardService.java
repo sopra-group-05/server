@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -78,9 +78,11 @@ public class CardService {
      * @param language*/
     public List<Card> get13Cards(Language language) {
         List<Card> cardList = cardRepository.findByLanguage(language);
-        Random rand = new Random();
+        //Random rand = new Random();
+        SecureRandom rand = new SecureRandom();
+        int streamSize = cardList.size() > 13 ? 13 : cardList.size();
         List<Card> wordList = rand.
-                ints(13, 0, cardList.size()).
+                ints(streamSize, 0, cardList.size()).
                 mapToObj(i -> cardList.get(i)).
                 collect(Collectors.toList());
 

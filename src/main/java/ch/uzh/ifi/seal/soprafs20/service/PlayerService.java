@@ -137,21 +137,19 @@ public class PlayerService {
             String token = "";
             Long id = (long)1;
             Random random = new Random();
-            while (name.equals("") | playerRepository.findByUsername(name) == null) {
+            while (name.equals("") | playerRepository.findByUsername(name) != null) {
                 String randomAddition = random.ints(3).toString();
                 name = playerType.toString() + "_" + randomAddition;
-
             }
+
             while (token.equals("") | playerRepository.findByToken(token) == null) {
                 String randomToken = random.ints(7).toString();
                 token = randomToken;
-
             }
 
             while (id.equals((long)1) | playerRepository.findById(id) == null) {
                 Long randomId = random.nextLong();
                 id = randomId;
-
             }
             botPlayer.setUsername(name);
             botPlayer.setToken(token);
