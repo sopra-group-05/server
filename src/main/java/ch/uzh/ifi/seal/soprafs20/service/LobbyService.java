@@ -444,4 +444,15 @@ public class LobbyService
             playerService.deletePlayer(player);
         }
     }
+
+    /**
+     * This method will invite the user to given lobby
+     *
+     * @param lobby lobby user is invited to
+     * @param user invited user
+     *
+     */
+    public void inviteUserToLobby(User user, Lobby lobby){
+        // TODO: implement invite user
+    }
 }
