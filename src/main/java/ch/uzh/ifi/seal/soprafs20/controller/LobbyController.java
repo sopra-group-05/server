@@ -147,6 +147,13 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
+    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
+                                  @RequestHeader(name = "Token", required = false) String token){
+        // TODO: invite functionality
+    }
+
     @PutMapping("/lobbies/{lobbyId}/leave")
     @ResponseBody
     public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
