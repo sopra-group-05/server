@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
+import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final LobbyService lobbyService;
 
-    UserController(UserService userService) {
+    UserController(UserService userService, LobbyService lobbyService) {
         this.userService = userService;
+        this.lobbyService = lobbyService;
     }
 
     /**
@@ -98,7 +101,9 @@ public class UserController {
 
         User toDeleteUser = DTOMapper.INSTANCE.convertUserDeleteDTOToEntity(userDeleteDTO);
         // delete User
-        userService.deleteUser(userId, token, toDeleteUser);
+        userService.authenticateDeletion(userId, token, toDeleteUser);
+        lobbyService.removeFromLobbyAndDeletePlayer(toDeleteUser);
+        userService.deleteUser(toDeleteUser);
 
         return ResponseEntity.noContent().build(); // status code 204 noContent
     }

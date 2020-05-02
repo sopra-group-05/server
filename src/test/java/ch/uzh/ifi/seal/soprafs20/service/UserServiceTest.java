@@ -253,7 +253,7 @@ public class UserServiceTest {
         UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, testUser.getToken(), testUser.getId()), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
-
+/*
     @Test
     public void deleteUserWrongPasswordTest() {
         testUser.setToken("12345");
@@ -292,4 +292,6 @@ public class UserServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(2L, "12345", testUser), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
+
+ */
 }

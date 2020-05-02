@@ -165,7 +165,7 @@ public class UserService {
     * @param token
     * @param id
     */
-    public void deleteUser(long id , String token, User toDeleteUser) {
+    public void authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
         User userById = userRepository.findById(id);
 
@@ -180,12 +180,13 @@ public class UserService {
         }  else if (!toDeleteUser.getPassword().equals(userById.getPassword())){
             //password should correct
             throw new ConflictException("Wrong Password");
-        } else {
-            userRepository.delete(userById);
-            userRepository.flush();
         }
+    }
 
-
+    public void deleteUser(User user){
+        userRepository.delete(user);
+        userRepository.flush();
+        //todo: check if flsuh needed
     }
 
     /**

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Random;
 import java.util.Set;
 
 import java.util.Optional;
@@ -44,6 +46,7 @@ public class PlayerService {
     public Player convertUserToPlayer(User user, PlayerRole playerRole) {
             Player player = new Player(user);
             player.setRole(playerRole);
+            player.setPlayerType(PlayerType.HUMAN);
             player = playerRepository.save(player);
             playerRepository.flush();
             return player;
@@ -119,5 +122,34 @@ public class PlayerService {
      * */
     public void saveAll(Set<Player> playerSet) {
         playerRepository.saveAll(playerSet);
+    }
+
+    public Player createBotPlayer(PlayerType playerType) {
+        if (!playerType.equals(PlayerType.HUMAN)) {
+            Player botPlayer = new Player();
+            botPlayer.setPlayerType(playerType);
+            botPlayer.setStatus(PlayerStatus.JOINED);
+            String name = "";
+            String token = "";
+            Random random = new Random();
+            while (name.equals("") | playerRepository.findByUsername(name) == null) {
+                String randomAddition = random.ints(3).toString();
+                name = playerType.toString() + "_" + randomAddition;
+
+            }
+            while (name.equals("") | playerRepository.findByToken(token) == null) {
+                String randomAddition = random.ints(5).toString();
+                name = playerType.toString() + "_" + randomAddition;
+
+            }
+            botPlayer.setUsername(name);
+            botPlayer.setToken(token);
+            botPlayer = playerRepository.save(botPlayer);
+            return botPlayer;
+        }
+
+        else {
+            throw new UnsupportedOperationException("Is not Bot");
+        }
     }
 }

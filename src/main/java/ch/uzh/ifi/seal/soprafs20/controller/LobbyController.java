@@ -1,11 +1,7 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
-import ch.uzh.ifi.seal.soprafs20.entity.Clue;
-import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
-import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
-import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
@@ -319,11 +315,12 @@ public class LobbyController {
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
 
+        //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
 
-        clueService.addClue(clue, lobbyId, token);
+        clueService.addClue(clue, lobby, token);
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")
@@ -331,7 +328,8 @@ public class LobbyController {
     @ResponseBody
     public List<ClueGetDTO> getClues(@PathVariable long lobbyId,
                                    @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
-        List<Clue> clues= clueService.getCluesForChecking(lobbyId, token);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        List<Clue> clues= clueService.getClues(lobby, token);
         List<ClueGetDTO> clueGetDTOs= new ArrayList<ClueGetDTO>();
         for (Clue clue:clues){
             clueGetDTOs.add(DTOMapper.INSTANCE.convertClueToClueGetDTO(clue));
@@ -343,7 +341,8 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public void flagClue(@PathVariable long lobbyId, @PathVariable long clueId, @RequestHeader(name = "Token", required = false) String token){
-        clueService.flagClue(clueId, token, lobbyId);
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        clueService.flagClue(clueId, token, lobby);
     }
 
     @PutMapping("/lobbies/{lobbyId}/clues/flag")
@@ -357,6 +356,8 @@ public class LobbyController {
 
         // todo remove and put at right place, status of players HAVE to be updated somewhere...
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        Game game = lobby.getGame();
+        game.setComparingGuessCounter(1 + game.getComparingGuessCounter());
         Player player = playerService.getPlayerById(userService.checkUserToken(token).getId());
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), player, PlayerStatus.GUESSING_WORD, PlayerStatus.WAITING_FOR_GUESS);
     }
