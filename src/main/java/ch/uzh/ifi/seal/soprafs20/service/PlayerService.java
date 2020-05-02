@@ -141,9 +141,9 @@ public class PlayerService {
                 name = playerType.toString() + "_" + randomAddition;
 
             }
-            while (name.equals("") | playerRepository.findByToken(token) == null) {
+            while (token.equals("") | playerRepository.findByToken(token) == null) {
                 String randomAddition = random.ints(5).toString();
-                name = playerType.toString() + "_" + randomAddition;
+                token = playerType.toString() + "_" + randomAddition;
 
             }
             botPlayer.setUsername(name);
