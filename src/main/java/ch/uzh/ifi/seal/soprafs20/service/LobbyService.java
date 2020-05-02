@@ -410,7 +410,7 @@ public class LobbyService
 
         if(!cards.isEmpty()) {
             Card card = cards.get(0);
-            cards.remove(0);
+            //cards.remove(0);
             //card.setDrawn(true);
             deck.setActiveCard(card);
             deckService.save(deck);
