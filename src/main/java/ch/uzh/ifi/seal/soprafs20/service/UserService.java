@@ -161,7 +161,7 @@ public class UserService {
     * @param token
     * @param id
     */
-    public void authenticateDeletion(long id , String token, User toDeleteUser) {
+    public User authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
         User userById = userRepository.findById(id);
 
@@ -177,6 +177,8 @@ public class UserService {
             //password should correct
             throw new ConflictException("Wrong Password");
         }
+
+        return userByToken;
     }
 
     public void deleteUser(User user){
