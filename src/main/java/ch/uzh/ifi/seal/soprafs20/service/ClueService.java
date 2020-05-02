@@ -48,6 +48,7 @@ public class ClueService {
         newClue.setPlayer(playerService.getPlayerByToken(token));
         newClue.setCard(lobby.getDeck().getActiveCard());
         newClue.setGame(lobby.getGame());
+        newClue.setFlagCounter(0);
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
