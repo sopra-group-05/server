@@ -429,20 +429,33 @@ public class LobbyService
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
-        Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
-        Lobby lobbyToRemovePlayer = null;
-        List<Lobby> lobbies= this.getLobbies();
-        for(Lobby lobby:lobbies){
-            Set<Player> players = lobby.getPlayers();
-            if(players.contains(player)){
-                lobbyToRemovePlayer = lobby;
-                break;
+        if (playerService.doesPlayerWithTokenExist(toDeleteUser.getToken())) {
+            Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
+            Lobby lobbyToRemovePlayer = null;
+            List<Lobby> lobbies= this.getLobbies();
+            for(Lobby lobby:lobbies){
+                Set<Player> players = lobby.getPlayers();
+                if(players.contains(player)){
+                    lobbyToRemovePlayer = lobby;
+                    break;
+                }
+            }
+            if(!lobbyToRemovePlayer.equals(null)) {
+                this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
+                playerService.deletePlayer(player);
             }
         }
-        if(!lobbyToRemovePlayer.equals(null)) {
-            this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
-            playerService.deletePlayer(player);
+    }
+
+    public void nextRound(long lobbyId, String token){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        Game game = lobby.getGame();
+        List<Clue> clues = game.getClues();
+        for(Clue clue:clues){
+            clue.setClueStatus(ClueStatus.INACTIVE);
         }
+        game.setComparingGuessCounter(0);
+        //todo: add other next Round functionality
     }
 
     /**
