@@ -3,11 +3,14 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Game;
+import ch.uzh.ifi.seal.soprafs20.entity.GameStats;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.repository.CardRepository;
 import ch.uzh.ifi.seal.soprafs20.repository.GameRepository;
+import ch.uzh.ifi.seal.soprafs20.repository.StatsRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +37,12 @@ public class GameService {
     private final Logger log = LoggerFactory.getLogger(GameService.class);
 
     private final GameRepository gameRepository;
+    private final StatsRepository statsRepository;
 
     @Autowired
-    public GameService(@Qualifier("gameRepository") GameRepository gameRepository) {
+    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("statsRepository") StatsRepository statsRepository) {
         this.gameRepository = gameRepository;
+        this.statsRepository = statsRepository;
     }
     
     /**
@@ -73,11 +78,12 @@ public class GameService {
      * @param - the active lobby
      * @param - the guess from the player
      */
-    public void compareGuess(Lobby lobby, String guess)
+    public void compareGuess(Lobby lobby, String guess, Player guesser, Long timeToGuess)
     {
     	Game game = lobby.getGame();
     	
     	List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
+    	
     	for(MysteryWord w : mysteryWords)
     	{
     		if (w.getStatus() == MysteryWordStatus.IN_USE)
@@ -86,12 +92,23 @@ public class GameService {
     			boolean success = guess.toLowerCase().equals(w.getWord().toLowerCase());
     			game.setLastGuessSuccess(success);
     			updateLeftCards(game,success);
+    			updateGuesserStats(success,timeToGuess,guesser.getId());
     			game = gameRepository.save(game);
     		}
     	}
     }
     
-    public String getGuess(Lobby lobby)
+    private void updateGuesserStats(boolean success, Long timeToGuess, Long id) 
+    {
+    	GameStats gameStats = statsRepository.findStatsByPlayerId(id);
+    	gameStats.incGuessCount(1l);
+    	if(success)
+    	{
+    		gameStats.incCorrectGuessCount(1l);
+    	}	
+	}
+
+	public String getGuess(Lobby lobby)
     {
     	return lobby.getGame().getActiveGuess();
     }
