@@ -1,3 +1,4 @@
+
 package ch.uzh.ifi.seal.soprafs20.service;
 
 
@@ -6,6 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.MalicousBot;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
+import ch.uzh.ifi.seal.soprafs20.service.GameService;
 import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
@@ -35,6 +37,10 @@ public class ClueService {
     @Autowired
     private PlayerService playerService;
 
+    @Autowired
+    private GameService gameService;
+    
+
     public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository) {
         this.clueRepository = clueRepository;
     }
@@ -53,6 +59,7 @@ public class ClueService {
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
+        gameService.updateClueGeneratorStats(true, 15l, playerService.getPlayerByToken(token).getId(), lobby.getId());      
     }
 
     private void checkClue(Clue clue, Lobby lobby){
@@ -84,6 +91,7 @@ public class ClueService {
         clue.setFlagCounter(1 + clue.getFlagCounter());
         if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
+            gameService.reduceGoodClues(playerService.getPlayerByToken(token).getId(), lobby.getId());
         }
         clueRepository.save(clue);
     }

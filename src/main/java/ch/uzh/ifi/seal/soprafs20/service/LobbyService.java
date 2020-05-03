@@ -456,7 +456,7 @@ public class LobbyService
                     break;
                 }
             }
-            if(!lobbyToRemovePlayer.equals(null)) {
+            if(lobbyToRemovePlayer != null) {
                 this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
                 playerService.deletePlayer(player);
             }
@@ -491,5 +491,7 @@ public class LobbyService
     public void inviteUserToLobby(User user, Lobby lobby){
         Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
         addPlayerToLobby(lobby, player);
+        // add ranking for player
+        gameService.addStats(player.getId(),lobby.getId());
     }
 }
