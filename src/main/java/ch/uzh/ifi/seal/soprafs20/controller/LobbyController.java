@@ -236,9 +236,18 @@ public class LobbyController {
         Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
 
         Player player = playerService.getPlayerById(user.getId());
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
         if(!isInThisLobby) {
             throw new ForbiddenException("The user is not in this Lobby.");
+        }
+        if(player.getRole().equals(PlayerRole.GUESSER)){
+            Set<Player> allPlayers = lobby.getPlayers();
+            for (Player singlePlayer:allPlayers){
+                if(!singlePlayer.getPlayerType().equals(PlayerType.HUMAN)){
+                    playerService.setPlayerReady(singlePlayer);
+                }
+            }
         }
         playerService.setPlayerReady(player);
         return true;
@@ -387,17 +396,6 @@ public class LobbyController {
         return clueGetDTOs;
     }
 
-    /*
-    @PutMapping("/lobbies/{lobbyId}/clues/{clueId}")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public void flagClue(@PathVariable long lobbyId, @PathVariable long clueId, @RequestHeader(name = "Token", required = false) String token){
-        Lobby lobby = lobbyService.getLobbyById(lobbyId);
-        clueService.flagClue(clueId, token, lobby);
-    }
-
-     */
-
     @PutMapping("/lobbies/{lobbyId}/clues/flag")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -441,7 +439,8 @@ public class LobbyController {
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        gameService.compareGuess(lobby, guess, user.getId(),10L); 
+        //TODO set correct time for guess
+        gameService.compareGuess(lobby, guess, user.getId(),0L); 
         // todo add points if correct (distribute them)
         // todo move arround roles of players? (Guesser vs Clue maker etc)
         // todo end of game what happens??

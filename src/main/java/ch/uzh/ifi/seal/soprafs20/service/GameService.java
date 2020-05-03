@@ -93,7 +93,8 @@ public class GameService {
     			game.setLastGuessSuccess(success);
     			updateLeftCards(game,success);
     			updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
-    			game = gameRepository.save(game);
+    			updateTeamPoints(lobby.getId(),game.getWonCards());
+       			game = gameRepository.save(game);
     			gameRepository.flush();
     		}
     	}
@@ -138,6 +139,18 @@ public class GameService {
     	statsRepository.save(gameStats);
     	statsRepository.flush();
 		
+	}
+	
+	public void updateTeamPoints(Long lobbyId, Long teamPoints)
+	{
+		List<GameStats> allGameStats = statsRepository.findAllByLobbyId(lobbyId);
+		for (GameStats eachGameStats : allGameStats)
+		{
+			eachGameStats.setTeamPoints(teamPoints);
+			eachGameStats.calculateScore();
+		}
+    	statsRepository.saveAll(allGameStats);
+    	statsRepository.flush();
 	}
 
 	public String getGuess(Lobby lobby)
@@ -189,8 +202,8 @@ public class GameService {
 		return (statsRepository.findAllByLobbyId(lobbyId));
 	}
 
-	public GameStats getPlayersStats(long playerId, long lobbyId) {
-		// TODO Auto-generated method stub
+	public GameStats getPlayersStats(long playerId, long lobbyId) 
+	{
 		return (statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId));
 	}
     

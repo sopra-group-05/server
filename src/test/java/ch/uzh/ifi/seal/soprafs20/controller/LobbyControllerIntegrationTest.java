@@ -1,28 +1,41 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
-import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.*;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
+import ch.uzh.ifi.seal.soprafs20.repository.ClueRepository;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.CluePostDTO;
+import ch.uzh.ifi.seal.soprafs20.rest.dto.GuessPostDTO;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPostDTO;
+import ch.uzh.ifi.seal.soprafs20.service.ClueService;
+import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus.HUMANS;
 import static java.lang.Math.toIntExact;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +60,15 @@ public class LobbyControllerIntegrationTest {
 
     @Autowired
     private LobbyRepository lobbyRepository;
+
+    @Autowired
+    private LobbyService lobbyService;
+
+    @Autowired
+    private PlayerService playerService;
+
+    @Autowired
+    private ClueRepository clueRepository;
 
     /**
      * Integration test to create user, login, create lobby
@@ -103,10 +125,137 @@ public class LobbyControllerIntegrationTest {
                 .andExpect(jsonPath("$").doesNotExist())
                 .andDo(print());
 
-        lobby = lobbyRepository.findByLobbyId(lobby.getId());
+        lobby = lobbyService.getLobbyById(lobby.getId());
         assertNotNull(lobby);
         assertEquals(2, lobby.getPlayers().size());
 
+
+        //user1 sets status ready
+        requestBuilder = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/ready");
+        requestBuilder.header("Token", userEntity.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").isBoolean())
+                .andDo(print());
+
+        Player player = playerService.getPlayerById(userEntity.getId());
+        assertNotNull(player);
+        assertEquals(PlayerStatus.READY, player.getStatus());
+
+        //user2 sets status ready
+        requestBuilder = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/ready");
+        requestBuilder.header("Token", userEntity2.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").isBoolean())
+                .andDo(print());
+
+        player = playerService.getPlayerById(userEntity2.getId());
+        assertNotNull(player);
+        assertEquals(PlayerStatus.READY, player.getStatus());
+
+        //creator (user1) starts lobby
+        requestBuilder = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/start");
+        requestBuilder.header("Token", userEntity.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+
+        lobby = lobbyService.getLobbyById(lobby.getId());
+        assertEquals(LobbyStatus.RUNNING, lobby.getLobbyStatus());
+        //user2 gets mysterywords
+        callCardAPI(lobby.getId(), userEntity2.getToken());
+        lobby = lobbyService.getLobbyById(lobby.getId());
+        Card activeCard = lobby.getDeck().getActiveCard();
+
+        //user1 picks number
+        requestBuilder = getMockHttpServletRequestBuilderForPost(2, "/lobbies/"+ lobby.getId() +"/number");
+        requestBuilder.header("Token", userEntity.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist());
+
+        //user2 gives clue
+        CluePostDTO cluePostDTO = new CluePostDTO();
+        cluePostDTO.setHint("Star");
+        requestBuilder = getMockHttpServletRequestBuilderForPost(cluePostDTO, "/lobbies/"+ lobby.getId() +"/clues");
+        requestBuilder.header("Token", userEntity2.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
+
+        //user2 gets clues
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() +"/clues")
+                .contentType(MediaType.APPLICATION_JSON).header("Token", userEntity2.getToken());
+        ResultActions result = mockMvc.perform(getRequest);
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.[0].id").exists())
+                .andExpect(jsonPath("$.[0].hint").exists());
+
+        List<Clue> clueList = clueRepository.findAll();
+        //user1 flags clue
+        //creator (user1) starts lobby
+        List<Long> ids = new ArrayList();
+        ids.add(clueList.get(0).getId());
+        requestBuilder = getMockHttpRequestBuilderForPut(ids, "/lobbies/"+ lobby.getId() +"/clues/flag");
+        requestBuilder.header("Token", userEntity2.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+
+        //user1 gets clues
+        getRequest = get("/lobbies/" + lobby.getId() +"/clues")
+                .contentType(MediaType.APPLICATION_JSON).header("Token", userEntity.getToken());
+        result = mockMvc.perform(getRequest);
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+                /*.andExpect(jsonPath("$.[0].id").exists())
+                .andExpect(jsonPath("$.[0].hint").exists());*/
+
+        //user1 guesses
+        GuessPostDTO guessPostDTO = new GuessPostDTO();
+        guessPostDTO.setGuess(activeCard.getMysteryWords().get(1).getWord());
+        requestBuilder = getMockHttpServletRequestBuilderForPost(guessPostDTO, "/lobbies/"+ lobby.getId() +"/guess");
+        requestBuilder.header("Token", userEntity.getToken());
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist());
+
+        //user2 leaves lobby
+        MockHttpServletRequestBuilder requestBuilderError = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/stop");
+        requestBuilderError.header("Token", userEntity2.getToken());
+
+        //todo: work in progress as stopping lobby is not fully implemented
+        // then
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent());
+                /*.andExpect(jsonPath("$.id", is(lobby.getId())))
+                .andExpect(jsonPath("$.lobbyName", is(lobbyPostDTO.getLobbyName())))
+                .andExpect(jsonPath("$.lobbyStatus", is(LobbyStatus.STOPPED)))
+                .andDo(print());*/
+
+    }
+
+    private void callCardAPI(Long lobbyId, String token) throws Exception {
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobbyId +"/card")
+                .contentType(MediaType.APPLICATION_JSON).header("Token", token);
+        ResultActions result = mockMvc.perform(getRequest);
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.[0].id").exists())
+                .andExpect(jsonPath("$.[0].word").exists())
+                .andExpect(jsonPath("$.[0].status").exists())
+                .andDo(print());
     }
 
     private UserPostDTO getUserPostDTO(String username, String password) {

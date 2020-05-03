@@ -456,7 +456,7 @@ public class LobbyService
                     break;
                 }
             }
-            if(!lobbyToRemovePlayer.equals(null)) {
+            if(lobbyToRemovePlayer != null) {
                 this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
                 playerService.deletePlayer(player);
             }
@@ -466,20 +466,77 @@ public class LobbyService
     public void nextRound(long lobbyId, String token){
         Lobby lobby = this.getLobbyById(lobbyId);
         Game game = lobby.getGame();
+        List<MysteryWord> mysteryWords= lobby.getDeck().getActiveCard().getMysteryWords();
+        for(MysteryWord mysteryWord:mysteryWords){
+            mysteryWord.setStatus(MysteryWordStatus.NOT_USED);
+        }
         List<Clue> clues = game.getClues();
         for(Clue clue:clues){
             clue.setClueStatus(ClueStatus.INACTIVE);
         }
         Deck deck = lobby.getDeck();
         List<Card> cards = deck.getCards();
+        Card cardToRemove = cards.remove(0);
+        //cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
-        cards.remove(0);
+        if(card.equals(null)){
+            this.endGame(lobby);
+        }
         deck.setActiveCard(card);
-        deckService.save(deck);
+        deckService.save(deck); 
         game.setActiveGuess("");//todo check if needed
-        //this.setNewPlayersStatus();
-        //
+        this.setNewRoleOfPlayers(lobby);
+        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
+        Set<Player> allPlayers = lobby.getPlayers();
+        for (Player player:allPlayers){
+            if(!player.getPlayerType().equals(PlayerType.HUMAN)){
+                player.setStatus(PlayerStatus.READY);
+            }
+        }
+    }
+
+    /**
+     * This method will assign the Role GUESSER to a new Player (only humans)
+     * @param lobby
+     */
+    public void setNewRoleOfPlayers(Lobby lobby) {
+        int oldPosition = 0; //position of oldGuesser
+        for (Player player : lobby.getPlayers()) {
+            if (player.getRole() == PlayerRole.GUESSER){
+                // set old Guesser to Clue Creator
+                player.setRole(PlayerRole.CLUE_CREATOR);
+                break;
+            }
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                // count at which position the older Guesser was
+                oldPosition = oldPosition + 1;
+            }
+        }
+
+        int size = this.getNumberOfHumanPlayersInLobby(lobby);
+        int newPosition = (oldPosition + 1) % size; // calculate new position of next player
+        int count = 0;
+
+        for (Player player : lobby.getPlayers()) {
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                if (count == newPosition) {
+                    player.setRole(PlayerRole.GUESSER);
+                    break;
+                }
+                count = count + 1;
+            }
+        }
+    }
+
+    private int getNumberOfHumanPlayersInLobby(Lobby lobby) {
+        int num = 0;
+        for (Player player : lobby.getPlayers()) {
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                num = num + 1;
+            }
+        }
+        return num;
     }
 
     /**
@@ -494,5 +551,13 @@ public class LobbyService
         addPlayerToLobby(lobby, player);
         // add ranking for player
         gameService.addStats(player.getId(),lobby.getId());
+    }
+
+    public void endGame(Lobby lobby){
+        Set<Player> players = lobby.getPlayers();
+        for (Player player:players){
+            player.setStatus(PlayerStatus.FINISHED);
+        }
+        lobby.setLobbyStatus(LobbyStatus.STOPPED);
     }
 }

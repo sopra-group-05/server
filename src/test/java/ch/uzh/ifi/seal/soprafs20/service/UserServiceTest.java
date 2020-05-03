@@ -253,9 +253,9 @@ public class UserServiceTest {
         UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> userService.updateUser(testUser, testUser.getToken(), testUser.getId()), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
-/*
+
     @Test
-    public void deleteUserWrongPasswordTest() {
+    public void authenticateUsertoDeleteWrongPasswordTest() {
         testUser.setToken("12345");
 
         User testUser2 = new User();
@@ -264,12 +264,12 @@ public class UserServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser);
         String exceptionMessage = "Wrong Password";
-        ConflictException exception = assertThrows(ConflictException.class, () -> userService.deleteUser(1L, "12345", testUser2), exceptionMessage);
+        ConflictException exception = assertThrows(ConflictException.class, () -> userService.authenticateDeletion(1L, "12345", testUser2), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @Test
-    public void deleteUserWrongUserTokenTest() {
+    public void authenticateUsertoDeleteWrongUserTokenTest() {
         testUser.setToken("12345");
 
         User testUser2 = new User();
@@ -278,20 +278,19 @@ public class UserServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser2);
         String exceptionMessage = "You're not supposed to delete this user Profile";
-        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> userService.deleteUser(1L, "wrong", testUser), exceptionMessage);
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> userService.authenticateDeletion(1L, "wrong", testUser), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @Test
-    public void deleteUserWrongUserIdTest() {
+    public void authenticateUsertoDeleteWrongUserId() {
         testUser.setToken("12345");
 
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(null);
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser);
         String exceptionMessage = "The provided User ID does not belong to any user";
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(2L, "12345", testUser), exceptionMessage);
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.authenticateDeletion(2L, "12345", testUser), exceptionMessage);
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
- */
 }
