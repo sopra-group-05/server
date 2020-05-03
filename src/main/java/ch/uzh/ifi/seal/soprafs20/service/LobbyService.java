@@ -466,6 +466,10 @@ public class LobbyService
     public void nextRound(long lobbyId, String token){
         Lobby lobby = this.getLobbyById(lobbyId);
         Game game = lobby.getGame();
+        List<MysteryWord> mysteryWords= lobby.getDeck().getActiveCard().getMysteryWords();
+        for(MysteryWord mysteryWord:mysteryWords){
+            mysteryWord.setStatus(MysteryWordStatus.NOT_USED);
+        }
         List<Clue> clues = game.getClues();
         for(Clue clue:clues){
             clue.setClueStatus(ClueStatus.INACTIVE);
