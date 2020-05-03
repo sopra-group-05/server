@@ -6,6 +6,7 @@ public class GuessGetDTO {
     private int leftCards;
     private int wonCards;
     private int lostCards;
+    private String mysteryWord;
 
 
 	public boolean isSuccess() {
@@ -46,6 +47,14 @@ public class GuessGetDTO {
 
 	public void setLostCards(int lostCards) {
 		this.lostCards = lostCards;
+	}
+
+	public String getMysteryWord() {
+		return mysteryWord;
+	}
+
+	public void setMysteryWord(String mysteryWord) {
+		this.mysteryWord = mysteryWord;
 	}
 	
 	
