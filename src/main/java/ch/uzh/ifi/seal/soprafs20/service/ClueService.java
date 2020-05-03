@@ -233,11 +233,6 @@ public class ClueService {
         return humanPlayers;
     }
 
-    public void deleteCluesForPlayer(Player player){
-        List<Clue> clues= player.getClues();
-        clueRepository.deleteAll(clues);
-    }
-
 }
 
 

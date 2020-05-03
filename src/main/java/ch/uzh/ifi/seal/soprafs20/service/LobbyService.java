@@ -474,11 +474,10 @@ public class LobbyService
         List<Card> cards = deck.getCards();
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
-        cards.remove(0);
         deck.setActiveCard(card);
         deckService.save(deck);
         game.setActiveGuess("");//todo check if needed
-        //this.setNewPlayersStatus();
+        //this.setNewPlayersStatus(lobby.getPlayers(),)
         //
     }
 

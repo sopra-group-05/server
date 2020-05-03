@@ -55,7 +55,7 @@ public class Player {
     private int points = 0;
 
     @OneToMany(mappedBy = "player", orphanRemoval = true)
-    //@Cascade(values = {CascadeType.PERSIST, CascadeType.REMOVE})
+    //@Cascade(value = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Clue> clues = new ArrayList<>();
 
     @Column
