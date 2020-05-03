@@ -478,7 +478,7 @@ public class LobbyService
         deck.setActiveCard(card);
         deckService.save(deck);
         game.setActiveGuess("");//todo check if needed
-        //this.setNewPlayersStatus();
+        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
         //
     }
 
