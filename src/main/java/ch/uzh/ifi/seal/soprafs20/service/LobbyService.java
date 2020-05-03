@@ -481,8 +481,7 @@ public class LobbyService
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
         if(card.equals(null)){
-            //todo:end game
-            //this.
+            this.endGame(lobby);
         }
         deck.setActiveCard(card);
         deckService.save(deck); 
@@ -552,5 +551,13 @@ public class LobbyService
         addPlayerToLobby(lobby, player);
         // add ranking for player
         gameService.addStats(player.getId(),lobby.getId());
+    }
+
+    public void endGame(Lobby lobby){
+        Set<Player> players = lobby.getPlayers();
+        for (Player player:players){
+            player.setStatus(PlayerStatus.FINISHED);
+        }
+        lobby.setLobbyStatus(LobbyStatus.STOPPED);
     }
 }
