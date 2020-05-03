@@ -47,7 +47,7 @@ public class FriendlyBot implements Bot {
             JsonNode synonymNode = root.get(0);
             synonym = synonymNode.get("word").asText();
         } catch (Exception e){
-            return "Error";
+            return "No Synonym found";
         }
         return synonym;
     }

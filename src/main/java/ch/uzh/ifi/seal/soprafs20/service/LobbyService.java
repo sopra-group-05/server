@@ -474,12 +474,17 @@ public class LobbyService
         List<Card> cards = deck.getCards();
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
-        cards.remove(0);
         deck.setActiveCard(card);
         deckService.save(deck);
         game.setActiveGuess("");//todo check if needed
         this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
-        //
+
+        Set<Player> allPlayers = lobby.getPlayers();
+        for (Player player:allPlayers){
+            if(!player.getPlayerType().equals(PlayerType.HUMAN)){
+                player.setStatus(PlayerStatus.READY);
+            }
+        }
     }
 
     /**

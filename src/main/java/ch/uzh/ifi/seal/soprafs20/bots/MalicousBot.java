@@ -48,7 +48,7 @@ public class MalicousBot implements Bot{
             JsonNode synonymNode = root.get(0);
             antonym = synonymNode.get("word").asText();
         } catch (Exception e){
-            return "Error";
+            return "No Antonym found";
         }
         return antonym;
     }
