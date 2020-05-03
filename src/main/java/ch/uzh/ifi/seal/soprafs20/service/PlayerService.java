@@ -97,13 +97,10 @@ public class PlayerService {
      * */
     public void deletePlayer(Player player) {
         if(player != null) {
-            List<Clue> clues = player.getClues();
-            for(Clue clue:clues){
-                clue.setPlayer(null);
-            }
             playerRepository.delete(player);
             playerRepository.flush();
         }
+
     }
 
     /**
