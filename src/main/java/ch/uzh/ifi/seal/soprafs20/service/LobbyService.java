@@ -215,29 +215,9 @@ public class LobbyService
     public void removePlayerFromLobby(Long lobbyId, Long playerId) {
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        if(lobby.getLobbyStatus().equals(LobbyStatus.RUNNING)){
-            if(lobby.getCreator().equals(player)){
-                Set<Player> players = lobby.getPlayers();
-                for(Player player1:players){
-                    if(player1.getPlayerType().equals(PlayerType.HUMAN)){
-                        lobby.setCreator(player1);
-                    }
-                }
-
-            }
-        }
         List<Clue> clues = player.getClues();
         for(Clue clue:clues){
             clue.setPlayer(null);
-        }
-        Game game = lobby.getGame();
-        if(game != null) {
-            List<Clue> clues1 = game.getClues();
-            for(Clue clue1:clues1){
-                if (clue1.getPlayer().equals(player)){
-                    clue1.setPlayer(null);
-                }
-            }
         }
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
