@@ -417,8 +417,9 @@ public class LobbyService
         lobby.setLobbyStatus(lobbyStatus);
         //Remove the Player from the Lobby
         this.removePlayerFromLobby(lobbyId, player.getId());
-
-        this.nextRound(lobbyId, lobby.getCreator().getToken());
+        if(lobby.getLobbyStatus().equals(LobbyStatus.RUNNING)) {
+            this.nextRound(lobbyId, lobby.getCreator().getToken());
+        }
 
         //If the response of the API call is "STOPPED" the frontend must redirect back to the lobby!
         //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
