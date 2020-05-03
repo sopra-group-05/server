@@ -478,6 +478,13 @@ public class LobbyService
         deckService.save(deck);
         game.setActiveGuess("");//todo check if needed
         //this.setNewPlayersStatus(lobby.getPlayers(),)
+        Set<Player> allPlayers = lobby.getPlayers();
+        for (Player player:allPlayers){
+            if(!player.getPlayerType().equals(PlayerType.HUMAN)){
+                player.setStatus(PlayerStatus.READY);
+            }
+        }
+
         //
     }
 

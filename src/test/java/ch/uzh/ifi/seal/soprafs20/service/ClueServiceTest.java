@@ -8,5 +8,5 @@ public class ClueServiceTest {
     @Mock
     private ClueRepository clueRepository;
 
-    @Autowired
+
 }
