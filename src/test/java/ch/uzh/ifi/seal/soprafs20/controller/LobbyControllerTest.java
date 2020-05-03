@@ -77,6 +77,7 @@ public class LobbyControllerTest {
         User testUser = new User();
         testUser.setId(1L);
         Player testPlayer = new Player(testUser);
+        testPlayer.setId(1L);
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testPlayer);
@@ -87,8 +88,10 @@ public class LobbyControllerTest {
         lobbyPostDTO.setLanguage("EN");
 
         given(playerService.checkPlayerToken(Mockito.any())).willReturn(true);
-        given(userService.createUser(Mockito.any())).willReturn(testUser);
+        given(userService.checkUserToken(Mockito.any())).willReturn(testUser);
         given(lobbyService.createLobby(Mockito.any())).willReturn(lobby);
+        given(playerService.convertUserToPlayer(Mockito.any(),Mockito.any())).willReturn(testPlayer);
+        Mockito.doNothing().when(gameService).addStats(Mockito.any(),Mockito.any());
 
 
         // when/then -> do the request + validate the result
@@ -279,6 +282,8 @@ public class LobbyControllerTest {
         given(lobbyService.addPlayerToLobby(Mockito.any(), Mockito.any())).willReturn(lobby);
         given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
         given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(playerService.convertUserToPlayer(Mockito.any(),Mockito.any())).willReturn(testPlayer);
+        Mockito.doNothing().when(gameService).addStats(Mockito.any(),Mockito.any());
 
         // make get Request to Lobby with id
         MockHttpServletRequestBuilder putRequest = put("/lobbies/" + lobby.getId() + "/join")
