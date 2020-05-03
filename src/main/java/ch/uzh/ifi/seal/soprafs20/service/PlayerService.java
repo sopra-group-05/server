@@ -102,7 +102,6 @@ public class PlayerService {
                 clue.setPlayer(null);
             }
             playerRepository.delete(player);
-            playerRepository.flush();
         }
     }
 

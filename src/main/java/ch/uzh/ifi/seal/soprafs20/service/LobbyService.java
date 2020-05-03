@@ -227,12 +227,10 @@ public class LobbyService
 
             }
         }
-        /*
         List<Clue> clues = player.getClues();
         for(Clue clue:clues){
             clue.setPlayer(null);
         }
-
         Game game = lobby.getGame();
         if(game != null) {
             List<Clue> clues1 = game.getClues();
@@ -244,11 +242,10 @@ public class LobbyService
                 }
             }
         }
-         */
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
-        lobbyRepository.flush();
         playerService.deletePlayer(player);
+        lobbyRepository.flush();
     }
 
     /**
@@ -515,7 +512,7 @@ public class LobbyService
         //cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
-        if(card == null){
+        if(card.equals(null)){
             this.endGame(lobby);
         }
         deck.setActiveCard(card);
