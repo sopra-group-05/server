@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.soprafs20.entity.Clue;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.repository.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import java.util.Optional;
@@ -142,7 +141,7 @@ public class PlayerService {
             botPlayer.setRole(PlayerRole.CLUE_CREATOR);
             String name = "";
             String token = "";
-            Random random = new Random();
+            SecureRandom random = new SecureRandom();
             Long id = random.nextLong();
             while (name.equals("") | playerRepository.findByUsername(name) != null) {
                 String randomAddition = Integer.toString(random.nextInt(100));

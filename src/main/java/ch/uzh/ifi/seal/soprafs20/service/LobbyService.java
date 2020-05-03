@@ -456,7 +456,7 @@ public class LobbyService
                     break;
                 }
             }
-            if(!lobbyToRemovePlayer.equals(null)) {
+            if(lobbyToRemovePlayer != null) {
                 this.removePlayerFromLobby(lobbyToRemovePlayer.getId(), player.getId());
                 playerService.deletePlayer(player);
             }
