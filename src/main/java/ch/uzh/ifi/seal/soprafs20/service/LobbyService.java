@@ -495,6 +495,7 @@ public class LobbyService
         List<MysteryWord> mysteryWords= lobby.getDeck().getActiveCard().getMysteryWords();
         for(MysteryWord mysteryWord:mysteryWords){
             mysteryWord.setStatus(MysteryWordStatus.NOT_USED);
+            mysteryWord.setCard(null);
         }
         List<Clue> clues = game.getClues();
         for(Clue clue:clues){
@@ -503,13 +504,19 @@ public class LobbyService
         Deck deck = lobby.getDeck();
         List<Card> cards = deck.getCards();
         Card cardToRemove = cards.remove(0);
-        //cardService.delete(cardToRemove);
-        game.setComparingGuessCounter(0);
         Card card = cards.get(0);
+        deck.setActiveCard(card);
+        List<Clue> allClues = lobby.getClues();
+        for(Clue clue:allClues){
+            if(clue.getCard().equals(cardToRemove)){
+                clue.setCard(null);
+            }
+        }
+        cardService.delete(cardToRemove);
+        game.setComparingGuessCounter(0);
         if(card.equals(null)){
             this.endGame(lobby);
         }
-        deck.setActiveCard(card);
         deckService.save(deck); 
         game.setActiveGuess("");//todo check if needed
         this.setNewRoleOfPlayers(lobby);
