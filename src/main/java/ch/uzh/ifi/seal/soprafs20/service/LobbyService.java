@@ -215,6 +215,10 @@ public class LobbyService
     public void removePlayerFromLobby(Long lobbyId, Long playerId) {
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
+        List<Clue> clues = player.getClues();
+        for(Clue clue:clues){
+            clue.setPlayer(null);
+        }
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
         playerService.deletePlayer(player);
