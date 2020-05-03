@@ -62,7 +62,8 @@ public class ClueService {
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
-        gameService.updateClueGeneratorStats(true, 15l, playerService.getPlayerByToken(token).getId(), lobby.getId());      
+        //TODO Set correct time for coming up whit the clue
+        gameService.updateClueGeneratorStats(true, 0l, playerService.getPlayerByToken(token).getId(), lobby.getId());      
     }
 
     /*

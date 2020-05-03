@@ -195,7 +195,7 @@ public class GameStats {
 	
 	public void addGuessTime(Long time) 
 	{
-		this.timeToGuess = (this.timeToGuess * this.guessCount - 1 + time) / this.guessCount;
+		this.timeToGuess = (this.timeToGuess * (this.guessCount - 1) + time) / this.guessCount;
 		if(this.timeToGuess > this.MAXTIME)
 		{
 			this.timeToGuess = this.MAXTIME;
@@ -204,7 +204,7 @@ public class GameStats {
 
 	public void addClueTime(Long time) 
 	{
-		this.timeForClue = (this.timeForClue * this.givenClues - 1 + time) / this.givenClues;
+		this.timeForClue = (this.timeForClue * (this.givenClues - 1) + time) / this.givenClues;
 		if(this.timeForClue > this.MAXTIME)
 		{
 			this.timeForClue = this.MAXTIME;
