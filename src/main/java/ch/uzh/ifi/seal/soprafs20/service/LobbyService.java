@@ -476,7 +476,7 @@ public class LobbyService
         Card card = cards.get(0);
         deck.setActiveCard(card);
         deckService.save(deck);
-        game.setActiveGuess("");//todo check if needed
+        game.setActiveGuess("");
         //this.setNewPlayersStatus(lobby.getPlayers(),)
         Set<Player> allPlayers = lobby.getPlayers();
         for (Player player:allPlayers){
