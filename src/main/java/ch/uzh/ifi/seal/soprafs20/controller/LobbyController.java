@@ -236,9 +236,18 @@ public class LobbyController {
         Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
 
         Player player = playerService.getPlayerById(user.getId());
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
         if(!isInThisLobby) {
             throw new ForbiddenException("The user is not in this Lobby.");
+        }
+        if(player.getRole().equals(PlayerRole.GUESSER)){
+            Set<Player> allPlayers = lobby.getPlayers();
+            for (Player singlePlayer:allPlayers){
+                if(!singlePlayer.getPlayerType().equals(PlayerType.HUMAN)){
+                    playerService.setPlayerReady(singlePlayer);
+                }
+            }
         }
         playerService.setPlayerReady(player);
         return true;
