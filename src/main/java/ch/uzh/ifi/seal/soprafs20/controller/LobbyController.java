@@ -153,9 +153,11 @@ public class LobbyController {
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
         // check Access rights via token
-        User user = userService.checkUserToken(token);
+        if (playerService.checkPlayerToken(token))
+            throw new UnauthorizedException("Requesting player does not exist!");
 
         // check whether User is in this Lobby
+        User user = userService.checkUserToken(token);
         Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
 
         // 401 Unauthorized
@@ -173,14 +175,19 @@ public class LobbyController {
             throw new ForbiddenException("Requested User is offline!");
 
         // User is already playing
+        boolean alreadyInAnotherLobby = false;
         try {
             Player invitedPlayer = playerService.getPlayerById(userId);
-            if (invitedPlayer.getStatus() != PlayerStatus.JOINED)
-                throw new ForbiddenException("Requested User is playing in another lobby!");
+            alreadyInAnotherLobby = !lobbyService.isUserInLobby(invitedUser,lobbyId);
         }
-        catch (NotFoundException e){
-            lobbyService.inviteUserToLobby(invitedUser, lobby);
+        catch (ForbiddenException e){
+            // player doesn't exist -> go ahead with invite
         }
+        if (alreadyInAnotherLobby)
+            throw new ForbiddenException("Requested User is in another lobby!");
+
+
+        lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
 
     @PutMapping("/lobbies/{lobbyId}/leave")
@@ -355,9 +362,10 @@ public class LobbyController {
         //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
+        clueService.addClue(clue, lobby, token);
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
 
-        clueService.addClue(clue, lobby, token);
+
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")
