@@ -22,7 +22,8 @@ public final class Card implements Serializable {
     @Column(nullable = false)
     private Language language;
 
-    @OneToMany(mappedBy = "card")
+
+    @OneToMany(mappedBy = "card", fetch = FetchType.EAGER)
     private List<MysteryWord> mysteryWords = new ArrayList<>();
 
     Card(){
