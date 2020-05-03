@@ -58,6 +58,7 @@ public class ClueService {
         newClue.setClueStatus(ClueStatus.ACTIVE);
         newClue.setPlayer(playerService.getPlayerByToken(token));
         newClue.setCard(lobby.getDeck().getActiveCard());
+        newClue.setGame(lobby.getGame());
         newClue.setFlagCounter(0);
         clueRepository.save(newClue);
         clueRepository.flush();
@@ -260,6 +261,7 @@ public class ClueService {
             botClue.setPlayer(player);
             botClue.setClueStatus(ClueStatus.ACTIVE);
             botClue.setCard(lobby.getDeck().getActiveCard());
+            botClue.setGame(lobby.getGame());
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
