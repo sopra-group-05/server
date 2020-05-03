@@ -396,17 +396,6 @@ public class LobbyController {
         return clueGetDTOs;
     }
 
-    /*
-    @PutMapping("/lobbies/{lobbyId}/clues/{clueId}")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public void flagClue(@PathVariable long lobbyId, @PathVariable long clueId, @RequestHeader(name = "Token", required = false) String token){
-        Lobby lobby = lobbyService.getLobbyById(lobbyId);
-        clueService.flagClue(clueId, token, lobby);
-    }
-
-     */
-
     @PutMapping("/lobbies/{lobbyId}/clues/flag")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

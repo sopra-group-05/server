@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class MaliciousBotTest {
     Bot friendlyBot = new MalicousBot(Language.EN);
     MysteryWord mysteryWord = new MysteryWord();
-    /*
+    /*todo add tests that are not dependent on api
     @Test
     public void botTest(){
         mysteryWord.setWord("early");

@@ -45,8 +45,12 @@ public class ClueService {
         this.clueRepository = clueRepository;
     }
 
-    //todo: add Mysteryword for rule violation
-    //Add new Clues
+    /*
+     * add new clues
+     * @param newClue - clue to annotate
+     * @param lobby - lobby in which the game takes place
+     * @param token - to check if player is allowed to create clues
+     */
     public void addClue(Clue newClue, Lobby lobby, String token){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
@@ -54,7 +58,6 @@ public class ClueService {
         newClue.setClueStatus(ClueStatus.ACTIVE);
         newClue.setPlayer(playerService.getPlayerByToken(token));
         newClue.setCard(lobby.getDeck().getActiveCard());
-        newClue.setGame(lobby.getGame());
         newClue.setFlagCounter(0);
         clueRepository.save(newClue);
         clueRepository.flush();
@@ -62,6 +65,11 @@ public class ClueService {
         gameService.updateClueGeneratorStats(true, 15l, playerService.getPlayerByToken(token).getId(), lobby.getId());      
     }
 
+    /*
+     * helper function to check, wheter a clue is allowed to be annotated
+     * @param clue - the clue about to be annotated
+     * @param lobby - lobby in which the game takes place
+     */
     private void checkClue(Clue clue, Lobby lobby){
         String hint = clue.getHint();
         List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
@@ -80,6 +88,14 @@ public class ClueService {
         }
     }
 
+    /*
+    *flag a clue and deactivate if >=50% of human players think the clue is illegal
+    * @param clueId - identify the clue to flag
+    * @param token - to check if player is allowed to flag
+    * @param lobby - lobby in which the players play
+    * todo: check if player can flag twice
+     */
+
     public void flagClue(long clueId, String token, Lobby lobby){
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
@@ -96,6 +112,13 @@ public class ClueService {
         clueRepository.save(clue);
     }
 
+    /*
+     * get Clues for Comparing or Guessing
+     * @param lobby
+     * @param token - token of the player that wants to get the clues, for identifying if he's clue creator or guesser
+     * @return List<Clue> - the clues the player is allowed to see
+     */
+
     public List<Clue> getClues(Lobby lobby, String token){
         playerIsInLobby(token, lobby);
         Player player = playerService.getPlayerByToken(token);
@@ -106,6 +129,11 @@ public class ClueService {
         }
     }
 
+    /*
+     * helper function to check if a player is allowed to annotate clues
+     * @param token - token of the player to identify him
+     */
+
     private void playerIsClueCreator(String token){
         Player player = playerService.getPlayerByToken(token);
         if (player.getRole() != PlayerRole.CLUE_CREATOR){
@@ -113,6 +141,11 @@ public class ClueService {
         }
     }
 
+    /*
+     * helper function to check wheter the player is in the lobby
+     * @param token - token of the player
+     * @param lobby - lobby to check if the player is part of
+     */
     private void playerIsInLobby(String token, Lobby lobby){
         Player player = playerService.getPlayerByToken(token);
         if (player == null) {
@@ -123,6 +156,12 @@ public class ClueService {
         }
 
     }
+
+    /*
+     * helper function to get all Clues for the Player that is guessing
+     * @param lobby - lobby where from which the clues should be gotten
+     * @return List<Clue> - clues for the guessing player to see
+     */
 
     private List<Clue> getCluesForGuessing(Lobby lobby){
         if(comparingFinished(lobby)) {
@@ -138,6 +177,13 @@ public class ClueService {
             throw new BadRequestException("Comparing Clues not finished");
         }
     }
+
+    /*
+     * helper function to get all Clues for the players that are annotating clues
+     * @param lobby - lobby for which the clues should be gotten
+     * @return List<Clue> - list of clues that are annotated
+     * is synchronized as the first time a player wants to get the clues, the clues for the bots are annotated
+     */
 
     synchronized private List<Clue> getCluesForComparing(Lobby lobby){
         List<Clue> clues = lobby.getGame().getClues();
@@ -156,6 +202,12 @@ public class ClueService {
             throw new BadRequestException("Not all Clues are annotated");
         }
     }
+
+    /*
+     * helper function to check if all Players have annotated their clues
+     * @param lobby - lobby on which the check should be applied
+     * @return boolean - true if players all players have annotated their clue
+     */
 
     private boolean haveBotPlayersAnnotatedClues(Lobby lobby){
         boolean haveBotPlayersAnnotatedClues = true;
@@ -177,6 +229,11 @@ public class ClueService {
         return haveBotPlayersAnnotatedClues;
 
     }
+
+    /*
+    * helper function that annotates the clues for all players that are bots
+    * @param lobby - lobby in which the bots should annotate clues
+     */
 
     private void createBotClues(Lobby lobby){
         List<Player> botPlayers = this.getBotPlayers(lobby);
@@ -202,7 +259,6 @@ public class ClueService {
             botClue.setPlayer(player);
             botClue.setClueStatus(ClueStatus.ACTIVE);
             botClue.setCard(lobby.getDeck().getActiveCard());
-            botClue.setGame(lobby.getGame());
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
@@ -211,6 +267,11 @@ public class ClueService {
         }
     }
 
+    /*
+     * helper function to check that all human Players have compared the clues
+     * @param lobby - lobby for which the check is
+     * @return boolean - boolean wheter the comparing has finished
+     */
 
     private boolean comparingFinished(Lobby lobby){
         Game game = lobby.getGame();
@@ -219,6 +280,11 @@ public class ClueService {
         return compared == humanPlayersNotActive;
     }
 
+    /*
+     * helper function to get all Players that are humans
+     * @param lobby - lobby to check for human players
+     * @return List<Player> - list of human players in the lobby
+     */
     private List<Player> getHumanPlayersExceptActivePlayer(Lobby lobby){
         Set<Player> players= lobby.getPlayers();
         List<Player> humanPlayers= new ArrayList<>();
@@ -230,6 +296,11 @@ public class ClueService {
         return humanPlayers;
     }
 
+    /*
+    * helper function to get all Players that are bots
+    * @param lobby - lobby to check for bot players
+    * @return List<Player> - list of bot players
+     */
     private List<Player> getBotPlayers(Lobby lobby){
         Set<Player> players= lobby.getPlayers();
         List<Player> humanPlayers= new ArrayList<>();

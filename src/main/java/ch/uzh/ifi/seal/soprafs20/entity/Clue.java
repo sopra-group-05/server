@@ -29,10 +29,6 @@ public class Clue {
     @ManyToOne
     private Card card;
 
-    @ManyToOne
-    private Game game;
-
-
     public long getId(){
         return this.id;
     }
@@ -71,10 +67,4 @@ public class Clue {
     public void setCard(Card card) {
         this.card = card;
     }
-
-    public void setGame(Game game) {
-        this.game = game;
-    }
-
-    public Game getGame(){return this.game;}
 }
