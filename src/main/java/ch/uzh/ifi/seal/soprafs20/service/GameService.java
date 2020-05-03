@@ -92,20 +92,52 @@ public class GameService {
     			boolean success = guess.toLowerCase().equals(w.getWord().toLowerCase());
     			game.setLastGuessSuccess(success);
     			updateLeftCards(game,success);
-    			updateGuesserStats(success,timeToGuess,guesserId);
+    			updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
     			game = gameRepository.save(game);
+    			gameRepository.flush();
     		}
     	}
     }
     
-    private void updateGuesserStats(boolean success, Long timeToGuess, Long id) 
+    public void updateGuesserStats(boolean success, Long timeToGuess, Long playerId, Long lobbyId) 
     {
-    	GameStats gameStats = statsRepository.findStatsByPlayerId(id);
+    
+    	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
     	gameStats.incGuessCount(1l);
+    	gameStats.addGuessTime(timeToGuess);
     	if(success)
     	{
     		gameStats.incCorrectGuessCount(1l);
-    	}	
+    	}
+    	gameStats.calculateScore();
+    	statsRepository.save(gameStats);
+    	statsRepository.flush();
+	}
+    
+    
+    
+    public void updateClueGeneratorStats(boolean goodClue, Long timeForClue, Long playerId, Long lobbyId) 
+    {
+    	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
+    	gameStats.incGivenClueCount(1l);
+    	gameStats.addClueTime(timeForClue);
+    	if(goodClue)
+    	{
+    		gameStats.incGoodClueCount(1l);
+    	}
+    	gameStats.calculateScore();
+    	statsRepository.save(gameStats);
+    	statsRepository.flush();
+	}
+    
+
+	public void reduceGoodClues(Long playerId, Long lobbyId) {
+		GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
+    	gameStats.decGoodClueCount(1l);
+     	gameStats.calculateScore();
+    	statsRepository.save(gameStats);
+    	statsRepository.flush();
+		
 	}
 
 	public String getGuess(Lobby lobby)
@@ -123,7 +155,7 @@ public class GameService {
     	return lobby.getGame().getLeftCards();
     }
     
-    public int getWonCards(Lobby lobby)
+    public Long getWonCards(Lobby lobby)
     {
     	return lobby.getGame().getWonCards();
     }
@@ -139,12 +171,28 @@ public class GameService {
     	game.setLastGuessSuccess(false);
     	game.setActiveGuess("");
     	game.setLeftCards(lobby.getDeck().getCards().size());
-    	game.setWonCards(0);
+    	game.setWonCards(0l);
     	game.setLostCards(0);
-    	game = gameRepository.save(game);
+    	gameRepository.save(game);
+    	gameRepository.flush();
     	return game;
     }
-    
+
+	public void addStats(Long playerId, Long lobbyId) {
+		GameStats gameStats = new GameStats(playerId,lobbyId);
+    	statsRepository.save(gameStats);
+    	statsRepository.flush();
+	}
+
+	public List<GameStats> getAllLobbyGameStats (Long lobbyId)
+	{
+		return (statsRepository.findAllByLobbyId(lobbyId));
+	}
+
+	public GameStats getPlayersStats(long playerId, long lobbyId) {
+		// TODO Auto-generated method stub
+		return (statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId));
+	}
     
     
 }

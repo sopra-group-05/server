@@ -66,6 +66,8 @@ public class LobbyController {
             lobbyInput.addPlayer(player);
             // create lobby
             Lobby createdLobby = lobbyService.createLobby(lobbyInput);
+            // add ranking for player
+            gameService.addStats(player.getId(),createdLobby.getId());
             // convert internal representation of lobby back to API
             // return with status code 201 created the Location and user object
             return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(createdLobby);
@@ -141,7 +143,10 @@ public class LobbyController {
                 Player player = playerService.convertUserToPlayer(userToJoin, PlayerRole.CLUE_CREATOR);
                 // get the requested Lobby and add the Player to the Lobby
                 lobbyService.addPlayerToLobby(lobby, player);
+                // add ranking for player
+                gameService.addStats(player.getId(),lobby.getId());
                 // return with status code 204
+                
             }
             else throw new ForbiddenException(forbiddenExceptionMsg);
         }
@@ -463,7 +468,7 @@ public class LobbyController {
         boolean success = gameService.getGuessSuccess(lobby);
         
         int leftCards = gameService.getLeftCards(lobby);
-        int wonCards = gameService.getWonCards(lobby);
+        Long wonCards = gameService.getWonCards(lobby);
         int lostCards = gameService.getLostCards(lobby);
         
         
@@ -496,4 +501,28 @@ public class LobbyController {
 
         return new ResponseEntity("next Round", HttpStatus.OK);
     }
+    
+    
+    @GetMapping("/lobbies/{lobbyId}/stats")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<StatsGetDTO> getLobbyStatistics(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        
+        // get all statistics from lobby
+        List<GameStats> LobbyAllGameStats = gameService.getAllLobbyGameStats(lobbyId);
+
+        List<StatsGetDTO> statsGetDTOs = new ArrayList<>();
+
+        // convert each statistic to the API representation
+        for (GameStats gameStats : LobbyAllGameStats) {
+        	StatsGetDTO tempStatsGetDTO = DTOMapper.INSTANCE.convertEntityToStatsGetDTO(gameStats);
+        	tempStatsGetDTO.setPlayerName(playerService.getPlayerById(gameStats.getPlayerId()).getUsername());
+        	statsGetDTOs.add(tempStatsGetDTO);
+        } 	
+        return statsGetDTOs;
+ 
+    }
+
 }
+

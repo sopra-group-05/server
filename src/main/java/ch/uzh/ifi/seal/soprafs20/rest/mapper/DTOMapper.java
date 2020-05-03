@@ -114,13 +114,25 @@ public interface DTOMapper {
     @Mapping(source = "leftCards", target = "leftCards")
     @Mapping(source = "wonCards", target = "wonCards")
     @Mapping(source = "lostCards", target = "lostCards")
-    GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success,int leftCards, int wonCards, int lostCards);
+    GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success,int leftCards, Long wonCards, int lostCards);
     
    
     @Named("convertString")
     default String convertGuessPostDTOToEntity(GuessPostDTO guessPostDTO)
     {
     	return guessPostDTO.getGuess();
-    };
+    }
+
+    
+    @Mapping(source = "playerId", target = "playerId")
+    @Mapping(source = "score", target = "score")
+    @Mapping(source = "givenClues", target = "givenClues")
+    @Mapping(source = "goodClues", target = "goodClues")
+    @Mapping(source = "guessCount", target = "guessCount")
+    @Mapping(source = "correctGuessCount", target = "correctGuessCount")
+    @Mapping(source = "timeForClue", target = "timeForClue")
+    @Mapping(source = "timeToGuess", target = "timeToGuess")
+    @Mapping(source = "teamPoints", target = "teamPoints")
+    StatsGetDTO convertEntityToStatsGetDTO(GameStats gameStats);
     
 }
