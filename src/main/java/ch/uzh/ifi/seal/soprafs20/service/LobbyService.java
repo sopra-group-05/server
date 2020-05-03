@@ -406,9 +406,10 @@ public class LobbyService
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
-        Card card = deck.getNextCard();
+        List<Card> cards = deck.getCards();
 
-        if(!card.equals(null)) {
+        if(!cards.isEmpty()) {
+            Card card = cards.get(0);
             //cards.remove(0);
             //card.setDrawn(true);
             deck.setActiveCard(card);
@@ -470,11 +471,9 @@ public class LobbyService
             clue.setClueStatus(ClueStatus.INACTIVE);
         }
         Deck deck = lobby.getDeck();
-        Card card = deck.getNextCard();
-        if(card.equals(null)){
-            //end game
-        }
+        List<Card> cards = deck.getCards();
         game.setComparingGuessCounter(0);
+        Card card = cards.get(0);
         deck.setActiveCard(card);
         deckService.save(deck); 
         game.setActiveGuess("");//todo check if needed
