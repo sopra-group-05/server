@@ -477,6 +477,7 @@ public class LobbyService
         deck.setActiveCard(card);
         deckService.save(deck);
         game.setActiveGuess("");//todo check if needed
+        this.setNewRoleOfPlayers(lobby);
         this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
 
         Set<Player> allPlayers = lobby.getPlayers();
@@ -485,6 +486,49 @@ public class LobbyService
                 player.setStatus(PlayerStatus.READY);
             }
         }
+    }
+
+    /**
+     * This method will assign the Role GUESSER to a new Player (only humans)
+     * @param lobby
+     */
+    public void setNewRoleOfPlayers(Lobby lobby) {
+        int oldPosition = 0; //position of oldGuesser
+        for (Player player : lobby.getPlayers()) {
+            if (player.getRole() == PlayerRole.GUESSER){
+                // set old Guesser to Clue Creator
+                player.setRole(PlayerRole.CLUE_CREATOR);
+                break;
+            }
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                // count at which position the older Guesser was
+                oldPosition = oldPosition + 1;
+            }
+        }
+
+        int size = this.getNumberOfHumanPlayersInLobby(lobby);
+        int newPosition = (oldPosition + 1) % size; // calculate new position of next player
+        int count = 0;
+
+        for (Player player : lobby.getPlayers()) {
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                if (count == newPosition) {
+                    player.setRole(PlayerRole.GUESSER);
+                    break;
+                }
+                count = count + 1;
+            }
+        }
+    }
+
+    private int getNumberOfHumanPlayersInLobby(Lobby lobby) {
+        int num = 0;
+        for (Player player : lobby.getPlayers()) {
+            if (player.getPlayerType() == PlayerType.HUMAN) {
+                num = num + 1;
+            }
+        }
+        return num;
     }
 
     /**
