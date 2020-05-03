@@ -378,9 +378,11 @@ public class LobbyService
             if(this.getLobbyById(lobbyId).getNumBots() == 0) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
                 this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
-            } else{
+            } else if (this.getLobbyById(lobbyId).getNumBots() == 1) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
                 this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+            } else{
+                lobbyStatus = LobbyStatus.STOPPED;
             }
         }
         //Update Points of the Player in the User Repository
