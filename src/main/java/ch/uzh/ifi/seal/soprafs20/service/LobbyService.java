@@ -213,6 +213,7 @@ public class LobbyService
      * @param playerId - the player to kick out
      */
     public void removePlayerFromLobby(Long lobbyId, Long playerId) {
+        //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
         List<Clue> clues = player.getClues();
