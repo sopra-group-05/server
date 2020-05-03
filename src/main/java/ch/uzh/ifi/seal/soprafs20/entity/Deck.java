@@ -63,4 +63,6 @@ public class Deck implements Serializable
     public void setActiveCard(Card activeCard) {
         this.activeCard = activeCard;
     }
+
+    public Card getNextCard(){return this.cards.remove(0);}
 }

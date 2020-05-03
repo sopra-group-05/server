@@ -75,6 +75,7 @@ public final class Card implements Serializable {
          return card;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,6 +88,8 @@ public final class Card implements Serializable {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
+
 
 
 }
