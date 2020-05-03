@@ -472,9 +472,13 @@ public class LobbyService
         }
         Deck deck = lobby.getDeck();
         List<Card> cards = deck.getCards();
-        cards.remove(0);
+        Card cardToRemove = cards.remove(0);
+        cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
         Card card = cards.get(0);
+        if(card.equals(null)){
+            //this.stopGame();
+        }
         deck.setActiveCard(card);
         deckService.save(deck); 
         game.setActiveGuess("");//todo check if needed
