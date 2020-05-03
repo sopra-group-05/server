@@ -221,7 +221,6 @@ public class LobbyService
                 for(Player player1:players){
                     if(player1.getPlayerType().equals(PlayerType.HUMAN)){
                         lobby.setCreator(player1);
-                        break;
                     }
                 }
 
@@ -234,11 +233,9 @@ public class LobbyService
         Game game = lobby.getGame();
         if(game != null) {
             List<Clue> clues1 = game.getClues();
-            if(clues1 != null) {
-                for (Clue clue1 : clues1) {
-                    if (clue1.getPlayer().equals(player)) {
-                        clue1.setPlayer(null);
-                    }
+            for(Clue clue1:clues1){
+                if (clue1.getPlayer().equals(player)){
+                    clue1.setPlayer(null);
                 }
             }
         }
@@ -417,8 +414,6 @@ public class LobbyService
         lobby.setLobbyStatus(lobbyStatus);
         //Remove the Player from the Lobby
         this.removePlayerFromLobby(lobbyId, player.getId());
-
-        this.nextRound(lobbyId, lobby.getCreator().getToken());
 
         //If the response of the API call is "STOPPED" the frontend must redirect back to the lobby!
         //Otherwise the game can continue and the frontend should only show a message how the game will proceed.
