@@ -100,8 +100,9 @@ public class CardServiceTest {
         List<Card> cardList = new ArrayList<>();
         cardList.add(card);
         cardList.add(getCard(3L));
-        cardList.add(getCard(4L));
-        cardList.add(getCard(5L));
+        //TODO Revert after demo
+        //cardList.add(getCard(4L));
+        //cardList.add(getCard(5L));
         Mockito.when(cardRepository.findByLanguage(Language.EN)).thenReturn(cardList);
 
         // when -> any object is being save in the cardRepository -> return the dummy testUser
