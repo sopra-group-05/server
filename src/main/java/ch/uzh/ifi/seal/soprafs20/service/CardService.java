@@ -80,7 +80,7 @@ public class CardService {
         List<Card> cardList = cardRepository.findByLanguage(language);
         //Random rand = new Random();
         //TODO set back to 13 cards
-        final int maxCard = 2;
+        final int maxCard = 7;
         SecureRandom rand = new SecureRandom();
         int streamSize = cardList.size() > maxCard ? maxCard : cardList.size();
         List<Card> wordList = rand.
