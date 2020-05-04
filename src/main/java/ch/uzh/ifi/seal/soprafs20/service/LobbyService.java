@@ -213,8 +213,13 @@ public class LobbyService
      * @param playerId - the player to kick out
      */
     public void removePlayerFromLobby(Long lobbyId, Long playerId) {
+        //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
+        List<Clue> clues = player.getClues();
+        for(Clue clue:clues){
+            clue.setPlayer(null);
+        }
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
         playerService.deletePlayer(player);
@@ -374,9 +379,11 @@ public class LobbyService
             if(this.getLobbyById(lobbyId).getNumBots() == 0) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
                 this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
-            } else{
+            } else if (this.getLobbyById(lobbyId).getNumBots() == 1) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
                 this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+            } else{
+                lobbyStatus = LobbyStatus.STOPPED;
             }
         }
         //Update Points of the Player in the User Repository

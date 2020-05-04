@@ -52,7 +52,7 @@ public class GameService {
      * @param - was the guess correct
      * 
      */
-    public void updateLeftCards(Game game, boolean success)
+    public void updateLeftCards(Game game, boolean success, String guess)
     {
 
     	game.setLeftCards(game.getLeftCards()-1);
@@ -63,9 +63,10 @@ public class GameService {
     	}
     	else
     	{
-    		if (game.getWonCards()>0)
+    		if ((game.getWonCards()>0)&&(guess.isEmpty()==false))
     		{
     			game.setWonCards(game.getWonCards()-1);
+    			game.setLostCards(game.getLostCards()+1);
     		}
     		game.setLostCards(game.getLostCards()+1);
     	}
@@ -80,24 +81,16 @@ public class GameService {
      */
     public void compareGuess(Lobby lobby, String guess, Long guesserId, Long timeToGuess)
     {
-    	Game game = lobby.getGame();
-    	
-    	List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
-    	
-    	for(MysteryWord w : mysteryWords)
-    	{
-    		if (w.getStatus() == MysteryWordStatus.IN_USE)
-    		{
-    			game.setActiveGuess(guess);
-    			boolean success = guess.toLowerCase().equals(w.getWord().toLowerCase());
-    			game.setLastGuessSuccess(success);
-    			updateLeftCards(game,success);
-    			updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
-    			updateTeamPoints(lobby.getId(),game.getWonCards());
-       			game = gameRepository.save(game);
-    			gameRepository.flush();
-    		}
-    	}
+    	Game game = lobby.getGame();	
+    	String mysteryWord = getMysteryWord(lobby);
+		game.setActiveGuess(guess);
+		boolean success = guess.toLowerCase().equals(mysteryWord.toLowerCase());
+		game.setLastGuessSuccess(success);
+		updateLeftCards(game,success,guess);
+		updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
+		updateTeamPoints(lobby.getId(),game.getWonCards());
+		game = gameRepository.save(game);
+		gameRepository.flush();
     }
     
     public void updateGuesserStats(boolean success, Long timeToGuess, Long playerId, Long lobbyId) 
@@ -205,6 +198,22 @@ public class GameService {
 	public GameStats getPlayersStats(long playerId, long lobbyId) 
 	{
 		return (statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId));
+	}
+
+	public String getMysteryWord(Lobby lobby) 
+	{
+			
+    	List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
+    	
+    	for(MysteryWord w : mysteryWords)
+    	{   		
+    		if (w.getStatus() == MysteryWordStatus.IN_USE)
+    		{
+    			return(w.getWord());		
+      		}
+    	}
+    	return("");
+
 	}
     
     
