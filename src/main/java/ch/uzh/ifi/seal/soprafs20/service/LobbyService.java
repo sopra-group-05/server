@@ -318,6 +318,25 @@ public class LobbyService
     }
 
     /**
+     * Checks if there are enough Human Players in the lobby to start the game.
+     * Has to be run before Bots are added.
+     */
+    public void lobbyHasEnoughPlayers(long lobbyId) {
+        Lobby lobby = this.getLobbyById(lobbyId);
+        if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+            // game mode with bots: has to be 2 players minimum (+bots)
+            if (lobby.getPlayers().size() < 2) {
+                throw new ForbiddenException("You need at least two players to start a game with bots.");
+            }
+        } else {
+            // game mode without bots: has to be 3 players minimum
+            if (lobby.getPlayers().size() < 3) {
+                throw new ForbiddenException("You need at least thre players to start a game.");
+            }
+        }
+    }
+
+    /**
      * Set status of this player according to input params
      * If all other players with already set their status to the new one, update the Guesser to his next status
      */
