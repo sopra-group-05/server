@@ -216,14 +216,17 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
+        Game game = lobby.getGame();
         List<Clue> clues = player.getClues();
         for(Clue clue:clues){
+        	game.deleteClue(clue);
             clue.setPlayer(null);
         }
         lobby.leave(player);
         lobby = lobbyRepository.save(lobby);
         playerService.deletePlayer(player);
-        lobbyRepository.flush();
+        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
+        lobbyRepository.flush();        
     }
 
     /**

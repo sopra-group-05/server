@@ -109,4 +109,9 @@ public class Game {
     public void setComparingGuessCounter(int comparingGuessCounter) {
         this.comparingGuessCounter = comparingGuessCounter;
     }
+
+
+	public void deleteClue(Clue clue) {
+		this.clues.remove(clue);		
+	}
 }
