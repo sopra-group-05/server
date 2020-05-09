@@ -411,7 +411,6 @@ public class LobbyService
         //Update Points of the Player in the User Repository
         int currentPoints = player.getPoints();
         User user = userService.getUserByID(player.getId());
-        userService.updatePoints(user, currentPoints);
 
         //Set Lobby Status to what is defined within the function
         lobby.setLobbyStatus(lobbyStatus);

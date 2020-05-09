@@ -13,5 +13,7 @@ public interface StatsRepository extends JpaRepository<GameStats, Long> {
 	GameStats findByPlayerIdAndLobbyId(Long playerId, Long lobbyId);
 	
 	List<GameStats> findAllByLobbyId(Long lobbyId);
+
+	List<GameStats> findAllByPlayerId(Long playerId);
 	
 }

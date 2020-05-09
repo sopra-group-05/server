@@ -1,15 +1,10 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -49,7 +44,13 @@ public class User implements Serializable {
     private String birthday;
 
     @Column (nullable = false)
-    private int points = 0;
+    private long score = 0;
+
+    @Column (nullable = false)
+    private long correctGuesses = 0;
+
+    @Column(nullable = false)
+    private long bestClues = 0;
 
 	public Long getId() {
 		return id;
@@ -99,17 +100,40 @@ public class User implements Serializable {
 		this.token = token;
 	}
 
-    public int getPoints() {
-        return points;
+    public long getScore() {
+        return score;
     }
 
-    public void setPoints(int points) {
-        this.points = points;
+    public void setScore(long score) {
+        this.score = score;
     }
 
-    public int addPoints(int points) {
-	    this.points = this.points + points;
-	    return this.points;
+    public void addScore(long score) {
+	    this.score = this.score + score;
+    }
+
+    public long getCorrectGuesses() {
+        return correctGuesses;
+    }
+
+    public void setCorrectGuesses(long correctGuesses) {
+        this.correctGuesses = correctGuesses;
+    }
+
+    public void incrementCorrectGuessCount(long correctGuesses){
+	    this.correctGuesses += correctGuesses;
+    }
+
+    public long getBestClues() {
+        return bestClues;
+    }
+
+    public void setBestClues(long bestClues) {
+        this.bestClues = bestClues;
+    }
+
+    public void incBestCluesCount(long bestCluesCount) {
+	    this.bestClues += bestCluesCount;
     }
 
     @Override
