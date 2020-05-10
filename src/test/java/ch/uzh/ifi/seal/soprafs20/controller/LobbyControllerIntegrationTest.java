@@ -219,6 +219,7 @@ public class LobbyControllerIntegrationTest {
         //user2 gives clue
         CluePostDTO cluePostDTO = new CluePostDTO();
         cluePostDTO.setHint("Star");
+        cluePostDTO.setTimeForClue(10L);
         requestBuilder = getMockHttpServletRequestBuilderForPost(cluePostDTO, "/lobbies/"+ lobby.getId() +"/clues");
         requestBuilder.header("Token", userEntity2.getToken());
         // then
@@ -229,6 +230,7 @@ public class LobbyControllerIntegrationTest {
         //user3 gives clue
         CluePostDTO cluePostDTO3 = new CluePostDTO();
         cluePostDTO3.setHint("Star");
+        cluePostDTO3.setTimeForClue(10L);
         requestBuilder = getMockHttpServletRequestBuilderForPost(cluePostDTO3, "/lobbies/"+ lobby.getId() +"/clues");
         requestBuilder.header("Token", userEntity3.getToken());
         // then
@@ -283,6 +285,7 @@ public class LobbyControllerIntegrationTest {
         //user1 guesses
         GuessPostDTO guessPostDTO = new GuessPostDTO();
         guessPostDTO.setGuess(activeCard.getMysteryWords().get(1).getWord());
+        guessPostDTO.setTimeToGuess(10L);
         requestBuilder = getMockHttpServletRequestBuilderForPost(guessPostDTO, "/lobbies/"+ lobby.getId() +"/guess");
         requestBuilder.header("Token", userEntity.getToken());
         // then

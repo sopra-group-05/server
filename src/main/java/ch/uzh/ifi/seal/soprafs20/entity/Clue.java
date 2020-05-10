@@ -19,6 +19,9 @@ public class Clue {
 
     @Column
     private String hint;
+    
+    @Column
+    private String hint2;
 
     @ManyToOne
     private Player player;
@@ -31,6 +34,9 @@ public class Clue {
 
     @ManyToOne
     private Game game;
+    
+    @Column
+    private Long timeForClue;
 
     public long getId(){
         return this.id;
@@ -54,8 +60,16 @@ public class Clue {
     public void setHint(String hint){
         this.hint = hint;
     }
+    
+    public String getHint2() {
+		return hint2;
+	}
 
-    public void setPlayer(Player player){
+	public void setHint2(String hint2) {
+		this.hint2 = hint2;
+	}
+
+	public void setPlayer(Player player){
         this.player = player;
     }
 
@@ -78,4 +92,13 @@ public class Clue {
     public void setGame(Game game) {
         this.game = game;
     }
+
+	public Long getTimeForClue() {
+		return timeForClue;
+	}
+
+	public void setTimeForClue(Long timeForClue) {
+		this.timeForClue = timeForClue;
+	}
+    
 }

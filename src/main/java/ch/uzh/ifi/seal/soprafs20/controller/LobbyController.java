@@ -437,7 +437,8 @@ public class LobbyController {
         //check whether User is in this Lobby and has the role of the Guesser
         Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
         
-        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToEntity(guessPostDTO);
+        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToGuessString(guessPostDTO);
+        Long timeToGuess = DTOMapper.INSTANCE.convertGuessPostDTOToTimeToGuess(guessPostDTO); 
 
         if (!isGuesserOfLobby) {
             throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
@@ -446,7 +447,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
         //TODO set correct time for guess
-        gameService.compareGuess(lobby, guess, user.getId(),0L); 
+        gameService.compareGuess(lobby, guess, user.getId(),timeToGuess); 
         // todo add points if correct (distribute them)
         // todo move arround roles of players? (Guesser vs Clue maker etc)
         // todo end of game what happens??

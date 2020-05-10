@@ -97,6 +97,8 @@ public interface DTOMapper {
     User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
 
     @Mapping(source = "hint", target = "hint")
+    @Mapping(source = "hint2", target = "hint2")
+    @Mapping(source = "timeForClue", target = "timeForClue")    
     Clue convertCluePOSTDTOToEntity(CluePostDTO cluePostDTO);
 
     @Mapping(source = "hint", target= "hint")
@@ -119,9 +121,15 @@ public interface DTOMapper {
     
    
     @Named("convertString")
-    default String convertGuessPostDTOToEntity(GuessPostDTO guessPostDTO)
+    default String convertGuessPostDTOToGuessString(GuessPostDTO guessPostDTO)
     {
     	return guessPostDTO.getGuess();
+    }
+    
+    @Named("convertLong")
+    default Long convertGuessPostDTOToTimeToGuess(GuessPostDTO guessPostDTO)
+    {
+    	return guessPostDTO.getTimeToGuess();
     }
 
     
