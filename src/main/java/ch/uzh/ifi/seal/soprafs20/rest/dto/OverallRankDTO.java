@@ -1,10 +1,19 @@
 package ch.uzh.ifi.seal.soprafs20.rest.dto;
 
 public class OverallRankDTO {
+    private long id;
     private String username;
     private long score;
     private long correctGuesses;
     private long bestClues;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
