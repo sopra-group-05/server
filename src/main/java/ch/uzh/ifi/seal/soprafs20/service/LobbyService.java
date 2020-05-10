@@ -250,7 +250,7 @@ public class LobbyService
 	       lobby.leave(player);
 	       lobby = lobbyRepository.save(lobby);
 	       playerService.deletePlayer(player);
-	       this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
+	       this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PLAYER_LEFT, PlayerStatus.PLAYER_LEFT);
 	       lobbyRepository.flush();  
         }
     }
