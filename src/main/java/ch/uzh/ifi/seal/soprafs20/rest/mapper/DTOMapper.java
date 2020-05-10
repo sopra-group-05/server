@@ -135,5 +135,11 @@ public interface DTOMapper {
     @Mapping(source = "timeToGuess", target = "timeToGuess")
     @Mapping(source = "teamPoints", target = "teamPoints")
     StatsGetDTO convertEntityToStatsGetDTO(GameStats gameStats);
+
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "score", target = "score")
+    @Mapping(source = "correctGuesses", target = "correctGuesses")
+    @Mapping(source = "bestClues", target = "bestClues")
+    OverallRankDTO convertEntityToOverallRankDTO(User user);
     
 }

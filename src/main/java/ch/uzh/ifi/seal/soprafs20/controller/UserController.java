@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -168,5 +169,25 @@ public class UserController {
 
         // Return Status Code 200 OK with User and Token (!)
         return ResponseEntity.ok(userLoginGetDTO);
+    }
+
+    /**
+     * Overall Game ranking for all users
+     *
+     */
+    @GetMapping("/users/ranking/{orderBy}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<OverallRankDTO> getOverallPlayerRanking(@RequestHeader(name = "Token", required = false) String token, @PathVariable String orderBy) {
+        User user = userService.checkUserToken(token);
+
+        List<User> users = userService.getAllUsersOrderBy(RankingOrderBy.valueOf(orderBy));
+
+        List<OverallRankDTO> result = new ArrayList<>();
+        for(User userRank : users) {
+            result.add(DTOMapper.INSTANCE.convertEntityToOverallRankDTO(userRank));
+        }
+
+        return result;
     }
 }

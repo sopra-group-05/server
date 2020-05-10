@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.*;
@@ -8,12 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.data.domain.Sort.by;
 
 /**
  * User Service
@@ -210,15 +213,43 @@ public class UserService {
         return userByToken;
     }
 
+    public List<User> getAllUsersOrderBy(RankingOrderBy orderBy) {
+        Sort sort = by(Sort.Direction.ASC, orderBy.name().toLowerCase());
+        List<User> users = userRepository.findAll(sort);
+        return users;
+    }
+
     /**
      * This method will add the achieved InGame Points of a Player to the Points balance of a User
      *
-     * @param user,points - the to be updated User and the Points he earned at the time of the function call
+     * @param userId  the user to be updated with the correct score
+     * @param score - the score to be updated which he earned at the time of the function call
      *
      * @return the new Balance of the Points of a User
      */
-    public int updatePoints(User user, int points){
-        return user.addPoints(points);
+    public void updateScore(long userId, long score){
+        User user = userRepository.findById(userId);
+        user.addScore(score);
+    }
+
+    /**
+     * adds the current guesses to the user's total guess count
+     *
+     */
+    public void updateCorrectGuessCount(long userId, long guessesCount){
+        User user = userRepository.findById(userId);
+        user.incrementCorrectGuessCount(guessesCount);
+    }
+
+    /**
+     * updates the best clue count
+     *
+     * @param userId - the user best clue count to be updated
+     * @param bestClueCount - the best clue count
+     * */
+    public void updateBestClueCount(long userId, long bestClueCount) {
+        User user = userRepository.findById(userId);
+        user.incBestCluesCount(bestClueCount);
     }
 
 }
