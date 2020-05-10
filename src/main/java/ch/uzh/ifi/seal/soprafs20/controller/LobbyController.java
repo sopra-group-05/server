@@ -200,10 +200,10 @@ public class LobbyController {
     public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
                                            @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
-        User lobbyCreator = userService.checkUserToken(token);
+        User leavingPlayer = userService.checkUserToken(token);
 
         //verify if the throwing out player is the lobby creator
-        lobbyService.removePlayerFromLobby(lobbyId, lobbyCreator.getId());
+        lobbyService.removePlayerFromLobby(lobbyId, leavingPlayer.getId());
         return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
 
 
