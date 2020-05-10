@@ -136,6 +136,7 @@ public interface DTOMapper {
     @Mapping(source = "teamPoints", target = "teamPoints")
     StatsGetDTO convertEntityToStatsGetDTO(GameStats gameStats);
 
+    @Mapping(source = "id", target="id" )
     @Mapping(source = "username", target = "username")
     @Mapping(source = "score", target = "score")
     @Mapping(source = "correctGuesses", target = "correctGuesses")
