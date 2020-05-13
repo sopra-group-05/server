@@ -106,7 +106,7 @@ public class CardServiceTest {
         Mockito.when(cardRepository.findByLanguage(Language.EN)).thenReturn(cardList);
 
         // when -> any object is being save in the cardRepository -> return the dummy testUser
-        List<Card> cardLocalList = cardService.get13Cards(Language.EN);
+        List<Card> cardLocalList = cardService.get13Cards(Language.EN,3);
 
         assertEquals(cardList.size(), cardLocalList.size());
     }
