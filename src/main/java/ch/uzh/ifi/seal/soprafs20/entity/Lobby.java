@@ -55,6 +55,9 @@ public class Lobby
     @Column
     private int numBots;
 
+    @Column
+    private int numberOfCards;
+
 
 	public Long getId() {
         return lobbyId;
@@ -144,5 +147,13 @@ public class Lobby
 
     public void setNumBots(int numBots) {
         this.numBots = numBots;
+    }
+
+    public int getNumberOfCards() {
+        return numberOfCards;
+    }
+
+    public void setNumberOfCards(int numberOfCards) {
+        this.numberOfCards = numberOfCards;
     }
 }
