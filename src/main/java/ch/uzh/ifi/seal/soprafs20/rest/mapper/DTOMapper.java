@@ -45,7 +45,6 @@ public interface DTOMapper {
     @Mapping(source = "lobbyName", target = "lobbyName")
     @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertInt")
     @Mapping(source = "language", target = "language", qualifiedByName = "convertString")
-    @Mapping(source = "numberOfCards", target = "numberOfCards")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
 
     @Named("convertInt")
@@ -119,7 +118,8 @@ public interface DTOMapper {
     @Mapping(source = "lostCards", target = "lostCards")
     @Mapping(source = "mysteryWord", target = "mysteryWord")
     GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success,int leftCards, Long wonCards, int lostCards, String mysteryWord);
-
+    
+   
     @Named("convertString")
     default String convertGuessPostDTOToGuessString(GuessPostDTO guessPostDTO)
     {
@@ -131,6 +131,7 @@ public interface DTOMapper {
     {
     	return guessPostDTO.getTimeToGuess();
     }
+
     
     @Mapping(source = "playerId", target = "playerId")
     @Mapping(source = "score", target = "score")

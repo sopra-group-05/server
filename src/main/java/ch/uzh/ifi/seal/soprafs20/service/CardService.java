@@ -76,10 +76,13 @@ public class CardService {
      * Generates 13 cards for one deck
      *
      * @param language*/
-    public List<Card> get13Cards(Language language, int numberOfCards) {
+    public List<Card> get13Cards(Language language) {
         List<Card> cardList = cardRepository.findByLanguage(language);
+        //Random rand = new Random();
+        //TODO set back to 13 cards
+        final int maxCard = 7;
         SecureRandom rand = new SecureRandom();
-        int streamSize = cardList.size() > numberOfCards ? numberOfCards : cardList.size();
+        int streamSize = cardList.size() > maxCard ? maxCard : cardList.size();
         List<Card> wordList = rand.
                 ints(streamSize, 0, cardList.size()).
                 mapToObj(i -> cardList.get(i)).

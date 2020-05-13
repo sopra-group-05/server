@@ -5,24 +5,6 @@ public class LobbyPostDTO {
     private String lobbyName;
     private Integer gameMode;
     private String language;
-    private int numberOfCards;
-    private int numberOfBots;
-
-    public int getNumberOfCards() {
-        return numberOfCards;
-    }
-
-    public void setNumberOfCards(int numberOfCards) {
-        this.numberOfCards = numberOfCards;
-    }
-
-    public int getNumberOfBots() {
-        return numberOfBots;
-    }
-
-    public void setNumberOfBots(int numberOfBots) {
-        this.numberOfBots = numberOfBots;
-    }
 
     public String getLobbyName() {
         return lobbyName;
