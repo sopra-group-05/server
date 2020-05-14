@@ -241,6 +241,8 @@ public class LobbyController {
         if(!isInThisLobby) {
             throw new ForbiddenException("The user is not in this Lobby.");
         }
+
+        // set Bots ready
         if(player.getRole().equals(PlayerRole.GUESSER)){
             Set<Player> allPlayers = lobby.getPlayers();
             for (Player singlePlayer:allPlayers){
@@ -249,7 +251,13 @@ public class LobbyController {
                 }
             }
         }
-        playerService.setPlayerReady(player);
+        if (playerService.isPlayerReady(player)){
+            // if Player was ready, trigger to not Ready
+            playerService.setPlayerToNotReady(player);
+        } else {
+            // if player was not ready, trigger to ready
+            playerService.setPlayerReady(player);
+        }
         return true;
     }
 

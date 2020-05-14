@@ -75,6 +75,14 @@ public class PlayerService {
         return true;
     }
 
+    public void setPlayerToNotReady(Player player) {
+        player.setStatus(PlayerStatus.JOINED);
+    }
+
+    public Boolean isPlayerReady(Player player) {
+        return player.getStatus() == PlayerStatus.READY;
+    }
+
     /**
      * Checks if token belongs to the lobby creator and therefore is allowed to start the game
      *
