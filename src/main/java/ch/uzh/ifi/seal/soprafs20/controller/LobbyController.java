@@ -384,8 +384,6 @@ public class LobbyController {
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
-
-
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")

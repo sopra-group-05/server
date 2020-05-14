@@ -484,7 +484,7 @@ public class LobbyService
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
-        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
+        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD, PlayerStatus.ACCEPTING_MYSTERY_WORD);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
             for(MysteryWord word : activeCard.getMysteryWords()) {
@@ -495,7 +495,60 @@ public class LobbyService
                 }
             }
         }
+    }
 
+    /**
+     * Function to accept or decline the mystery word that was chosen by the active player
+     */
+    public void acceptOrDeclineMysteryWord(User user, Lobby lobby, Boolean acceptWord) {
+        if (acceptWord) {
+            // Player accepts mystery word. Changing Status for next state of the game for this Player.
+            Player player = playerService.getPlayerByToken(user.getToken());
+            player.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
+
+            // if all players are waiting to accept the mystery word, then change status to writing clues and waiting for clues
+            if (this.allPlayerHaveStatus(lobby.getPlayers(), PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD)) {
+                this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
+            }
+
+
+        } else {
+            // change back status of chosen word to default
+            Deck deck = lobby.getDeck();
+            if(deck == null) {
+                throw new SopraServiceException("Lobby has no Deck assigned!");
+            }
+            Card activeCard = deck.getActiveCard();
+            if(activeCard != null) {
+                for(MysteryWord word : activeCard.getMysteryWords()) {
+                    if(word.getStatus() == MysteryWordStatus.IN_USE) {
+                        word.setStatus(MysteryWordStatus.NOT_USED);
+                        mysteryWordService.save(word);
+                    }
+                }
+            }
+
+            // change status of ALL players back to choosing a number.
+            this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
+        }
+    }
+
+    /**
+     * Checks if all players have that status
+     * @param playerStatus
+     * @return
+     */
+    private Boolean allPlayerHaveStatus(Set<Player> players, PlayerStatus playerStatus) {
+        int playersWithThatStatus = 0;
+        for (Player player : players) {
+            if (player.getStatus() == playerStatus) {
+                playersWithThatStatus += 1;
+            }
+        }
+        if (playersWithThatStatus == players.size()){
+            return true;
+        }
+        return false;
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
