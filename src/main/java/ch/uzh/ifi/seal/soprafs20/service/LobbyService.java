@@ -506,6 +506,15 @@ public class LobbyService
             Player player = playerService.getPlayerByToken(user.getToken());
             player.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
 
+            // if there are bots, change their status to waiting to accept mystery word.
+            if (lobby.getGameMode() == GameModeStatus.BOTS) {
+                for (Player playerInLobby : lobby.getPlayers()) {
+                    if(playerInLobby.getPlayerType() != PlayerType.HUMAN) {
+                        playerInLobby.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
+                    }
+                }
+            }
+
             // if all players are waiting to accept the mystery word, then change status to writing clues and waiting for clues
             if (this.allPlayerHaveStatus(lobby.getPlayers(), PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD)) {
                 this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
