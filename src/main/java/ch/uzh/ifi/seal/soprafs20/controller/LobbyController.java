@@ -371,6 +371,40 @@ public class LobbyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
+    /**
+     * API Post request to accept the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/acceptword")
+    @ResponseBody
+    public ResponseEntity<?> acceptMysteryWord(@PathVariable long lobbyId,
+                                                       @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, true);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * API Post request to decline the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/declineword")
+    @ResponseBody
+    public ResponseEntity<?> DeclineMysteryWord(@PathVariable long lobbyId,
+                                                      @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, false);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping("/lobbies/{lobbyId}/clues")
     @ResponseStatus(HttpStatus.OK)
