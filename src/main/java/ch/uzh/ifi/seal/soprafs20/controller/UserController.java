@@ -190,4 +190,42 @@ public class UserController {
 
         return result;
     }
+
+    @GetMapping("/users/{userId}/invitations")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<LobbyGetDTO> getInvitations(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId){
+        // TODO: 15/05/2020
+        /*
+        200	List of all lobbies, the user with userId has been invited to	Returns a list of all lobbies, the user with userId has been invited to
+        401	Error	Unauthorized (Invalid Token)
+        */
+        return new ArrayList<>();
+    }
+
+    @PutMapping("/users/{userId}/invitations/{lobbyId}/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void acceptInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId) {
+        // TODO: 15/05/2020
+        /*
+        204	-	Accept invite of user(userId) to lobby(lobbyId)
+        401	Error	Unauthorized (Invalid Token)
+        403	Error	Forbidden: Wrong user (Token) tries to accept
+        409	Error	Conflict: Lobby is already playing
+        */
+    }
+
+    @PutMapping("/users/{userId}/invitations/{lobbyId}/decline")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void declineInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId){
+        // TODO: 15/05/2020
+        /*
+        204	-	Decline invite of user(userId) to lobby(lobbyId)
+        401	Error	Unauthorized (Invalid Token)
+        403	Error	Forbidden: Wrong user (Token) tries to decline
+        409	Error	Conflict: User already in this lobby
+        */
+    }
+
 }
