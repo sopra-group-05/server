@@ -10,7 +10,6 @@ public class UserGetDTO {
     private UserStatus status;
     private String birthday;
     private LocalDateTime created;
-    // todo: maybe add invitinglobbies (also see DTOMapper.java)
 
     public Long getId() {
         return id;

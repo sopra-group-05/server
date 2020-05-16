@@ -221,9 +221,16 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void acceptInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId) {
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
         // TODO: 15/05/2020
         /*
-        204	-	Accept invite of user(userId) to lobby(lobbyId)
+        204	Accept invite of user(userId) to lobby(lobbyId)
+        404 lobby not found
         409	Error	Conflict: Lobby is already playing
         */
     }
@@ -231,12 +238,17 @@ public class UserController {
     @PutMapping("/users/{userId}/invitations/{lobbyId}/decline")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void declineInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId){
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
         // TODO: 15/05/2020
         /*
         204	-	Decline invite of user(userId) to lobby(lobbyId)
         401	Error	Unauthorized (Invalid Token)
-        403	Error	Forbidden: Wrong user (Token) tries to decline
-        404 not found user/lobby not found
+        404 not found lobby not found
         409	Error	Conflict: User already in this lobby
         */
     }
