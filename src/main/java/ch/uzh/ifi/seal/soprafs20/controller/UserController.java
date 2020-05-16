@@ -1,7 +1,10 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
@@ -15,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User Controller
@@ -195,12 +199,22 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<LobbyGetDTO> getInvitations(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId){
-        // TODO: 15/05/2020
-        /*
-        200	List of all lobbies, the user with userId has been invited to	Returns a list of all lobbies, the user with userId has been invited to
-        401	Error	Unauthorized (Invalid Token)
-        */
-        return new ArrayList<>();
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
+
+        // get invitingLobbies
+        Set<Lobby> lobbies = idUser.getInvitingLobbies();
+        // convert to LobbyGetDTO
+        List<LobbyGetDTO> dtoLobbies = new ArrayList<>();
+        for (Lobby lobby: lobbies) {
+            dtoLobbies.add(DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby));
+        }
+        // send 200 with list of inviting lobbies
+        return dtoLobbies;
     }
 
     @PutMapping("/users/{userId}/invitations/{lobbyId}/accept")
@@ -210,8 +224,6 @@ public class UserController {
         // TODO: 15/05/2020
         /*
         204	-	Accept invite of user(userId) to lobby(lobbyId)
-        401	Error	Unauthorized (Invalid Token)
-        403	Error	Forbidden: Wrong user (Token) tries to accept
         409	Error	Conflict: Lobby is already playing
         */
     }
@@ -224,6 +236,7 @@ public class UserController {
         204	-	Decline invite of user(userId) to lobby(lobbyId)
         401	Error	Unauthorized (Invalid Token)
         403	Error	Forbidden: Wrong user (Token) tries to decline
+        404 not found user/lobby not found
         409	Error	Conflict: User already in this lobby
         */
     }
