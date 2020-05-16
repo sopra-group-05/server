@@ -241,6 +241,8 @@ public class LobbyController {
         if(!isInThisLobby) {
             throw new ForbiddenException("The user is not in this Lobby.");
         }
+
+        // set Bots ready
         if(player.getRole().equals(PlayerRole.GUESSER)){
             Set<Player> allPlayers = lobby.getPlayers();
             for (Player singlePlayer:allPlayers){
@@ -249,7 +251,13 @@ public class LobbyController {
                 }
             }
         }
-        playerService.setPlayerReady(player);
+        if (playerService.isPlayerReady(player)){
+            // if Player was ready, trigger to not Ready
+            playerService.setPlayerToNotReady(player);
+        } else {
+            // if player was not ready, trigger to ready
+            playerService.setPlayerReady(player);
+        }
         return true;
     }
 
@@ -371,6 +379,40 @@ public class LobbyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
+    /**
+     * API Post request to accept the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/acceptword")
+    @ResponseBody
+    public ResponseEntity<?> acceptMysteryWord(@PathVariable long lobbyId,
+                                                       @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, true);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * API Post request to decline the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/declineword")
+    @ResponseBody
+    public ResponseEntity<?> DeclineMysteryWord(@PathVariable long lobbyId,
+                                                      @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, false);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping("/lobbies/{lobbyId}/clues")
     @ResponseStatus(HttpStatus.OK)
@@ -384,8 +426,6 @@ public class LobbyController {
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
-
-
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")

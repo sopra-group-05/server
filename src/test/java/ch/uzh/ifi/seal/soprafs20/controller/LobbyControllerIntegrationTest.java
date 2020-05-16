@@ -110,6 +110,7 @@ public class LobbyControllerIntegrationTest {
         lobbyPostDTO.setLobbyName("testName");
         lobbyPostDTO.setGameMode(0);
         lobbyPostDTO.setLanguage("EN");
+        lobbyPostDTO.setNumberOfCards(13);
 
         requestBuilder = getMockHttpServletRequestBuilderForPost(lobbyPostDTO, "/lobbies");
         requestBuilder.header("Token", userEntity.getToken());
