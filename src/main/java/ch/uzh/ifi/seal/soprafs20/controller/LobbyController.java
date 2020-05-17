@@ -169,6 +169,10 @@ public class LobbyController {
         if (!isInThisLobby)
             throw new UnauthorizedException("Requesting User is not in specified lobby!");
 
+        // check that invited user is not requesting user
+        if (userId == user.getId())
+            throw new ForbiddenException("Requesting user is the to be invited user!");
+
         // Get Lobby from lobbyId
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
