@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -15,6 +16,7 @@ public class UserRepositoryIntegrationTest {
     @Autowired
     private TestEntityManager entityManager;
 
+    @Qualifier("userRepository")
     @Autowired
     private UserRepository userRepository;
 
@@ -138,7 +140,7 @@ public class UserRepositoryIntegrationTest {
         entityManager.flush();
 
         // when
-        User found = userRepository.findById(5);
+        User found = userRepository.findById(5L).orElse(null);
 
         // then
         assertNull(found);

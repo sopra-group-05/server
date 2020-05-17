@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.data.domain.Sort.by;
@@ -153,7 +154,7 @@ public class UserService {
      * @return User
      */
     public User getUserByID(long id) {
-        User userById = userRepository.findById(id);
+        User userById = userRepository.findById(id).orElseThrow(()->new NotFoundException("User was not found"));
         if (userById == null) {
             // user was not found
             throw new NotFoundException("User was not found");
@@ -167,7 +168,7 @@ public class UserService {
     */
     public User authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
-        User userById = userRepository.findById(id);
+        User userById = userRepository.findById(id).orElseThrow(()->new NotFoundException("The provided User ID does not belong to any user"));
 
         if (null == userById){
             // Profile does not exist
@@ -229,7 +230,8 @@ public class UserService {
      * @return the new Balance of the Points of a User
      */
     public void updateScore(long userId, long score){
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user != null;
         user.addScore(score);
     }
 
@@ -238,7 +240,8 @@ public class UserService {
      *
      */
     public void updateCorrectGuessCount(long userId, long guessesCount){
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user!= null;
         user.incrementCorrectGuessCount(guessesCount);
     }
 
@@ -249,7 +252,8 @@ public class UserService {
      * @param bestClueCount - the best clue count
      * */
     public void updateBestClueCount(long userId, long bestClueCount) {
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user != null;
         user.incBestCluesCount(bestClueCount);
     }
 
