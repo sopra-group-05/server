@@ -426,7 +426,7 @@ public class LobbyController {
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
         if("" != clue2.getHint() && clue2.getHint() != null){
-            if(lobby.getPlayers().size() != 3){
+            if(lobby.getPlayers().size() == 3){
                 clueService.addClue(clue2, lobby, token);
             } else{
                 throw new ForbiddenException("Number of Players is not 3, you are not allowed to add to clues");
