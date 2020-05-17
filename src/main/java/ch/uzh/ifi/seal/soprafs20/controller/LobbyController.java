@@ -424,7 +424,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
-        if(!clue2.getHint().equals("")){
+        if("" != clue2.getHint() && clue2.getHint() != null){
             if(lobby.getPlayers().size() != 3){
                 clueService.addClue(clue2, lobby, token);
             } else{

@@ -20,8 +20,8 @@ public class Clue {
     @Column
     private String hint;
     
-    @Column
-    private String hint2;
+    //@Column
+    //private String hint2;
 
     @ManyToOne
     private Player player;
