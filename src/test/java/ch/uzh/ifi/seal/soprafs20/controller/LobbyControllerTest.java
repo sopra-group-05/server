@@ -1,13 +1,11 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.Language;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.entity.Deck;
@@ -36,6 +34,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -397,5 +396,55 @@ public class LobbyControllerTest {
                 .andDo(print());
 
         Assert.isNull(playerService.getPlayerById(2L));
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * Valid Input, adds lobby to user's inviting lobbies
+     */
+    @Test
+    public void inviteUserToLobby_validInput() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.ONLINE);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willReturn(true);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(userService.getUserByID(Mockito.anyLong())).willReturn(testInvitedUser);
+        given(playerService.getPlayerById(Mockito.anyLong())).willThrow(new ForbiddenException("Player not found"));
+        given(lobbyService.isUserInLobby(testInvitedUser,2L)).willReturn(false);
+        doNothing().when(lobbyService).inviteUserToLobby(Mockito.any(), Mockito.any());
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
     }
 }

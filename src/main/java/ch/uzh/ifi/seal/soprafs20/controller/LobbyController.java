@@ -191,7 +191,6 @@ public class LobbyController {
         if (alreadyInAnotherLobby)
             throw new ForbiddenException("Requested User is in another lobby!");
 
-
         lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
 
