@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
+import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ public class LobbyService
     //private static final java.util.UUID UUID = ;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
-
 
     private PlayerService playerService;
     private UserService userService;
@@ -673,10 +673,10 @@ public class LobbyService
      *
      */
     public void inviteUserToLobby(User user, Lobby lobby){
-        Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
-        addPlayerToLobby(lobby, player);
-        // add ranking for player
-        gameService.addStats(player.getId(),lobby.getId());
+        User invitedUser = userService.getUserByID(user.getId());
+        Lobby invitingLobby = this.getLobbyById(lobby.getId());
+        // add lobby to set of inviting lobbies
+        userService.addToInvitingLobbies(invitedUser.getId(),invitingLobby);
     }
 
     public void endGame(Lobby lobby){

@@ -5,7 +5,10 @@ import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Internal User Representation
@@ -51,6 +54,10 @@ public class User implements Serializable {
 
     @Column(nullable = false)
     private long bestClues = 0;
+
+    @OneToMany
+    @Column(nullable = false)
+    private final Set<Lobby> invitingLobbies = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -134,6 +141,18 @@ public class User implements Serializable {
 
     public void incBestCluesCount(long bestCluesCount) {
 	    this.bestClues += bestCluesCount;
+    }
+
+    public void addInvitingLobby(Lobby lobby){
+	    this.invitingLobbies.add(lobby);
+    }
+
+    public void removeInvitingLobby(Lobby lobby){
+	    this.invitingLobbies.remove(lobby);
+    }
+
+    public Set<Lobby> getInvitingLobbies(){
+	    return invitingLobbies;
     }
 
     @Override

@@ -4,7 +4,6 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -153,7 +152,7 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
-    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @PostMapping("/lobbies/{lobbyId}/invite/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
@@ -168,6 +167,10 @@ public class LobbyController {
         // 401 Unauthorized
         if (!isInThisLobby)
             throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // check that invited user is not requesting user
+        if (userId == user.getId())
+            throw new ForbiddenException("Requesting user is the to be invited user!");
 
         // Get Lobby from lobbyId
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -190,7 +193,6 @@ public class LobbyController {
         }
         if (alreadyInAnotherLobby)
             throw new ForbiddenException("Requested User is in another lobby!");
-
 
         lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
@@ -426,7 +428,7 @@ public class LobbyController {
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
         if("" != clue2.getHint() && clue2.getHint() != null){
-            if(lobby.getPlayers().size() != 3){
+            if(lobby.getPlayers().size() == 3){
                 clueService.addClue(clue2, lobby, token);
             } else{
                 throw new ForbiddenException("Number of Players is not 3, you are not allowed to add to clues");
