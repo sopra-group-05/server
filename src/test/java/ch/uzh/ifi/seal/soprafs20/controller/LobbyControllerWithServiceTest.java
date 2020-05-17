@@ -3,10 +3,15 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.repository.*;
 import ch.uzh.ifi.seal.soprafs20.service.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalAnswers;
 import org.mockito.Mockito;
@@ -247,6 +252,49 @@ public class LobbyControllerWithServiceTest {
 
     }
 
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * Valid Input, adds lobby to user's inviting lobbies (204)
+     */
+    @Test
+    public void inviteUserToLobby_validInput() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = createUser(1L, "testUser", "1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = createUser(3L, "testInvitedUser", "3");
+        testInvitedUser.setStatus(UserStatus.ONLINE);
+
+        given(playerRepository.findByToken(testUser.getToken())).willReturn(testPlayer);
+        given(userRepository.findByToken(testUser.getToken())).willReturn(testUser);
+        given(playerRepository.findById(testUser.getId())).willReturn(Optional.of(testPlayer));
+        given(lobbyRepository.findByLobbyId(lobby.getId())).willReturn(lobby);
+        given(userRepository.findById(testInvitedUser.getId())).willReturn(Optional.of(testInvitedUser));
+        given(playerRepository.findById(testInvitedUser.getId())).willReturn(Optional.empty());
+        given(userRepository.saveAndFlush(testInvitedUser)).willReturn(testInvitedUser);
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+
+        Assert.notEmpty(testInvitedUser.getInvitingLobbies(), "lobby not added to inviting");
+    }
 
     private void createRepositoryMock(Lobby lobby, User testUser, Player testPlayer, User testUser2, Player testPlayer2) {
         given(playerRepository.findByToken(testPlayer.getToken())).willReturn(testPlayer);
