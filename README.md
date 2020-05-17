@@ -1,13 +1,36 @@
-# SoPra RESTful Service Template FS20 - #M2
+# SoPra FS20 - Just One M4 - Server
 
-## Getting started with Spring Boot
+## Introduction
+
+Welcome to the digital version of the game Just One! Players are able to register and login and get a good look
+at the dashboard. Users can join other lobbies, start a game with different sizes of decks, or play in 
+English or German against other Players in real time. There's also a game mode where you can play against Bots. 
+
+Players can also compare each other via a leader Board. Their score will be set according to the 
+time they need to come up with the clues and guesses and whether they were eliminated or not.
+
+We are using ReactJS in the Frontend and Java (Spring Boot) in the Backend. The Frontend will interact with the Backend
+via a REST API. We decided to consume different external APIs, one in the form of synonyms and antonyms for the Bots
+and another to show a definition of a mystery word (if a player doesn’t know what it is).
+
+## Technologies used
+We're using Spring Boot for the Backend of Just One. 
+
+Getting started with Spring Boot:
 
 -   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
 -   Guides: http://spring.io/guides
     -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
     -   Building REST services with Spring: http://spring.io/guides/tutorials/bookmarks/
 
-## Setup this Template with your IDE of choice
+## High-Level components [todo]
+
+In this section we'll tell you about three main components and their role.
+
+todo for backend!
+
+## Launch & Deployment 
+### Setup this Template with your IDE of choice
 
 Download your IDE of choice: (e.g., [Eclipse](http://www.eclipse.org/downloads/), [IntelliJ](https://www.jetbrains.com/idea/download/)) and make sure Java 13 is installed on your system.
 
@@ -16,7 +39,7 @@ Download your IDE of choice: (e.g., [Eclipse](http://www.eclipse.org/downloads/)
 
 To build right click the `build.gradle` file and choose `Run Build`
 
-## Building with Gradle
+### Building with Gradle
 
 You can use the local Gradle Wrapper to build the application.
 
@@ -28,25 +51,25 @@ Plattform-Prefix:
 
 More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) and [Gradle](https://gradle.org/docs/).
 
-### Build
+#### Build
 
 ```bash
 ./gradlew build
 ```
 
-### Run
+#### Run
 
 ```bash
 ./gradlew bootRun
 ```
 
-### Test
+#### Test
 
 ```bash
 ./gradlew test
 ```
 
-### Development Mode
+#### Development Mode
 
 You can start the backend in development mode, this will automatically trigger a new build and reload the application
 once the content of a file has been changed and you save the file.
@@ -63,13 +86,13 @@ If you want to avoid running all tests with every change, use the following comm
 
 `./gradlew build --continuous -xtest`
 
-## API Endpoint Testing
+### API Endpoint Testing
 
-### Postman
+#### Postman
 
 -   We highly recommend to use [Postman](https://www.getpostman.com) in order to test your API Endpoints.
 
-## Debugging
+### Debugging
 
 If something is not working and/or you don't know what is going on. We highly recommend that you use a debugger and step
 through the process step-by-step.
@@ -84,6 +107,41 @@ do the following:
 5. Set breakpoints in the application where you need it
 6. Step through the process one step at a time
 
-## Testing
+### Testing
 
 Have a look here: https://www.baeldung.com/spring-boot-testing
+
+## Roadmap
+
+Here are two features that you, as a new member of our team, could contribute to this project!
+
+### Adding custom Mystery-Word Cards
+
+As a User I want to be able to add mystery word cards to the Game in order to keep the game interesting and avoid 
+playing the same words over and over again.
+- On the Lobby-Page there should be a button that opens a add-mystery-word-card form
+- In the form there should be five empty spaces to put five mystery words.
+- The mystery word should be put to the list of mystery-word-cards.
+- The user should be able to specify to which language the card should belong.
+
+### Let the active Player choose which Clue was the best one
+
+As an active Player, I want to be able to choose the best clue presented in order to award the player who wrote 
+it some extra points.
+- Alle Clues should be visible to the active Player.
+- The active Player should be able to click on the best clue.
+- The Player that wrote the chosen clue should get extra points.
+- The active Player should be able to skip if no clue stands out.
+
+## Authors and acknowledgement
+
+- [Adiboeh](https://github.com/Adiboeh)
+- [Floribur](https://github.com/Floribur)
+- [nmulle](https://github.com/nmulle)
+- [yritz](https://github.com/yritz)
+- [mgoki](https://github.com/mgoki)
+- [InfoYak](https://github.com/InfoYak)
+
+## License
+
+[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/) 
