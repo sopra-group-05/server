@@ -190,6 +190,7 @@ public class ClueService {
     synchronized private List<Clue> getCluesForComparing(Lobby lobby){
         List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
+        Set<Player> players = lobby.getPlayers();
         if(!haveBotPlayersAnnotatedClues(lobby)){
             createBotClues(lobby);
         }
@@ -198,11 +199,13 @@ public class ClueService {
                 activeClues.add(clue);
             }
         }
-        if(activeClues.size() == lobby.getPlayers().size()-1) {
-            return activeClues;
-        } else{
-            throw new BadRequestException("Not all Clues are annotated");
+        for (Player player:players) {
+            if (!player.getStatus().equals(PlayerStatus.REVIEWING_CLUES) & !player.getRole().equals(PlayerRole.GUESSER)) {
+                throw new BadRequestException("Not all Clues are annotated");
+            }
         }
+        return activeClues;
+
     }
 
     /*
