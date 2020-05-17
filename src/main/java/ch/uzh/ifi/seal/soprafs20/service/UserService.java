@@ -272,7 +272,9 @@ public class UserService {
      * @param lobby - lobby to remove
      */
     public void removeFromInvitingLobbies(long userId, Lobby lobby){
-        // TODO: 17/05/2020
+        User user = getUserByID(userId);
+        user.removeInvitingLobby(lobby);
+        userRepository.saveAndFlush(user);
     }
 
 }
