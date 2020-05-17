@@ -98,9 +98,14 @@ public interface DTOMapper {
     User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
 
     @Mapping(source = "hint", target = "hint")
-    @Mapping(source = "hint2", target = "hint2")
+    //@Mapping(source = "hint2", target = "hint2")
     @Mapping(source = "timeForClue", target = "timeForClue")    
     Clue convertCluePOSTDTOToEntity(CluePostDTO cluePostDTO);
+
+    //@Mapping(source = "hint", target = "hint")
+    @Mapping(source = "hint2", target = "hint")
+    @Mapping(source = "timeForClue", target = "timeForClue")
+    Clue convertClue2POSTDTOToEntity(CluePostDTO cluePostDTO);
 
     @Mapping(source = "hint", target= "hint")
     @Mapping(source = "id", target = "id")
