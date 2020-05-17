@@ -1,13 +1,18 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,11 +35,13 @@ public class UserController {
 
     private final UserService userService;
     private final LobbyService lobbyService;
+    private final PlayerService playerService;
 
     @Autowired
-    UserController(UserService userService, LobbyService lobbyService) {
+    UserController(UserService userService, LobbyService lobbyService, PlayerService playerService) {
         this.userService = userService;
         this.lobbyService = lobbyService;
+        this.playerService = playerService;
     }
 
     /**
@@ -224,15 +231,24 @@ public class UserController {
         // check that token belongs to userId
         User tokenUser = userService.checkUserToken(token); // can throw 401
         User idUser = userService.getUserByID(userId); // can throw 404
+
         // return a 403 Forbidden
         if (!tokenUser.equals(idUser))
             throw new ForbiddenException("Wrong user sent request!");
-        // TODO: 15/05/2020
-        /*
-        204	Accept invite of user(userId) to lobby(lobbyId)
-        404 lobby not found
-        409	Error	Conflict: Lobby is already playing
-        */
+
+        // check that lobby is valid
+        Lobby lobby = lobbyService.getLobbyById(lobbyId); // can throw 404
+
+        // return 409
+        if (!lobby.getLobbyStatus().equals(LobbyStatus.WAITING))
+            throw new ConflictException("Lobby is already playing or has already stopped!");
+
+        // convert user to player
+        Player player = playerService.convertUserToPlayer(idUser, PlayerRole.CLUE_CREATOR);
+        // add user to lobby
+        lobbyService.addPlayerToLobby(lobby,player);
+        // remove lobby from inviting lobbies
+        userService.removeFromInvitingLobbies(userId, lobby);
     }
 
     @PutMapping("/users/{userId}/invitations/{lobbyId}/decline")
