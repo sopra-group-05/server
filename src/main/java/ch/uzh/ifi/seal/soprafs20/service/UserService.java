@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
@@ -250,6 +251,26 @@ public class UserService {
     public void updateBestClueCount(long userId, long bestClueCount) {
         User user = userRepository.findById(userId);
         user.incBestCluesCount(bestClueCount);
+    }
+
+    /**
+     * adds lobby to invitingLobbies
+     *
+     * @param userId - user's id
+     * @param lobby - lobby to add
+     */
+    public void addToInvitingLobbies(long userId, Lobby lobby){
+        // TODO: 17/05/2020
+    }
+
+    /**
+     * removes lobby from invitingLobbies
+     *
+     * @param userId - user's id
+     * @param lobby - lobby to remove
+     */
+    public void removeFromInvitingLobbies(long userId, Lobby lobby){
+        // TODO: 17/05/2020
     }
 
 }
