@@ -216,7 +216,17 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        if(lobby.getPlayers().size() > 3)
+        Set<Player> players = lobby.getPlayers();
+        int humanPlayerCounter = 0;
+        
+        for(Player countHumanPlayer:players) {
+        	if(countHumanPlayer.getPlayerType()==PlayerType.HUMAN)
+        	{
+        		humanPlayerCounter++;
+        	}
+        }
+        
+        if((lobby.getPlayers().size() > 3)&&(humanPlayerCounter > 2))
         {
 	        Player creator = lobby.getCreator();
 	        Game game = lobby.getGame();
@@ -228,15 +238,13 @@ public class LobbyService
 	        boolean guesserSet = false;
 	        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
 	        {
-	        	Set<Player> players = lobby.getPlayers();
 	        	for(Player candidatPlayer : players)
 	        	{
 	        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
 	        		{
 	        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
 		        		{
-		        			lobby.setCreator(candidatPlayer);
-		
+		        			lobby.setCreator(candidatPlayer);	
 		        		}
 		        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
 		        		{
@@ -247,9 +255,9 @@ public class LobbyService
 	        	}
 	        }
         }
-        else
+        else //if there are not enough human players left
         {
-        	lobby.setCreator(player);
+        	lobby.setCreator(player);  //set leaving player as creator to delete the game
         }
         if(lobby.getCreator().getId() == playerId)
         {
