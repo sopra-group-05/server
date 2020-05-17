@@ -216,48 +216,51 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        Set<Player> players = lobby.getPlayers();
-        int humanPlayerCounter = 0;
-        
-        for(Player countHumanPlayer:players) {
-        	if(countHumanPlayer.getPlayerType()==PlayerType.HUMAN)
-        	{
-        		humanPlayerCounter++;
-        	}
-        }
-        
-        if((lobby.getPlayers().size() > 3)&&(humanPlayerCounter > 2))
+        if(lobby.getLobbyStatus()==LobbyStatus.RUNNING)
         {
-	        Player creator = lobby.getCreator();
-	        Game game = lobby.getGame();
-	        List<Clue> clues = player.getClues();
-	        for(Clue clue:clues){
-	        	game.deleteClue(clue);
-	            clue.setPlayer(null);
-	        }
-	        boolean guesserSet = false;
-	        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
-	        {
-	        	for(Player candidatPlayer : players)
+	        Set<Player> players = lobby.getPlayers();
+	        int humanPlayerCounter = 0;
+        
+	        for(Player countHumanPlayer:players) {
+	        	if(countHumanPlayer.getPlayerType()==PlayerType.HUMAN)
 	        	{
-	        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
-	        		{
-	        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
-		        		{
-		        			lobby.setCreator(candidatPlayer);	
-		        		}
-		        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
-		        		{
-		        			candidatPlayer.setRole(PlayerRole.GUESSER);
-		        			guesserSet = true;
-		        		}
-	        		}
+	        		humanPlayerCounter++;
 	        	}
 	        }
-        }
-        else //if there are not enough human players left
-        {
-        	lobby.setCreator(player);  //set leaving player as creator to delete the game
+	        
+	        if((lobby.getPlayers().size() > 3)&&(humanPlayerCounter > 2))
+	        {
+		        Player creator = lobby.getCreator();
+		        Game game = lobby.getGame();
+		        List<Clue> clues = player.getClues();
+		        for(Clue clue:clues){
+		        	game.deleteClue(clue);
+		            clue.setPlayer(null);
+		        }
+		        boolean guesserSet = false;
+		        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+		        {
+		        	for(Player candidatPlayer : players)
+		        	{
+		        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
+		        		{
+		        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+			        		{
+			        			lobby.setCreator(candidatPlayer);	
+			        		}
+			        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+			        		{
+			        			candidatPlayer.setRole(PlayerRole.GUESSER);
+			        			guesserSet = true;
+			        		}
+		        		}
+		        	}
+		        }
+	        }
+	        else //if there are not enough human players left
+	        {
+	        	lobby.setCreator(player);  //set leaving player as creator to delete the game
+	        }
         }
         if(lobby.getCreator().getId() == playerId)
         {
