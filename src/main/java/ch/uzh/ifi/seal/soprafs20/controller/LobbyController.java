@@ -420,11 +420,19 @@ public class LobbyController {
     public void addClue(@PathVariable long lobbyId,
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
+        Clue clue2 = DTOMapper.INSTANCE.convertClue2POSTDTOToEntity(cluePostDTO);
 
-        //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
+        if(!clue2.getHint().equals("")){
+            if(lobby.getPlayers().size() != 3){
+                clueService.addClue(clue2, lobby, token);
+            } else{
+                throw new ForbiddenException("Number of Players is not 3, you are not allowed to add to clues");
+            }
+
+        }
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
     }
 

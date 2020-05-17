@@ -61,13 +61,15 @@ public class Clue {
         this.hint = hint;
     }
     
-    public String getHint2() {
+    /*public String getHint2() {
 		return hint2;
 	}
 
 	public void setHint2(String hint2) {
 		this.hint2 = hint2;
 	}
+
+     */
 
 	public void setPlayer(Player player){
         this.player = player;
