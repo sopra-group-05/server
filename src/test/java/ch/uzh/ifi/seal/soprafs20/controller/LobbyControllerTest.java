@@ -4,16 +4,13 @@ import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
-import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
-import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
-import ch.uzh.ifi.seal.soprafs20.entity.Deck;
+
 import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
-//import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.ClueService;
 import ch.uzh.ifi.seal.soprafs20.service.GameService;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
@@ -22,6 +19,7 @@ import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.Mapping;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,11 +29,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -397,5 +397,183 @@ public class LobbyControllerTest {
                 .andDo(print());
 
         Assert.isNull(playerService.getPlayerById(2L));
+    }
+
+    /**
+     * Test to get lobby statistics
+     * */
+    @Test
+    public void getLobbyStatistics_validInput() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        User testUser2 = new User();
+        testUser2.setUsername("testUser2");
+        testUser2.setToken("2");
+        testUser2.setId(2L);
+        Player testPlayer2 = new Player(testUser2);
+        testPlayer2.setRole(PlayerRole.CLUE_CREATOR);
+        lobby.addPlayer(testPlayer2);
+
+        List<GameStats> gameStatsList = new ArrayList<>();
+        GameStats gameStats = new GameStats(testPlayer.getId(), lobby.getId());
+        gameStats.setGivenClues(3l);
+        gameStats.setGoodClues(1l);
+        gameStats.setTeamPoints(20l);
+        gameStatsList.add(gameStats);
+
+        given(gameService.getAllLobbyGameStats(lobby.getId())).willReturn(gameStatsList);
+        given(playerService.getPlayerById(1L)).willReturn(testPlayer);
+        given(playerService.getPlayerById(2L)).willReturn(testPlayer2);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() + "/stats")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$[0].playerId", is(testPlayer.getId().intValue())))
+                .andExpect(jsonPath("$[0].givenClues", is(gameStats.getGivenClues().intValue())))
+                .andExpect(jsonPath("$[0].goodClues", is(gameStats.getGoodClues().intValue())))
+                .andExpect(jsonPath("$[0].teamPoints", is(gameStats.getTeamPoints().intValue())))
+                .andDo(print());
+    }
+
+    /**
+     * Test to go to next round
+     * */
+    @Test
+    public void getNextRound_validInput() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        doNothing().when(lobbyService).nextRound(Mockito.anyLong(), Mockito.anyString());
+
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder putRequest = put("/lobbies/" + lobby.getId() + "/nextRound")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value("next Round"))
+                .andDo(print());
+    }
+
+    /**
+     * Test to get word definition
+     * */
+    @Test
+    public void getWordDefinition_validInput() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+
+        String word = "Star";
+
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        doNothing().when(lobbyService).nextRound(Mockito.anyLong(), Mockito.anyString());
+
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() + "/definition/" + word)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andDo(print());
+    }
+
+    /**
+     * Test to guess correct mystery word
+     * */
+    @Test
+    public void guessMysteryWord_validInput() throws Exception {
+        // given
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        String guessedWord = "Moon";
+        String mysteryWord = "Star";
+        boolean success = true;
+        int leftCards = 1;
+        Long wonCards = 2l;
+        int lostCards = 6;
+
+        given(gameService.getGuess(lobby)).willReturn(guessedWord);
+        given(gameService.getMysteryWord(lobby)).willReturn(mysteryWord);
+        given(gameService.getGuessSuccess(lobby)).willReturn(success);
+        given(gameService.getLeftCards(lobby)).willReturn(leftCards);
+        given(gameService.getWonCards(lobby)).willReturn(wonCards);
+        given(gameService.getLostCards(lobby)).willReturn(lostCards);
+
+        given(playerService.getPlayerById(1L)).willReturn(testPlayer);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+
+        // make get Request to Lobby with id
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() + "/guess")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.guess", is(guessedWord)))
+                .andExpect(jsonPath("$.leftCards", is(leftCards)))
+                .andExpect(jsonPath("$.wonCards", is(wonCards.intValue())))
+                .andExpect(jsonPath("$.mysteryWord", is(mysteryWord)))
+                .andDo(print());
+
     }
 }
