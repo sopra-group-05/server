@@ -257,16 +257,22 @@ public class UserController {
         // check that token belongs to userId
         User tokenUser = userService.checkUserToken(token); // can throw 401
         User idUser = userService.getUserByID(userId); // can throw 404
+
         // return a 403 Forbidden
         if (!tokenUser.equals(idUser))
             throw new ForbiddenException("Wrong user sent request!");
-        // TODO: 15/05/2020
-        /*
-        204	-	Decline invite of user(userId) to lobby(lobbyId)
-        401	Error	Unauthorized (Invalid Token)
-        404 not found lobby not found
-        409	Error	Conflict: User already in this lobby
-        */
+
+        // check validity of lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId); // can throw 404
+
+        // Check if user is in the lobby already (409)
+        for (Player player: lobby.getPlayers()) {
+            if (player.getId().equals(idUser.getId()))
+                throw new ConflictException("User is already in the lobby!");
+        }
+
+        // remove lobby from inviting lobbies
+        userService.removeFromInvitingLobbies(userId, lobby);
     }
 
 }
