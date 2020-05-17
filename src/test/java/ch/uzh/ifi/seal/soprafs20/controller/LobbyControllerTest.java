@@ -1,16 +1,11 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
-import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.Language;
-import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
-
+import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import static java.lang.Math.toIntExact;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
+//import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPutDTO;
 import ch.uzh.ifi.seal.soprafs20.service.ClueService;
 import ch.uzh.ifi.seal.soprafs20.service.GameService;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
@@ -577,5 +572,283 @@ public class LobbyControllerTest {
         Assert.isNull(playerService.getPlayerById(2L));
     }
 
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * Valid Input, adds lobby to user's inviting lobbies
+     */
+    @Test
+    public void inviteUserToLobby_validInput() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.ONLINE);
 
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willReturn(true);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(userService.getUserByID(Mockito.anyLong())).willReturn(testInvitedUser);
+        given(playerService.getPlayerById(Mockito.anyLong())).willThrow(new ForbiddenException("Player not found"));
+        given(lobbyService.isUserInLobby(testInvitedUser,2L)).willReturn(false);
+        doNothing().when(lobbyService).inviteUserToLobby(Mockito.any(), Mockito.any());
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist())
+                .andDo(print());
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * Invalid token, throws UnauthorizedException
+     */
+    @Test
+    public void inviteUserToLobby_invalidToken() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.ONLINE);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(true);
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "5");
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$", is("Requesting player does not exist!")))
+                .andDo(print());
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * Lobby doesn't exist, throws NotFoundException
+     */
+    @Test
+    public void inviteUserToLobby_lobbyNotFound() throws Exception {
+        // given
+        // init lobby
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.ONLINE);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willThrow(new NotFoundException("The requested Lobby does not exist."));
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willThrow(new NotFoundException("The requested Lobby does not exist."));
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + 2L + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$", is("The requested Lobby does not exist.")))
+                .andDo(print());
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * invitedUser doesn't exist, throws NotFoundException
+     */
+    @Test
+    public void inviteUserToLobby_invitedUserNotFound() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willReturn(true);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(userService.getUserByID(Mockito.anyLong())).willThrow(new NotFoundException("User was not found"));
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + 3L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$", is("User was not found")))
+                .andDo(print());
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * invitedUser is offline, throws ForbiddenException
+     */
+    @Test
+    public void inviteUserToLobby_invitedUserIsOffline() throws Exception {
+        // given
+        // init lobby
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        lobby.addPlayer(testPlayer);
+        lobby.setGameMode(GameModeStatus.HUMANS);
+        lobby.setCreator(testPlayer);
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.OFFLINE);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willReturn(true);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        given(userService.getUserByID(Mockito.anyLong())).willReturn(testInvitedUser);
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$", is("Requested User is offline!")))
+                .andDo(print());
+    }
+
+    /**
+     * Tests inviteUserToLobby POST /lobbies/{lobbyId}/invite/{userId}
+     * invitedUser is already in another lobby, throws ForbiddenException
+     */
+    @Test
+    public void inviteUserToLobby_invitedUserInOtherLobby() throws Exception {
+        // given
+        // init inviting lobby
+        Lobby invLobby = new Lobby();
+        invLobby.setId(2L);
+        invLobby.setLobbyName("testName");
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+        invLobby.addPlayer(testPlayer);
+        invLobby.setGameMode(GameModeStatus.HUMANS);
+        invLobby.setCreator(testPlayer);
+        invLobby.setLobbyStatus(LobbyStatus.WAITING);
+        // init user to be invited
+        User testInvitedUser = new User();
+        testInvitedUser.setUsername("testInvitedUser");
+        testInvitedUser.setToken("3");
+        testInvitedUser.setId(3L);
+        testInvitedUser.setStatus(UserStatus.ONLINE);
+        // init other lobby
+        Lobby otherLobby = new Lobby();
+        otherLobby.setId(4L);
+        otherLobby.setLobbyName("otherLobby");
+        Player testInvitedPlayer = new Player(testInvitedUser);
+        testInvitedPlayer.setRole(PlayerRole.GUESSER);
+        otherLobby.addPlayer(testInvitedPlayer);
+        otherLobby.setGameMode(GameModeStatus.HUMANS);
+        otherLobby.setCreator(testInvitedPlayer);
+        otherLobby.setLobbyStatus(LobbyStatus.WAITING);
+
+
+        given(playerService.checkPlayerToken(Mockito.anyString())).willReturn(false);
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.isUserInLobby(testUser,2L)).willReturn(true);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(invLobby);
+        given(userService.getUserByID(Mockito.anyLong())).willReturn(testInvitedUser);
+        given(playerService.getPlayerById(Mockito.anyLong())).willReturn(testInvitedPlayer);
+        given(lobbyService.isUserInLobby(testInvitedUser,2L)).willReturn(false);
+        // doNothing().when(lobbyService).inviteUserToLobby(Mockito.any(), Mockito.any());
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + invLobby.getId() + "/invite/" + testInvitedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$", is("Requested User is in another lobby!")))
+                .andDo(print());
+    }
 }

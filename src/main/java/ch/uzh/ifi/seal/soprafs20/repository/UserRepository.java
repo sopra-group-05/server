@@ -11,7 +11,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 	User findByUsername(String username);
 	User findByToken(String token);
-	User findById(long id);
 
 	List<User> findAll(Sort sort);
 	// also haves delete, and findAll (see JPA Slides from Tutorial, page 25)
