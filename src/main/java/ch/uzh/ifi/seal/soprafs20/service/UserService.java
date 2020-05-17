@@ -260,7 +260,9 @@ public class UserService {
      * @param lobby - lobby to add
      */
     public void addToInvitingLobbies(long userId, Lobby lobby){
-        // TODO: 17/05/2020
+        User user = getUserByID(userId);
+        user.addInvitingLobby(lobby);
+        userRepository.saveAndFlush(user);
     }
 
     /**
