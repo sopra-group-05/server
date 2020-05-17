@@ -45,6 +45,7 @@ public interface DTOMapper {
     @Mapping(source = "lobbyName", target = "lobbyName")
     @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertInt")
     @Mapping(source = "language", target = "language", qualifiedByName = "convertString")
+    @Mapping(source = "numberOfCards", target = "numberOfCards")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
 
     @Named("convertInt")
@@ -97,7 +98,14 @@ public interface DTOMapper {
     User convertUserDeleteDTOToEntity(UserDeleteDTO userDeleteDTO);
 
     @Mapping(source = "hint", target = "hint")
+    //@Mapping(source = "hint2", target = "hint2")
+    @Mapping(source = "timeForClue", target = "timeForClue")    
     Clue convertCluePOSTDTOToEntity(CluePostDTO cluePostDTO);
+
+    //@Mapping(source = "hint", target = "hint")
+    @Mapping(source = "hint2", target = "hint")
+    @Mapping(source = "timeForClue", target = "timeForClue")
+    Clue convertClue2POSTDTOToEntity(CluePostDTO cluePostDTO);
 
     @Mapping(source = "hint", target= "hint")
     @Mapping(source = "id", target = "id")
@@ -116,14 +124,18 @@ public interface DTOMapper {
     @Mapping(source = "lostCards", target = "lostCards")
     @Mapping(source = "mysteryWord", target = "mysteryWord")
     GuessGetDTO convertEntityToGuessGETDTO(String guess, boolean success,int leftCards, Long wonCards, int lostCards, String mysteryWord);
-    
-   
+
     @Named("convertString")
-    default String convertGuessPostDTOToEntity(GuessPostDTO guessPostDTO)
+    default String convertGuessPostDTOToGuessString(GuessPostDTO guessPostDTO)
     {
     	return guessPostDTO.getGuess();
     }
-
+    
+    @Named("convertLong")
+    default Long convertGuessPostDTOToTimeToGuess(GuessPostDTO guessPostDTO)
+    {
+    	return guessPostDTO.getTimeToGuess();
+    }
     
     @Mapping(source = "playerId", target = "playerId")
     @Mapping(source = "score", target = "score")
@@ -135,5 +147,13 @@ public interface DTOMapper {
     @Mapping(source = "timeToGuess", target = "timeToGuess")
     @Mapping(source = "teamPoints", target = "teamPoints")
     StatsGetDTO convertEntityToStatsGetDTO(GameStats gameStats);
+
+    @Mapping(source = "id", target="id" )
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "score", target = "score")
+    @Mapping(source = "correctGuesses", target = "correctGuesses")
+    @Mapping(source = "bestClues", target = "bestClues")
+    OverallRankDTO convertEntityToOverallRankDTO(User user);
     
 }
+

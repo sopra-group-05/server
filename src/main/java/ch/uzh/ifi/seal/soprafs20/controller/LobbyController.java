@@ -4,7 +4,6 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -200,10 +199,10 @@ public class LobbyController {
     public ResponseEntity<?> leaveLobby(@PathVariable long lobbyId,
                                            @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
-        User lobbyCreator = userService.checkUserToken(token);
+        User leavingPlayer = userService.checkUserToken(token);
 
         //verify if the throwing out player is the lobby creator
-        lobbyService.removePlayerFromLobby(lobbyId, lobbyCreator.getId());
+        lobbyService.removePlayerFromLobby(lobbyId, leavingPlayer.getId());
         return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
 
 
@@ -241,6 +240,8 @@ public class LobbyController {
         if(!isInThisLobby) {
             throw new ForbiddenException("The user is not in this Lobby.");
         }
+
+        // set Bots ready
         if(player.getRole().equals(PlayerRole.GUESSER)){
             Set<Player> allPlayers = lobby.getPlayers();
             for (Player singlePlayer:allPlayers){
@@ -249,7 +250,13 @@ public class LobbyController {
                 }
             }
         }
-        playerService.setPlayerReady(player);
+        if (playerService.isPlayerReady(player)){
+            // if Player was ready, trigger to not Ready
+            playerService.setPlayerToNotReady(player);
+        } else {
+            // if player was not ready, trigger to ready
+            playerService.setPlayerReady(player);
+        }
         return true;
     }
 
@@ -282,7 +289,13 @@ public class LobbyController {
                                @RequestHeader(name = "Token", required = false) String token) {
         //check if Player is the Host of the lobby and therefore allowed to start the game
         Boolean isPlayerAllowedToStart = playerService.isAllowedToStart(token);
+
+        // check if Lobby has enough Players to start the game
+        lobbyService.lobbyHasEnoughPlayers(lobbyId);
+
+        // add Bots to Lobby if Gamemode is Bots.
         lobbyService.addBots(lobbyId);
+
         //check Access rights via token
         userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -365,6 +378,40 @@ public class LobbyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
+    /**
+     * API Post request to accept the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/acceptword")
+    @ResponseBody
+    public ResponseEntity<?> acceptMysteryWord(@PathVariable long lobbyId,
+                                                       @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, true);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * API Post request to decline the mystery word
+     */
+    @PostMapping("/lobbies/{lobbyId}/declineword")
+    @ResponseBody
+    public ResponseEntity<?> DeclineMysteryWord(@PathVariable long lobbyId,
+                                                      @RequestHeader(name = "Token", required = false) String token) {
+        //check Access rights via token
+        User user = userService.checkUserToken(token);
+
+        // get Lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId);
+        lobbyService.acceptOrDeclineMysteryWord(user, lobby, false);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping("/lobbies/{lobbyId}/clues")
     @ResponseStatus(HttpStatus.OK)
@@ -372,14 +419,20 @@ public class LobbyController {
     public void addClue(@PathVariable long lobbyId,
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
+        Clue clue2 = DTOMapper.INSTANCE.convertClue2POSTDTOToEntity(cluePostDTO);
 
-        //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
+        if("" != clue2.getHint() && clue2.getHint() != null){
+            if(lobby.getPlayers().size() == 3){
+                clueService.addClue(clue2, lobby, token);
+            } else{
+                throw new ForbiddenException("Number of Players is not 3, you are not allowed to add to clues");
+            }
+
+        }
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
-
-
     }
 
     @GetMapping("/lobbies/{lobbyId}/clues")
@@ -431,7 +484,8 @@ public class LobbyController {
         //check whether User is in this Lobby and has the role of the Guesser
         Boolean isGuesserOfLobby = lobbyService.isGuesserOfLobby(user, lobbyId);
         
-        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToEntity(guessPostDTO);
+        String guess = DTOMapper.INSTANCE.convertGuessPostDTOToGuessString(guessPostDTO);
+        Long timeToGuess = DTOMapper.INSTANCE.convertGuessPostDTOToTimeToGuess(guessPostDTO); 
 
         if (!isGuesserOfLobby) {
             throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
@@ -440,7 +494,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
         //TODO set correct time for guess
-        gameService.compareGuess(lobby, guess, user.getId(),0L); 
+        gameService.compareGuess(lobby, guess, user.getId(),timeToGuess); 
         // todo add points if correct (distribute them)
         // todo move arround roles of players? (Guesser vs Clue maker etc)
         // todo end of game what happens??

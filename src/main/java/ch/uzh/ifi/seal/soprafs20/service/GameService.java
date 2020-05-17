@@ -38,11 +38,13 @@ public class GameService {
 
     private final GameRepository gameRepository;
     private final StatsRepository statsRepository;
+    private final UserService userService;
 
     @Autowired
-    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("statsRepository") StatsRepository statsRepository) {
+    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("statsRepository") StatsRepository statsRepository, UserService userService) {
         this.gameRepository = gameRepository;
         this.statsRepository = statsRepository;
+        this.userService = userService;
     }
     
     /**
@@ -88,7 +90,7 @@ public class GameService {
 		game.setLastGuessSuccess(success);
 		updateLeftCards(game,success,guess);
 		updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
-		updateTeamPoints(lobby.getId(),game.getWonCards());
+		updateTeamPoints(lobby.getId(),game);
 		game = gameRepository.save(game);
 		gameRepository.flush();
     }
@@ -102,6 +104,7 @@ public class GameService {
     	if(success)
     	{
     		gameStats.incCorrectGuessCount(1l);
+    		userService.updateCorrectGuessCount(playerId, 1l);
     	}
     	gameStats.calculateScore();
     	statsRepository.save(gameStats);
@@ -118,6 +121,7 @@ public class GameService {
     	if(goodClue)
     	{
     		gameStats.incGoodClueCount(1l);
+    		userService.updateBestClueCount(playerId, 1l);
     	}
     	gameStats.calculateScore();
     	statsRepository.save(gameStats);
@@ -128,20 +132,27 @@ public class GameService {
 	public void reduceGoodClues(Long playerId, Long lobbyId) {
 		GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
     	gameStats.decGoodClueCount(1l);
+    	userService.updateBestClueCount(playerId, -1l);
      	gameStats.calculateScore();
     	statsRepository.save(gameStats);
     	statsRepository.flush();
 		
 	}
 	
-	public void updateTeamPoints(Long lobbyId, Long teamPoints)
+	public void updateTeamPoints(Long lobbyId, Game game)
 	{
 		List<GameStats> allGameStats = statsRepository.findAllByLobbyId(lobbyId);
 		for (GameStats eachGameStats : allGameStats)
 		{
-			eachGameStats.setTeamPoints(teamPoints);
+			eachGameStats.setTeamPoints(game.getWonCards());
 			eachGameStats.calculateScore();
 		}
+		//if there are no more cards left, then update overall stats for each user
+		if(game.getLeftCards() <= 0) {
+		    for(GameStats playerGameStats : allGameStats) {
+                userService.updateScore(playerGameStats.getPlayerId(), playerGameStats.getScore());
+            }
+        }
     	statsRepository.saveAll(allGameStats);
     	statsRepository.flush();
 	}
@@ -199,6 +210,13 @@ public class GameService {
 	{
 		return (statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId));
 	}
+
+	/**
+     * returns list of all Game statistics the player played in all Lobbies of their Games
+     * */
+	public List<GameStats> getPlayersStats(Long playerId) {
+        return statsRepository.findAllByPlayerId(playerId);
+    }
 
 	public String getMysteryWord(Lobby lobby) 
 	{

@@ -74,9 +74,9 @@ public class DeckService {
      * Constructs cards and deck for a new game
      *
      * @param language*/
-    public Deck constructDeckForLanguage(Language language) {
+    public Deck constructDeckForLanguage(Language language, int numberOfCards) {
         Deck deck = new Deck();
-        List<Card> cards = cardService.get13Cards(language);
+        List<Card> cards = cardService.get13Cards(language, numberOfCards);
         deck.clearAndAddCards(cards);
         deck = deckRepository.save(deck);
         return deck;

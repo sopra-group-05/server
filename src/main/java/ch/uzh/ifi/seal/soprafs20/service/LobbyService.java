@@ -216,14 +216,43 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
+        Player creator = lobby.getCreator();
+        Game game = lobby.getGame();
         List<Clue> clues = player.getClues();
         for(Clue clue:clues){
+        	game.deleteClue(clue);
             clue.setPlayer(null);
         }
-        lobby.leave(player);
-        lobby = lobbyRepository.save(lobby);
-        playerService.deletePlayer(player);
-        lobbyRepository.flush();
+        boolean guesserSet = false;
+        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+        {
+        	Set<Player> players = lobby.getPlayers();
+        	for(Player candidatPlayer : players)
+        	{
+        		if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+        		{
+        			lobby.setCreator(candidatPlayer);
+
+        		}
+        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+        		{
+        			candidatPlayer.setRole(PlayerRole.GUESSER);
+        			guesserSet = true;
+        		}
+        	}
+        }
+        if(lobby.getCreator().getId() == playerId)
+        {
+        	endLobby(lobbyId,userService.getUserByID(playerId));
+        }
+        else
+        {
+	       lobby.leave(player);
+	       lobby = lobbyRepository.save(lobby);
+	       playerService.deletePlayer(player);
+	       this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PLAYER_LEFT, PlayerStatus.PLAYER_LEFT);
+	       lobbyRepository.flush();  
+        }
     }
 
     /**
@@ -270,7 +299,7 @@ public class LobbyService
     public boolean startGame(Long lobbyId){
         try {
             Lobby lobbyToBeStarted = lobbyRepository.findByLobbyId(lobbyId);
-            lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage()));
+            lobbyToBeStarted.setDeck(deckService.constructDeckForLanguage(lobbyToBeStarted.getLanguage(), lobbyToBeStarted.getNumberOfCards()));
             lobbyToBeStarted.setGame(gameService.createNewGame(lobbyToBeStarted));
             lobbyToBeStarted.setLobbyStatus(LobbyStatus.RUNNING);
             this.setNewPlayersStatus(lobbyToBeStarted.getPlayers(),PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
@@ -313,6 +342,25 @@ public class LobbyService
                         lobby.setNumBots(2);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Checks if there are enough Human Players in the lobby to start the game.
+     * Has to be run before Bots are added.
+     */
+    public void lobbyHasEnoughPlayers(long lobbyId) {
+        Lobby lobby = this.getLobbyById(lobbyId);
+        if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+            // game mode with bots: has to be 2 players minimum (+bots)
+            if (lobby.getPlayers().size() < 2) {
+                throw new ForbiddenException("You need at least two players to start a game with bots.");
+            }
+        } else {
+            // game mode without bots: has to be 3 players minimum
+            if (lobby.getPlayers().size() < 3) {
+                throw new ForbiddenException("You need at least thre players to start a game.");
             }
         }
     }
@@ -389,7 +437,6 @@ public class LobbyService
         //Update Points of the Player in the User Repository
         int currentPoints = player.getPoints();
         User user = userService.getUserByID(player.getId());
-        userService.updatePoints(user, currentPoints);
 
         //Set Lobby Status to what is defined within the function
         lobby.setLobbyStatus(lobbyStatus);
@@ -437,7 +484,7 @@ public class LobbyService
         if(deck == null) {
             throw new SopraServiceException("Lobby has no Deck assigned!");
         }
-        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
+        this.setNewPlayersStatus(lobby.getPlayers(),PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD, PlayerStatus.ACCEPTING_MYSTERY_WORD);
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
             for(MysteryWord word : activeCard.getMysteryWords()) {
@@ -448,7 +495,69 @@ public class LobbyService
                 }
             }
         }
+    }
 
+    /**
+     * Function to accept or decline the mystery word that was chosen by the active player
+     */
+    public void acceptOrDeclineMysteryWord(User user, Lobby lobby, Boolean acceptWord) {
+        if (acceptWord) {
+            // Player accepts mystery word. Changing Status for next state of the game for this Player.
+            Player player = playerService.getPlayerByToken(user.getToken());
+            player.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
+
+            // if there are bots, change their status to waiting to accept mystery word.
+            if (lobby.getGameMode() == GameModeStatus.BOTS) {
+                for (Player playerInLobby : lobby.getPlayers()) {
+                    if(playerInLobby.getPlayerType() != PlayerType.HUMAN) {
+                        playerInLobby.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
+                    }
+                }
+            }
+
+            // if all players are waiting to accept the mystery word, then change status to writing clues and waiting for clues
+            if (this.allPlayerHaveStatus(lobby.getPlayers(), PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD)) {
+                this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
+            }
+
+
+        } else {
+            // change back status of chosen word to default
+            Deck deck = lobby.getDeck();
+            if(deck == null) {
+                throw new SopraServiceException("Lobby has no Deck assigned!");
+            }
+            Card activeCard = deck.getActiveCard();
+            if(activeCard != null) {
+                for(MysteryWord word : activeCard.getMysteryWords()) {
+                    if(word.getStatus() == MysteryWordStatus.IN_USE) {
+                        word.setStatus(MysteryWordStatus.NOT_USED);
+                        mysteryWordService.save(word);
+                    }
+                }
+            }
+
+            // change status of ALL players back to choosing a number.
+            this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
+        }
+    }
+
+    /**
+     * Checks if all players have that status
+     * @param playerStatus
+     * @return
+     */
+    private Boolean allPlayerHaveStatus(Set<Player> players, PlayerStatus playerStatus) {
+        int playersWithThatStatus = 0;
+        for (Player player : players) {
+            if (player.getStatus() == playerStatus) {
+                playersWithThatStatus += 1;
+            }
+        }
+        if (playersWithThatStatus == players.size()){
+            return true;
+        }
+        return false;
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
