@@ -55,6 +55,13 @@ public class ClueService {
         playerIsInLobby(token, lobby);
         playerIsClueCreator(token);
         checkClue(newClue, lobby);
+        Player player = playerService.getPlayerByToken(token);
+        List<Clue> clues = lobby.getGame().getClues();
+        for(Clue clue:clues){
+            if((clue.getClueStatus().equals(ClueStatus.ACTIVE) | clue.getClueStatus().equals(ClueStatus.DISABLED)) && clue.getPlayer().equals(player)){
+                throw new SopraServiceException("You already annotated a clue");
+            }
+        }
         newClue.setClueStatus(ClueStatus.ACTIVE);
         newClue.setPlayer(playerService.getPlayerByToken(token));
         newClue.setCard(lobby.getDeck().getActiveCard());
