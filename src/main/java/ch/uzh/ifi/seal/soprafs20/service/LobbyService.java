@@ -216,30 +216,40 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        Player creator = lobby.getCreator();
-        Game game = lobby.getGame();
-        List<Clue> clues = player.getClues();
-        for(Clue clue:clues){
-        	game.deleteClue(clue);
-            clue.setPlayer(null);
-        }
-        boolean guesserSet = false;
-        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+        if(lobby.getPlayers().size() > 3)
         {
-        	Set<Player> players = lobby.getPlayers();
-        	for(Player candidatPlayer : players)
-        	{
-        		if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
-        		{
-        			lobby.setCreator(candidatPlayer);
-
-        		}
-        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
-        		{
-        			candidatPlayer.setRole(PlayerRole.GUESSER);
-        			guesserSet = true;
-        		}
-        	}
+	        Player creator = lobby.getCreator();
+	        Game game = lobby.getGame();
+	        List<Clue> clues = player.getClues();
+	        for(Clue clue:clues){
+	        	game.deleteClue(clue);
+	            clue.setPlayer(null);
+	        }
+	        boolean guesserSet = false;
+	        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+	        {
+	        	Set<Player> players = lobby.getPlayers();
+	        	for(Player candidatPlayer : players)
+	        	{
+	        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
+	        		{
+	        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+		        		{
+		        			lobby.setCreator(candidatPlayer);
+		
+		        		}
+		        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+		        		{
+		        			candidatPlayer.setRole(PlayerRole.GUESSER);
+		        			guesserSet = true;
+		        		}
+	        		}
+	        	}
+	        }
+        }
+        else
+        {
+        	lobby.setCreator(player);
         }
         if(lobby.getCreator().getId() == playerId)
         {
