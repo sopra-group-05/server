@@ -98,15 +98,14 @@ public class ClueServiceTest {
         lobby.addPlayer(player4);
         lobby.setDeck(deck);
         lobby.setGame(game);
-        playerService = mock(PlayerService.class);
-        gameService = mock(GameService.class);
-        doNothing().when(gameService).updateClueGeneratorStats(Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong());
-        doNothing().when(gameService).reduceGoodClues(Mockito.anyLong(), Mockito.anyLong());
+        Mockito.doThrow(new RuntimeException()).when(gameService).updateClueGeneratorStats(Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong());
+        Mockito.doThrow(new RuntimeException()).when(gameService).reduceGoodClues(Mockito.anyLong(), Mockito.anyLong());
 
     }
 
    @Test
     public void addClueValidInputs(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
         Clue clue = new Clue();
         clue.setHint("hint");
         clue.setTimeForClue(2L);
@@ -120,6 +119,7 @@ public class ClueServiceTest {
 
    @Test
     public void addClueEmptySpace(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hi nt");
        clue.setTimeForClue(2L);
@@ -132,6 +132,7 @@ public class ClueServiceTest {
 
    @Test
    public void addClueSameAsMisteryWord(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("test");
        when(clueRepository.save(clue)).thenReturn(clue);
@@ -144,6 +145,7 @@ public class ClueServiceTest {
 
    @Test
    public void addClueAnnotateTwice(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
        when(clueRepository.save(clue)).thenReturn(clue);
@@ -155,6 +157,7 @@ public class ClueServiceTest {
 
    @Test
     public void flagClueValidInputs(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
        when(clueRepository.save(clue)).thenReturn(clue);
@@ -168,6 +171,7 @@ public class ClueServiceTest {
 
    @Test
    public void flagClueIllegalClueId(){
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
        when(clueRepository.save(clue)).thenReturn(clue);
@@ -189,6 +193,7 @@ public class ClueServiceTest {
  */
     @Test
     public void flagAndDisableClue(){
+        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
         Clue clue = new Clue();
         clue.setHint("hint");
         when(clueRepository.save(clue)).thenReturn(clue);
@@ -202,13 +207,7 @@ public class ClueServiceTest {
 
    @Test
    public void getCluesForComparingValid(){
-        List<Player> players = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        players.add(player3);
-        players.add(player4);
         when(playerService.getPlayerByToken(Mockito.anyString())).thenReturn(player1);
-        when(playerService.getBotPlayers(lobby)).thenReturn(players);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
        Clue clue2 = new Clue();
@@ -231,13 +230,12 @@ public class ClueServiceTest {
    }
    @Test
    public void getCluesForGuessingValid(){
-       List<Player> players = new ArrayList<>();
-       players.add(player1);
-       players.add(player2);
-       players.add(player3);
-       players.add(player4);
-       Mockito.when(playerService.getBotPlayers(lobby)).thenReturn(players);
-       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
+       List<Player> comparingPlayers = new ArrayList<>();
+       comparingPlayers.add(player1);
+       comparingPlayers.add(player2);
+       comparingPlayers.add(player3);
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player4);
+       Mockito.when(playerService.getHumanPlayersExceptActivePlayer(Mockito.any())).thenReturn(comparingPlayers);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
        Clue clue2 = new Clue();
@@ -262,13 +260,7 @@ public class ClueServiceTest {
 
    @Test
    public void getClueClueCreatorAnnotatingNotFinished(){
-       List<Player> players = new ArrayList<>();
-       players.add(player1);
-       players.add(player2);
-       players.add(player3);
-       players.add(player4);
        when(playerService.getPlayerByToken(Mockito.anyString())).thenReturn(player1);
-       when(playerService.getBotPlayers(lobby)).thenReturn(players);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
        Clue clue2 = new Clue();
@@ -284,7 +276,6 @@ public class ClueServiceTest {
        game.addClue(clue1);
        game.addClue(clue2);
        game.addClue(clue3);
-       List<Clue> clues = clueService.getClues(lobby, player1.getToken());
        String exceptionMessage = "Not all Clues are annotated";
        SopraServiceException exception = Assertions.assertThrows(SopraServiceException.class, () -> clueService.getClues(lobby, player1.getToken()), exceptionMessage);
        Assertions.assertEquals(exceptionMessage, exception.getMessage());
@@ -292,13 +283,12 @@ public class ClueServiceTest {
 
    @Test
    public void getClueCluesGuesserComparingNotFinished(){
-       List<Player> players = new ArrayList<>();
-       players.add(player1);
-       players.add(player2);
-       players.add(player3);
-       players.add(player4);
-       Mockito.when(playerService.getBotPlayers(lobby)).thenReturn(players);
-       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
+       List<Player> comparingPlayers = new ArrayList<>();
+       comparingPlayers.add(player1);
+       comparingPlayers.add(player2);
+       comparingPlayers.add(player3);
+       Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player4);
+       Mockito.when(playerService.getHumanPlayersExceptActivePlayer(Mockito.any())).thenReturn(comparingPlayers);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
        Clue clue2 = new Clue();

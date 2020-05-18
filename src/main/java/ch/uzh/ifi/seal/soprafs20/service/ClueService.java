@@ -156,7 +156,7 @@ public class ClueService {
             }
             return activeClues;
         } else{
-            throw new BadRequestException("Comparing Clues not finished");
+            throw new SopraServiceException("Comparing Clues not finished");
         }
     }
 
