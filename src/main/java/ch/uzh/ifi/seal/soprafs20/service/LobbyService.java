@@ -367,6 +367,25 @@ public class LobbyService
         }
     }
 
+    public void addBotsPerRequest(Long lobbyId, int numBots){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        List<PlayerType> differentBots = new ArrayList<>();
+        differentBots.add(PlayerType.FRIENDLYBOT);
+        differentBots.add(PlayerType.MALICIOUSBOT);
+        differentBots.add(PlayerType.CRAZYBOT);
+        int numPlayers = lobby.getPlayers().size();
+        if(!lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+            throw new ForbiddenException("You have not enabled Bots");
+        } else{
+            while (numPlayers < 7 && numBots > 0){
+                int i = 0 + (int)(Math.random() * ((2 - 0) + 1));
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
+                numPlayers++;
+                numBots--;
+            }
+        }
+    }
+
     /**
      * Checks if there are enough Human Players in the lobby to start the game.
      * Has to be run before Bots are added.

@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 
 import ch.uzh.ifi.seal.soprafs20.bots.Bot;
+import ch.uzh.ifi.seal.soprafs20.bots.CrazyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.MalicousBot;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
@@ -253,9 +254,11 @@ public class ClueService {
         }
         Bot friendlyBot = new FriendlyBot(language);
         Bot maliciousBot = new MalicousBot(language);
+        Bot crazyBot = new CrazyBot(language);
         HashMap<PlayerType, Bot> botHashMap = new HashMap<PlayerType, Bot>(){{
                 put(PlayerType.FRIENDLYBOT, friendlyBot);
                 put(PlayerType.MALICIOUSBOT, maliciousBot);
+                put(PlayerType.CRAZYBOT, crazyBot);
             }};
         for(Player player:botPlayers){
             Bot bot = botHashMap.get(player.getPlayerType());

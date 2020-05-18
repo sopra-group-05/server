@@ -21,7 +21,7 @@ public class CrazyBot implements Bot {
     ResponseEntity<String> response;
 
     private HashMap<Language, String> urls = new HashMap<Language, String>(){{
-        put(Language.EN, "https://api.datamuse.com/words?ml=");
+        put(Language.EN, "https://random-word-api.herokuapp.com//word?number=");
         put(Language.DE, "http:german-api");
     }};
 
@@ -36,19 +36,18 @@ public class CrazyBot implements Bot {
 
     @Override
     public String getClue(MysteryWord mysteryWord) {
-        String synonym;
+        String crazyWord;
         try {
-            response = restTemplate.getForEntity(url + mysteryWord.getWord(), String.class);
+            response = restTemplate.getForEntity(url + "1", String.class);
         } catch(Exception e){
             return "Server not reachable";
         }
         try{
             JsonNode root = mapper.readTree(response.getBody());
-            JsonNode synonymNode = root.get(0);
-            synonym = synonymNode.get("word").asText();
+            crazyWord = root.get(0).asText();
         } catch (Exception e){
-            return "No Synonym found";
+            return "No Random Word found";
         }
-        return synonym;
+        return crazyWord;
     }
 }
