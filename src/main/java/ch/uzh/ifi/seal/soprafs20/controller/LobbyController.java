@@ -157,12 +157,12 @@ public class LobbyController {
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
         // check Access rights via token
-        if (playerService.checkPlayerToken(token))
+        if (Boolean.TRUE.equals(playerService.checkPlayerToken(token)))
             throw new UnauthorizedException("Requesting player does not exist!");
 
         // check whether User is in this Lobby
         User user = userService.checkUserToken(token);
-        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+        boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
 
         // 401 Unauthorized
         if (!isInThisLobby)
