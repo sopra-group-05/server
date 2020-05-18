@@ -212,6 +212,10 @@ public class UserService {
         if (userByToken == null) {
             throw new UnauthorizedException("You are not allowed to access this page");
         }
+        if (userByToken.getStatus() == UserStatus.OFFLINE) {
+            // set User to online if he was offline before
+            userByToken.setStatus(UserStatus.ONLINE);
+        }
         return userByToken;
     }
 
