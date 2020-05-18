@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -657,32 +658,40 @@ public class LobbyService
      * @param lobby
      */
     public void setNewRoleOfPlayers(Lobby lobby) {
-        int oldPosition = 0; //position of oldGuesser
-        for (Player player : lobby.getPlayers()) {
+        // sort Players of this lobby according to their ID
+        List<Player> playersSorted = lobby.getPlayers().stream().collect(Collectors.toList());
+        Collections.sort(playersSorted, (p1, p2) -> p1.getId().compareTo(p2.getId()));
+
+        // remove bots from List because they can't be a guesser
+        playersSorted.removeIf(player -> player.getPlayerType() != PlayerType.HUMAN);
+
+        // get index of last guesser and set role of that player to ClueCreator
+        int index = this.getIndexOfGuesserAndRemoveGuesser(playersSorted);
+
+        // get size of list
+        int size = playersSorted.size();
+
+        // set new Guesser
+        int indexOfNewGuesser = (index + 1) % size;
+        playersSorted.get(indexOfNewGuesser).setRole(PlayerRole.GUESSER);
+    }
+
+    /**
+     * This function gets the index of the guesser in a List and also removes that status from the guesser (now clue creator)
+     * @param players
+     * @return
+     */
+    private int getIndexOfGuesserAndRemoveGuesser(List<Player> players) {
+        int index = 0;
+        for (Player player : players) {
             if (player.getRole() == PlayerRole.GUESSER){
-                // set old Guesser to Clue Creator
                 player.setRole(PlayerRole.CLUE_CREATOR);
                 break;
-            }
-            if (player.getPlayerType() == PlayerType.HUMAN) {
-                // count at which position the older Guesser was
-                oldPosition = oldPosition + 1;
+            } else {
+                index += 1;
             }
         }
-
-        int size = this.getNumberOfHumanPlayersInLobby(lobby);
-        int newPosition = (oldPosition + 1) % size; // calculate new position of next player
-        int count = 0;
-
-        for (Player player : lobby.getPlayers()) {
-            if (player.getPlayerType() == PlayerType.HUMAN) {
-                if (count == newPosition) {
-                    player.setRole(PlayerRole.GUESSER);
-                    break;
-                }
-                count = count + 1;
-            }
-        }
+        return index;
     }
 
     private int getNumberOfHumanPlayersInLobby(Lobby lobby) {
