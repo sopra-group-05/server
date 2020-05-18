@@ -55,7 +55,9 @@ public class ClueService {
         List<Clue> clues = lobby.getGame().getClues();
         for(Clue clue:clues){
             if((clue.getClueStatus().equals(ClueStatus.ACTIVE) | clue.getClueStatus().equals(ClueStatus.DISABLED)) && clue.getPlayer().equals(player)){
-                throw new SopraServiceException("You already annotated a clue");
+                if(lobby.getPlayers().size() !=3){
+                    throw new SopraServiceException("You already annotated a clue");
+                }
             }
         }
         newClue.setClueStatus(ClueStatus.ACTIVE);
