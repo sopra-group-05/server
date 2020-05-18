@@ -607,7 +607,6 @@ public class LobbyControllerTest {
         given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
         given(userService.getUserByID(Mockito.anyLong())).willReturn(testInvitedUser);
         given(playerService.getPlayerById(Mockito.anyLong())).willThrow(new ForbiddenException("Player not found"));
-        given(lobbyService.isUserInLobby(testInvitedUser,2L)).willReturn(false);
         doNothing().when(lobbyService).inviteUserToLobby(Mockito.any(), Mockito.any());
 
         // make post Request to Lobby with id & user with id
@@ -797,7 +796,7 @@ public class LobbyControllerTest {
      * invitedUser is already in another lobby, throws ForbiddenException
      */
     @Test
-    public void inviteUserToLobby_invitedUserInOtherLobby() throws Exception {
+    public void inviteUserToLobby_invitedUserInSomeLobby() throws Exception {
         // given
         // init inviting lobby
         Lobby invLobby = new Lobby();
@@ -848,7 +847,7 @@ public class LobbyControllerTest {
         // then
         mockMvc.perform(postRequest)
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$", is("Requested User is in another lobby!")))
+                .andExpect(jsonPath("$", is("Requested User is in a lobby already!")))
                 .andDo(print());
     }
 }

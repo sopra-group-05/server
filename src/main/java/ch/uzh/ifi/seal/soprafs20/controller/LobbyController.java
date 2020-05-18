@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * User Controller
- * This class is responsible for handling all REST request that are related to the user.
- * The controller will receive the request and delegate the execution to the UserService and finally return the result.
+ * Lobby Controller
+ * This class is responsible for handling all REST request that are related to the lobby.
+ * The controller will receive the request and delegate the execution to the LobbyService and finally return the result.
  */
 @RestController
 public class LobbyController {
@@ -182,19 +182,18 @@ public class LobbyController {
         if (invitedUser.getStatus()==UserStatus.OFFLINE)
             throw new ForbiddenException("Requested User is offline!");
 
-        // User is already playing
-        boolean alreadyInAnotherLobby = false;
+        // User is already in a lobby (ths one or another one)
+        Player invitedPlayer = null;
         try {
-            Player invitedPlayer = playerService.getPlayerById(userId);
-            alreadyInAnotherLobby = !lobbyService.isUserInLobby(invitedUser,lobbyId);
+            invitedPlayer = playerService.getPlayerById(userId);
         }
         catch (ForbiddenException e){
             // player doesn't exist -> go ahead with invite
+            lobbyService.inviteUserToLobby(invitedUser, lobby);
         }
-        if (alreadyInAnotherLobby)
-            throw new ForbiddenException("Requested User is in another lobby!");
+        if (invitedPlayer!= null)
+            throw new ForbiddenException("Requested User is in a lobby already!");
 
-        lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
 
     @PutMapping("/lobbies/{lobbyId}/leave")
@@ -427,7 +426,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
-        if("" != clue2.getHint() && clue2.getHint() != null){
+        if(!"".equals(clue2.getHint()) && clue2.getHint() != null){
             if(lobby.getPlayers().size() == 3){
                 clueService.addClue(clue2, lobby, token);
             } else{
