@@ -152,7 +152,7 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
-    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @PostMapping("/lobbies/{lobbyId}/invite/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
@@ -167,6 +167,10 @@ public class LobbyController {
         // 401 Unauthorized
         if (!isInThisLobby)
             throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // check that invited user is not requesting user
+        if (userId == user.getId())
+            throw new ForbiddenException("Requesting user is the to be invited user!");
 
         // Get Lobby from lobbyId
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -189,7 +193,6 @@ public class LobbyController {
         }
         if (alreadyInAnotherLobby)
             throw new ForbiddenException("Requested User is in another lobby!");
-
 
         lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
@@ -577,6 +580,25 @@ public class LobbyController {
         } 	
         return statsGetDTOs;
  
+    }
+
+    @PostMapping("/lobbies/{lobbyId}/addBots/{numBots}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public ResponseEntity addBot(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId, @PathVariable int numBots){
+        userService.checkUserToken(token);
+        lobbyService.addBotsPerRequest(lobbyId, numBots);
+        return new ResponseEntity("Created Bot(s)", HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/restart")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity restartGame(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.restartGame(lobbyId, token);
+
+        return new ResponseEntity("Restart Game", HttpStatus.OK);
     }
 
 }

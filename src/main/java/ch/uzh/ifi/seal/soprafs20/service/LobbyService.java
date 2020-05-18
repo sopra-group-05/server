@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
+import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ public class LobbyService
     //private static final java.util.UUID UUID = ;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
-
 
     private PlayerService playerService;
     private UserService userService;
@@ -216,30 +216,51 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        Player creator = lobby.getCreator();
-        Game game = lobby.getGame();
-        List<Clue> clues = player.getClues();
-        for(Clue clue:clues){
-        	game.deleteClue(clue);
-            clue.setPlayer(null);
-        }
-        boolean guesserSet = false;
-        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+        if(lobby.getLobbyStatus()==LobbyStatus.RUNNING)
         {
-        	Set<Player> players = lobby.getPlayers();
-        	for(Player candidatPlayer : players)
-        	{
-        		if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
-        		{
-        			lobby.setCreator(candidatPlayer);
-
-        		}
-        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
-        		{
-        			candidatPlayer.setRole(PlayerRole.GUESSER);
-        			guesserSet = true;
-        		}
-        	}
+	        Set<Player> players = lobby.getPlayers();
+	        int humanPlayerCounter = 0;
+        
+	        for(Player countHumanPlayer:players) {
+	        	if(countHumanPlayer.getPlayerType()==PlayerType.HUMAN)
+	        	{
+	        		humanPlayerCounter++;
+	        	}
+	        }
+	        
+	        if((lobby.getPlayers().size() > 3)&&(humanPlayerCounter > 2))
+	        {
+		        Player creator = lobby.getCreator();
+		        Game game = lobby.getGame();
+		        List<Clue> clues = player.getClues();
+		        for(Clue clue:clues){
+		        	game.deleteClue(clue);
+		            clue.setPlayer(null);
+		        }
+		        boolean guesserSet = false;
+		        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+		        {
+		        	for(Player candidatPlayer : players)
+		        	{
+		        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
+		        		{
+		        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+			        		{
+			        			lobby.setCreator(candidatPlayer);	
+			        		}
+			        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+			        		{
+			        			candidatPlayer.setRole(PlayerRole.GUESSER);
+			        			guesserSet = true;
+			        		}
+		        		}
+		        	}
+		        }
+	        }
+	        else //if there are not enough human players left
+	        {
+	        	lobby.setCreator(player);  //set leaving player as creator to delete the game
+	        }
         }
         if(lobby.getCreator().getId() == playerId)
         {
@@ -342,6 +363,25 @@ public class LobbyService
                         lobby.setNumBots(2);
                     }
                 }
+            }
+        }
+    }
+
+    public void addBotsPerRequest(Long lobbyId, int numBots){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        List<PlayerType> differentBots = new ArrayList<>();
+        differentBots.add(PlayerType.FRIENDLYBOT);
+        differentBots.add(PlayerType.MALICIOUSBOT);
+        differentBots.add(PlayerType.CRAZYBOT);
+        int numPlayers = lobby.getPlayers().size();
+        if(!lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+            throw new ForbiddenException("You have not enabled Bots");
+        } else{
+            while (numPlayers < 7 && numBots > 0){
+                int i = 0 + (int)(Math.random() * ((2 - 0) + 1));
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
+                numPlayers++;
+                numBots--;
             }
         }
     }
@@ -663,10 +703,10 @@ public class LobbyService
      *
      */
     public void inviteUserToLobby(User user, Lobby lobby){
-        Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
-        addPlayerToLobby(lobby, player);
-        // add ranking for player
-        gameService.addStats(player.getId(),lobby.getId());
+        User invitedUser = userService.getUserByID(user.getId());
+        Lobby invitingLobby = this.getLobbyById(lobby.getId());
+        // add lobby to set of inviting lobbies
+        userService.addToInvitingLobbies(invitedUser.getId(),invitingLobby);
     }
 
     public void endGame(Lobby lobby){
@@ -675,5 +715,9 @@ public class LobbyService
             player.setStatus(PlayerStatus.FINISHED);
         }
         lobby.setLobbyStatus(LobbyStatus.STOPPED);
+    }
+
+    public void restartGame(long lobbyId, String token){
+        this.startGame(lobbyId);
     }
 }
