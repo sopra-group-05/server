@@ -102,5 +102,7 @@ public class Clue {
 	public void setTimeForClue(Long timeForClue) {
 		this.timeForClue = timeForClue;
 	}
+
+	public void setId(long id){this.id = id;}
     
 }

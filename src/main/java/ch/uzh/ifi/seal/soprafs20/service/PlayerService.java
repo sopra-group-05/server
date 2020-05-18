@@ -4,9 +4,11 @@ import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import ch.uzh.ifi.seal.soprafs20.entity.Clue;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -177,4 +180,71 @@ public class PlayerService {
             throw new UnsupportedOperationException("Is not Bot");
         }
     }
+
+    /*
+     * helper function to get all Players that are humans
+     * @param lobby - lobby to check for human players
+     * @return List<Player> - list of human players in the lobby
+     */
+    public List<Player> getHumanPlayersExceptActivePlayer(Lobby lobby){
+        Set<Player> players= lobby.getPlayers();
+        List<Player> humanPlayers= new ArrayList<>();
+        for(Player player:players){
+            if(player.getPlayerType().equals(PlayerType.HUMAN) && !player.getRole().equals(PlayerRole.GUESSER)){
+                humanPlayers.add(player);
+            }
+        }
+        return humanPlayers;
+    }
+
+    /*
+     * helper function to get all Players that are bots
+     * @param lobby - lobby to check for bot players
+     * @return List<Player> - list of bot players
+     */
+    public List<Player> getBotPlayers(Lobby lobby){
+        Set<Player> players= lobby.getPlayers();
+        List<Player> humanPlayers= new ArrayList<>();
+        for(Player player:players){
+            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) |  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)){
+                humanPlayers.add(player);
+            }
+        }
+        return humanPlayers;
+    }
+
+    /*
+     * helper function to check if a player is allowed to annotate clues
+     * @param token - token of the player to identify him
+     */
+
+    public boolean playerIsClueCreator(String token){
+        Player player = this.getPlayerByToken(token);
+        if (player.getRole() != PlayerRole.CLUE_CREATOR){
+            throw new UnauthorizedException("Player is not Clue Creator");
+        } else {
+            return true;
+        }
+    }
+
+    /*
+     * helper function to check wheter the player is in the lobby
+     * @param token - token of the player
+     * @param lobby - lobby to check if the player is part of
+     */
+    public boolean playerIsInLobby(String token, Lobby lobby){
+        Player player = this.getPlayerByToken(token);
+        if (player == null) {
+            throw new UnauthorizedException("User is not a Player");
+        }
+        if (!lobby.getPlayers().contains(player)){
+            throw new UnauthorizedException("Player is not in Lobby");
+        } else{
+            return true;
+        }
+
+    }
+
+
+
 }
