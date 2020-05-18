@@ -196,9 +196,14 @@ public class GameService {
     }
 
 	public void addStats(Long playerId, Long lobbyId) {
-		GameStats gameStats = new GameStats(playerId,lobbyId);
-    	statsRepository.save(gameStats);
-    	statsRepository.flush();
+        // check if GameStats for that playerID and Lobby already exists
+        // if it doesn't exist create new GameStats
+        GameStats existingGameStats = statsRepository.findByPlayerIdAndLobbyId(playerId, lobbyId);
+        if (existingGameStats == null) {
+            GameStats gameStats = new GameStats(playerId,lobbyId);
+            statsRepository.save(gameStats);
+            statsRepository.flush();
+        }
 	}
 
 	public List<GameStats> getAllLobbyGameStats (Long lobbyId)
