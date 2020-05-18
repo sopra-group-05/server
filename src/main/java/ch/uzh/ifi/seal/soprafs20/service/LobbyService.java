@@ -716,4 +716,8 @@ public class LobbyService
         }
         lobby.setLobbyStatus(LobbyStatus.STOPPED);
     }
+
+    public void restartGame(long lobbyId, String token){
+        this.startGame(lobbyId);
+    }
 }

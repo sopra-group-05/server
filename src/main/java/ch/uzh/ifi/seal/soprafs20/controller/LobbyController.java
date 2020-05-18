@@ -583,12 +583,22 @@ public class LobbyController {
     }
 
     @PostMapping("/lobbies/{lobbyId}/addBots/{numBots}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public ResponseEntity addBot(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId, @PathVariable int numBots){
         userService.checkUserToken(token);
         lobbyService.addBotsPerRequest(lobbyId, numBots);
         return new ResponseEntity("Created Bot(s)", HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/restart")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity restartGame(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.restartGame(lobbyId, token);
+
+        return new ResponseEntity("Restart Game", HttpStatus.OK);
     }
 
 }
