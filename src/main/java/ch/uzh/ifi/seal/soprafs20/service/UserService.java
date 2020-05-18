@@ -90,7 +90,14 @@ public class UserService {
         }
 
         if (!userByToken.getUsername().equals(user.getUsername())) {
-            // username different. Try to change, if already in use throw exception
+            // username different
+
+            // new username should not be empty or only contain white space!
+            if (user.getUsername().isEmpty() || user.getUsername().isBlank()){
+                throw new ConflictException("Username should not be empty.");
+            }
+
+            // Try to change, if already in use throw exception
             if (null == userRepository.findByUsername(user.getUsername())) {
                 userByToken.setUsername(user.getUsername());
             } else {
