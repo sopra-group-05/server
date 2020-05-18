@@ -1,10 +1,18 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
+import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User Controller
@@ -26,11 +35,13 @@ public class UserController {
 
     private final UserService userService;
     private final LobbyService lobbyService;
+    private final PlayerService playerService;
 
     @Autowired
-    UserController(UserService userService, LobbyService lobbyService) {
+    UserController(UserService userService, LobbyService lobbyService, PlayerService playerService) {
         this.userService = userService;
         this.lobbyService = lobbyService;
+        this.playerService = playerService;
     }
 
     /**
@@ -190,4 +201,78 @@ public class UserController {
 
         return result;
     }
+
+    @GetMapping("/users/{userId}/invitations")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<LobbyGetDTO> getInvitations(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId){
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
+
+        // get invitingLobbies
+        Set<Lobby> lobbies = idUser.getInvitingLobbies();
+        // convert to LobbyGetDTO
+        List<LobbyGetDTO> dtoLobbies = new ArrayList<>();
+        for (Lobby lobby: lobbies) {
+            dtoLobbies.add(DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby));
+        }
+        // send 200 with list of inviting lobbies
+        return dtoLobbies;
+    }
+
+    @PutMapping("/users/{userId}/invitations/{lobbyId}/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void acceptInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId) {
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
+
+        // check that lobby is valid
+        Lobby lobby = lobbyService.getLobbyById(lobbyId); // can throw 404
+
+        // return 409
+        if (!lobby.getLobbyStatus().equals(LobbyStatus.WAITING))
+            throw new ConflictException("Lobby is already playing or has already stopped!");
+
+        // convert user to player
+        Player player = playerService.convertUserToPlayer(idUser, PlayerRole.CLUE_CREATOR);
+        // add user to lobby
+        lobbyService.addPlayerToLobby(lobby,player);
+        // remove lobby from inviting lobbies
+        userService.removeFromInvitingLobbies(userId, lobby);
+    }
+
+    @PutMapping("/users/{userId}/invitations/{lobbyId}/decline")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void declineInvitation(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId, @PathVariable long lobbyId){
+        // check that token belongs to userId
+        User tokenUser = userService.checkUserToken(token); // can throw 401
+        User idUser = userService.getUserByID(userId); // can throw 404
+
+        // return a 403 Forbidden
+        if (!tokenUser.equals(idUser))
+            throw new ForbiddenException("Wrong user sent request!");
+
+        // check validity of lobby
+        Lobby lobby = lobbyService.getLobbyById(lobbyId); // can throw 404
+
+        // Check if user is in the lobby already (409)
+        for (Player player: lobby.getPlayers()) {
+            if (player.getId().equals(idUser.getId()))
+                throw new ConflictException("User is already in the lobby!");
+        }
+
+        // remove lobby from inviting lobbies
+        userService.removeFromInvitingLobbies(userId, lobby);
+    }
+
 }

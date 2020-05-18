@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -89,7 +90,7 @@ public class UserServiceTest {
     @Test
     public void getUserByID_throwsException() {
         // when trying to find user by id return null
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(null);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         // then -> attempt to find a user with an invalid id -> check that correct error is thrown
         String exceptionMessage = "User was not found";
@@ -103,7 +104,7 @@ public class UserServiceTest {
     @Test
     public void getUserByID_validInput() {
         // when trying to find user, return user
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUser));
 
 
         User foundUser = userService.getUserByID(testUser.getId());
@@ -191,7 +192,7 @@ public class UserServiceTest {
         // when trying to find user via token or id, return user
         testUser.setToken("12345");
         testUser.setBirthday("24.11.1996");
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUser));
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(testUser);
 
         // try changing username and birthday
@@ -214,7 +215,7 @@ public class UserServiceTest {
         // But since token wrong, not for findByToken
         testUser.setToken("12345");
         testUser.setBirthday("24.11.1996");
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUser));
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(null);
 
         // try changing username and birthday
@@ -242,7 +243,7 @@ public class UserServiceTest {
 
         testUser.setToken("12345");
         testUser.setBirthday("24.11.1996");
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUserTwo);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUserTwo));
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(testUser);
 
         // try changing username and birthday
@@ -261,7 +262,7 @@ public class UserServiceTest {
         User testUser2 = new User();
         testUser2.setPassword("wrong");
 
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUser));
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser);
         String exceptionMessage = "Wrong Password";
         ConflictException exception = assertThrows(ConflictException.class, () -> userService.authenticateDeletion(1L, "12345", testUser2), exceptionMessage);
@@ -275,7 +276,7 @@ public class UserServiceTest {
         User testUser2 = new User();
         testUser2.setToken("wrong");
 
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(testUser));
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser2);
         String exceptionMessage = "You're not supposed to delete this user Profile";
         ForbiddenException exception = assertThrows(ForbiddenException.class, () -> userService.authenticateDeletion(1L, "wrong", testUser), exceptionMessage);
@@ -286,7 +287,7 @@ public class UserServiceTest {
     public void authenticateUsertoDeleteWrongUserId() {
         testUser.setToken("12345");
 
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(null);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
         Mockito.when(userRepository.findByToken(Mockito.any())).thenReturn(testUser);
         String exceptionMessage = "The provided User ID does not belong to any user";
         NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.authenticateDeletion(2L, "12345", testUser), exceptionMessage);

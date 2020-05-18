@@ -152,7 +152,7 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
-    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @PostMapping("/lobbies/{lobbyId}/invite/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
@@ -167,6 +167,10 @@ public class LobbyController {
         // 401 Unauthorized
         if (!isInThisLobby)
             throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // check that invited user is not requesting user
+        if (userId == user.getId())
+            throw new ForbiddenException("Requesting user is the to be invited user!");
 
         // Get Lobby from lobbyId
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -189,7 +193,6 @@ public class LobbyController {
         }
         if (alreadyInAnotherLobby)
             throw new ForbiddenException("Requested User is in another lobby!");
-
 
         lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
