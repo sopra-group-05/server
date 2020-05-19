@@ -33,7 +33,7 @@ public class Lobby
     @Column(nullable = false)
     private LobbyStatus lobbyStatus;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(value={org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN})
     private Set<Player> players = new HashSet<>();
 

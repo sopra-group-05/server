@@ -46,7 +46,7 @@ public class MysteryWordService {
     /**
      * Saves the mysteryWord using MysteryWord repository
      *
-     * @param - the mysteryWord to be updated to the MysteryWord repository
+     * @param mysteryWord - the mysteryWord to be updated to the MysteryWord repository
      * */
     public void save(MysteryWord mysteryWord) {
         if(mysteryWord != null) {
@@ -57,7 +57,7 @@ public class MysteryWordService {
     /**
      * Saves the mysteryWords using MysteryWord repository
      *
-     * @param - the mysteryWords to be updated to the MysteryWord repository
+     * @param mysteryWords - the mysteryWords to be updated to the MysteryWord repository
      * */
     public void saveAll(List<MysteryWord> mysteryWords) {
         if(mysteryWords != null && !mysteryWords.isEmpty()) {

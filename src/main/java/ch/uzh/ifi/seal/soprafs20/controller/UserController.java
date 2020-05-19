@@ -67,7 +67,7 @@ public class UserController {
 
     /**
      * Get Profile of One User
-     * @param userID
+     * @param userID - id of user to get
      * @return Status Code 200 "OK" with Profile Data of User (id, username, creation_date, status, birthday)
      */
     @GetMapping("/users/{userID}")
@@ -88,7 +88,7 @@ public class UserController {
 
     /**
      * Update Profile of User (username and birthday)
-     * @param userPutDTO
+     * @param userPutDTO - updated user
      */
     @PutMapping("/users/{userId}")
     @ResponseBody
@@ -106,7 +106,6 @@ public class UserController {
 
     /**
      * Delete Profile of User (username and birthday)
-     * @param
      */
     @DeleteMapping("/users/{userId}")
     @ResponseBody
@@ -124,7 +123,7 @@ public class UserController {
 
     /**
      * Set internal Status of User to Logout
-     * @param userPutDTO
+     * @param userPutDTO - user to log out
      */
     @PutMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT) // Status Code 204
@@ -139,7 +138,7 @@ public class UserController {
 
     /**
      * REGISTER a new User
-     * @param userPostDTO
+     * @param userPostDTO - data to create user
      * @return Status Code 201 and the Location of the newly created User (/users/{id}) and the created user info (without token)
      */
     @PostMapping("/users")
@@ -163,7 +162,7 @@ public class UserController {
 
     /**
      * LOGIN User
-     * @param userPostDTO
+     * @param userPostDTO - user to log in
      * @return Status Code 200 "OK" with User and its token to save in the frontend
      */
     @PutMapping("/login")

@@ -110,7 +110,6 @@ public class Game {
         this.comparingGuessCounter = comparingGuessCounter;
     }
 
-
 	public void deleteClue(Clue clue) {
 		this.clues.remove(clue);		
 	}

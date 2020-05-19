@@ -48,8 +48,8 @@ public class UserService {
 
     /**
      * Adds a New User to the userRepository if it doesn't already exist (by username)
-     * @param newUser
-     * @return USer
+     * @param newUser - user to create
+     * @return User
      */
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
@@ -70,7 +70,7 @@ public class UserService {
      * First it Checks the Token (Does it belong to any User? Does the token belong to the user you're trying to edit?)
      * Checks the User ID (Does it even exist?)
      * Changes Username and birthday if it is different than the one in the database
-     * @param user
+     * @param user - user to update
      * @return User
      */
     public User updateUser(User user, String token, long id) {
@@ -119,7 +119,7 @@ public class UserService {
 
     /**
      * Finds User by Token and set their Status to Offline
-     * @param user
+     * @param user - user to log out
      * @return User
      */
     public User logoutUser(User user) {
@@ -134,7 +134,7 @@ public class UserService {
 
     /**
      * Checks if username and password are correct, sets User Status to Online and then returns that User
-     * @param user
+     * @param user - user to log in
      * @return User
      */
     public User loginUser(User user) {
@@ -157,7 +157,7 @@ public class UserService {
 
     /**
      * Finds and returns a User by ID
-     * @param id
+     * @param id - id of user to get
      * @return User
      */
     public User getUserByID(long id) {
@@ -168,10 +168,9 @@ public class UserService {
         }
         return userById;
     }
-    /*
-    Delete User
-    * @param token
-    * @param id
+    /**Delete User
+    * @param token - token of the user doing the request
+    * @param id - id of the to be deleted user
     */
     public User authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
@@ -196,15 +195,15 @@ public class UserService {
     public void deleteUser(User user){
         userRepository.delete(user);
         userRepository.flush();
-        //todo: check if flsuh needed
+        //todo: check if flush needed
     }
 
     /**
      * This is a helper method that will check the uniqueness criteria of the username
      * defined in the User entity. The method will do nothing if the input is unique and throw an error otherwise.
      *
-     * @param userToBeCreated
-     * @throws ConflictException
+     * @param userToBeCreated - to be created user
+     * @throws ConflictException - 409 when username not uniques
      * @see User
      */
     private void checkIfUserExists(User userToBeCreated) {
@@ -238,7 +237,6 @@ public class UserService {
      * @param userId  the user to be updated with the correct score
      * @param score - the score to be updated which he earned at the time of the function call
      *
-     * @return the new Balance of the Points of a User
      */
     public void updateScore(long userId, long score){
         User user = userRepository.findById(userId).orElse(null);
