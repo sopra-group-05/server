@@ -238,6 +238,10 @@ public class GameService {
     	return("");
 
 	}
+
+	public void deleteGame(Game lobbyGame) {
+		this.gameRepository.delete(lobbyGame);
+	}
     
     
 }

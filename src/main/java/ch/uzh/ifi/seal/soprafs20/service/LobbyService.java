@@ -290,6 +290,11 @@ public class LobbyService
         if(isUserLobbyCreator(lobbyId, creator)) {
             Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
             Set<Player> playersSet = lobby.getPlayers();
+            Game lobbyGame = lobby.getGame();
+            if (lobbyGame != null)
+            {
+            	gameService.deleteGame(lobbyGame);
+            }
             lobbyRepository.delete(lobby);
             playerService.deletePlayers(playersSet);
             result = true;
