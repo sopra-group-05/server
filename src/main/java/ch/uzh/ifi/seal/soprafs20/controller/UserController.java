@@ -11,6 +11,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
+import ch.uzh.ifi.seal.soprafs20.service.GameService;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
@@ -36,12 +37,14 @@ public class UserController {
     private final UserService userService;
     private final LobbyService lobbyService;
     private final PlayerService playerService;
+    private final GameService gameService;
 
     @Autowired
-    UserController(UserService userService, LobbyService lobbyService, PlayerService playerService) {
+    UserController(UserService userService, LobbyService lobbyService, PlayerService playerService, GameService gameService) {
         this.userService = userService;
         this.lobbyService = lobbyService;
         this.playerService = playerService;
+        this.gameService = gameService;
     }
 
     /**
@@ -247,6 +250,8 @@ public class UserController {
         Player player = playerService.convertUserToPlayer(idUser, PlayerRole.CLUE_CREATOR);
         // add user to lobby
         lobbyService.addPlayerToLobby(lobby,player);
+        // add ranking for player
+        gameService.addStats(player.getId(),lobby.getId());
         // remove lobby from inviting lobbies
         userService.removeFromInvitingLobbies(userId, lobby);
     }
