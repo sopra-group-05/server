@@ -21,6 +21,7 @@ public class CluePostDTO {
 		this.hint2 = hint2;
 	}
 
+
 	public Long getTimeForClue() {
 		return timeForClue;
 	}

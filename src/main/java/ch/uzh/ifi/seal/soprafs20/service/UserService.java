@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.data.domain.Sort.by;
@@ -88,7 +90,14 @@ public class UserService {
         }
 
         if (!userByToken.getUsername().equals(user.getUsername())) {
-            // username different. Try to change, if already in use throw exception
+            // username different
+
+            // new username should not be empty or only contain white space!
+            if (user.getUsername().isEmpty() || user.getUsername().isBlank()){
+                throw new ConflictException("Username should not be empty.");
+            }
+
+            // Try to change, if already in use throw exception
             if (null == userRepository.findByUsername(user.getUsername())) {
                 userByToken.setUsername(user.getUsername());
             } else {
@@ -152,7 +161,7 @@ public class UserService {
      * @return User
      */
     public User getUserByID(long id) {
-        User userById = userRepository.findById(id);
+        User userById = userRepository.findById(id).orElseThrow(()->new NotFoundException("User was not found"));
         if (userById == null) {
             // user was not found
             throw new NotFoundException("User was not found");
@@ -166,7 +175,7 @@ public class UserService {
     */
     public User authenticateDeletion(long id , String token, User toDeleteUser) {
         User userByToken = userRepository.findByToken(token);
-        User userById = userRepository.findById(id);
+        User userById = userRepository.findById(id).orElseThrow(()->new NotFoundException("The provided User ID does not belong to any user"));
 
         if (null == userById){
             // Profile does not exist
@@ -210,6 +219,10 @@ public class UserService {
         if (userByToken == null) {
             throw new UnauthorizedException("You are not allowed to access this page");
         }
+        if (userByToken.getStatus() == UserStatus.OFFLINE) {
+            // set User to online if he was offline before
+            userByToken.setStatus(UserStatus.ONLINE);
+        }
         return userByToken;
     }
 
@@ -228,7 +241,8 @@ public class UserService {
      * @return the new Balance of the Points of a User
      */
     public void updateScore(long userId, long score){
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user != null;
         user.addScore(score);
     }
 
@@ -237,7 +251,8 @@ public class UserService {
      *
      */
     public void updateCorrectGuessCount(long userId, long guessesCount){
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user!= null;
         user.incrementCorrectGuessCount(guessesCount);
     }
 
@@ -248,8 +263,33 @@ public class UserService {
      * @param bestClueCount - the best clue count
      * */
     public void updateBestClueCount(long userId, long bestClueCount) {
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        assert user != null;
         user.incBestCluesCount(bestClueCount);
+    }
+
+    /**
+     * adds lobby to invitingLobbies
+     *
+     * @param userId - user's id
+     * @param lobby - lobby to add
+     */
+    public void addToInvitingLobbies(long userId, Lobby lobby){
+        User user = getUserByID(userId);
+        user.addInvitingLobby(lobby);
+        userRepository.saveAndFlush(user);
+    }
+
+    /**
+     * removes lobby from invitingLobbies
+     *
+     * @param userId - user's id
+     * @param lobby - lobby to remove
+     */
+    public void removeFromInvitingLobbies(long userId, Lobby lobby){
+        User user = getUserByID(userId);
+        user.removeInvitingLobby(lobby);
+        userRepository.saveAndFlush(user);
     }
 
 }

@@ -10,6 +10,7 @@ public class UserGetDTO {
     private UserStatus status;
     private String birthday;
     private LocalDateTime created;
+    private Long score;
 
     public Long getId() {
         return id;
@@ -49,5 +50,13 @@ public class UserGetDTO {
 
     public void setCreated(LocalDateTime created) {
         this.created = created;
+    }
+
+    public Long getScore() {
+        return score;
+    }
+
+    public void setScore(Long score) {
+        this.score = score;
     }
 }

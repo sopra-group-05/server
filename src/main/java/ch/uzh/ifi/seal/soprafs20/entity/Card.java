@@ -26,7 +26,7 @@ public final class Card implements Serializable {
     @OneToMany(mappedBy = "card", fetch = FetchType.EAGER)
     private List<MysteryWord> mysteryWords = new ArrayList<>();
 
-    Card(){
+    public Card(){
         //making it to be default constructor to be better controlled
     }
 

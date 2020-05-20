@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 
 import ch.uzh.ifi.seal.soprafs20.bots.Bot;
+import ch.uzh.ifi.seal.soprafs20.bots.CrazyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.MalicousBot;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
@@ -30,19 +31,14 @@ import java.util.Set;
 public class ClueService {
     private final Logger log = LoggerFactory.getLogger(ClueService.class);
     private final ClueRepository clueRepository;
+    private final PlayerService playerService;
+    private final GameService gameService;
 
     @Autowired
-    private LobbyService lobbyService;
-
-    @Autowired
-    private PlayerService playerService;
-
-    @Autowired
-    private GameService gameService;
-    
-
-    public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository) {
+    public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository, PlayerService playerService, GameService gameService) {
         this.clueRepository = clueRepository;
+        this.playerService = playerService;
+        this.gameService = gameService;
     }
 
     /*
@@ -51,12 +47,21 @@ public class ClueService {
      * @param lobby - lobby in which the game takes place
      * @param token - to check if player is allowed to create clues
      */
-    public void addClue(Clue newClue, Lobby lobby, String token){
-        playerIsInLobby(token, lobby);
-        playerIsClueCreator(token);
+    public Clue addClue(Clue newClue, Lobby lobby, String token){
+        playerService.playerIsInLobby(token, lobby);
+        playerService.playerIsClueCreator(token);
+        Player player = playerService.getPlayerByToken(token);
         checkClue(newClue, lobby);
+        List<Clue> clues = lobby.getGame().getClues();
+        for(Clue clue:clues){
+            if((clue.getClueStatus().equals(ClueStatus.ACTIVE) | clue.getClueStatus().equals(ClueStatus.DISABLED)) && clue.getPlayer().equals(player)){
+                if(lobby.getPlayers().size() !=3){
+                    throw new SopraServiceException("You already annotated a clue");
+                }
+            }
+        }
         newClue.setClueStatus(ClueStatus.ACTIVE);
-        newClue.setPlayer(playerService.getPlayerByToken(token));
+        newClue.setPlayer(player);
         newClue.setCard(lobby.getDeck().getActiveCard());
         newClue.setGame(lobby.getGame());
         newClue.setFlagCounter(0);
@@ -64,7 +69,8 @@ public class ClueService {
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
         //TODO Set correct time for coming up whit the clue
-        gameService.updateClueGeneratorStats(true, newClue.getTimeForClue(), playerService.getPlayerByToken(token).getId(), lobby.getId());      
+        gameService.updateClueGeneratorStats(true, newClue.getTimeForClue(), player.getId(), lobby.getId());
+        return newClue;
     }
 
     /*
@@ -98,20 +104,23 @@ public class ClueService {
     * todo: check if player can flag twice
      */
 
-    public void flagClue(long clueId, String token, Lobby lobby){
-        playerIsInLobby(token, lobby);
-        playerIsClueCreator(token);
-        float numPlayersbyTwo = (float)this.getHumanPlayersExceptActivePlayer(lobby).size()/2;
+    public boolean flagClue(long clueId, String token, Lobby lobby){
+        boolean bool = false;
+        playerService.playerIsInLobby(token, lobby);
+        playerService.playerIsClueCreator(token);
+        float numPlayersbyTwo = (float)playerService.getHumanPlayersExceptActivePlayer(lobby).size()/2;
         Clue clue = clueRepository.findClueById(clueId);
         if(clue == null){
-            throw new BadRequestException("Clue not in Repository");
+            throw new SopraServiceException("Clue not in Repository");
         }
         clue.setFlagCounter(1 + clue.getFlagCounter());
         if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
-            gameService.reduceGoodClues(playerService.getPlayerByToken(token).getId(), lobby.getId());
+            bool = true;
         }
         clueRepository.save(clue);
+        gameService.reduceGoodClues(playerService.getPlayerByToken(token).getId(), lobby.getId());
+        return bool;
     }
 
     /*
@@ -122,7 +131,7 @@ public class ClueService {
      */
 
     public List<Clue> getClues(Lobby lobby, String token){
-        playerIsInLobby(token, lobby);
+        playerService.playerIsInLobby(token, lobby);
         Player player = playerService.getPlayerByToken(token);
         if(player.getRole().equals(PlayerRole.GUESSER)) {
             return this.getCluesForGuessing(lobby);
@@ -131,33 +140,7 @@ public class ClueService {
         }
     }
 
-    /*
-     * helper function to check if a player is allowed to annotate clues
-     * @param token - token of the player to identify him
-     */
 
-    private void playerIsClueCreator(String token){
-        Player player = playerService.getPlayerByToken(token);
-        if (player.getRole() != PlayerRole.CLUE_CREATOR){
-            throw new UnauthorizedException("Player is not Clue Creator");
-        }
-    }
-
-    /*
-     * helper function to check wheter the player is in the lobby
-     * @param token - token of the player
-     * @param lobby - lobby to check if the player is part of
-     */
-    private void playerIsInLobby(String token, Lobby lobby){
-        Player player = playerService.getPlayerByToken(token);
-        if (player == null) {
-            throw new UnauthorizedException("User is not a Player");
-        }
-        if (!lobby.getPlayers().contains(player)){
-            throw new UnauthorizedException("Player is not in Lobby");
-        }
-
-    }
 
     /*
      * helper function to get all Clues for the Player that is guessing
@@ -176,7 +159,7 @@ public class ClueService {
             }
             return activeClues;
         } else{
-            throw new BadRequestException("Comparing Clues not finished");
+            throw new SopraServiceException("Comparing Clues not finished");
         }
     }
 
@@ -190,6 +173,7 @@ public class ClueService {
     synchronized private List<Clue> getCluesForComparing(Lobby lobby){
         List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
+        Set<Player> players = lobby.getPlayers();
         if(!haveBotPlayersAnnotatedClues(lobby)){
             createBotClues(lobby);
         }
@@ -198,11 +182,13 @@ public class ClueService {
                 activeClues.add(clue);
             }
         }
-        if(activeClues.size() == lobby.getPlayers().size()-1) {
-            return activeClues;
-        } else{
-            throw new BadRequestException("Not all Clues are annotated");
+        for (Player player:players) {
+            if (!player.getStatus().equals(PlayerStatus.REVIEWING_CLUES) & !player.getRole().equals(PlayerRole.GUESSER)) {
+                throw new SopraServiceException("Not all Clues are annotated");
+            }
         }
+        return activeClues;
+
     }
 
     /*
@@ -213,7 +199,7 @@ public class ClueService {
 
     private boolean haveBotPlayersAnnotatedClues(Lobby lobby){
         boolean haveBotPlayersAnnotatedClues = true;
-        List<Player> botPlayers = this.getBotPlayers(lobby);
+        List<Player> botPlayers = playerService.getBotPlayers(lobby);
         List<Player> playersWhoAnnotated = new ArrayList<>();
         List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
@@ -238,7 +224,7 @@ public class ClueService {
      */
 
     private void createBotClues(Lobby lobby){
-        List<Player> botPlayers = this.getBotPlayers(lobby);
+        List<Player> botPlayers = playerService.getBotPlayers(lobby);
         Language language = lobby.getLanguage();
         MysteryWord activeMysteryWord = null;
         List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
@@ -250,9 +236,11 @@ public class ClueService {
         }
         Bot friendlyBot = new FriendlyBot(language);
         Bot maliciousBot = new MalicousBot(language);
+        Bot crazyBot = new CrazyBot(language);
         HashMap<PlayerType, Bot> botHashMap = new HashMap<PlayerType, Bot>(){{
                 put(PlayerType.FRIENDLYBOT, friendlyBot);
                 put(PlayerType.MALICIOUSBOT, maliciousBot);
+                put(PlayerType.CRAZYBOT, crazyBot);
             }};
         for(Player player:botPlayers){
             Bot bot = botHashMap.get(player.getPlayerType());
@@ -279,40 +267,8 @@ public class ClueService {
     private boolean comparingFinished(Lobby lobby){
         Game game = lobby.getGame();
         int compared = game.getComparingGuessCounter();
-        int humanPlayersNotActive = this.getHumanPlayersExceptActivePlayer(lobby).size();
+        int humanPlayersNotActive = playerService.getHumanPlayersExceptActivePlayer(lobby).size();
         return compared == humanPlayersNotActive;
-    }
-
-    /*
-     * helper function to get all Players that are humans
-     * @param lobby - lobby to check for human players
-     * @return List<Player> - list of human players in the lobby
-     */
-    private List<Player> getHumanPlayersExceptActivePlayer(Lobby lobby){
-        Set<Player> players= lobby.getPlayers();
-        List<Player> humanPlayers= new ArrayList<>();
-        for(Player player:players){
-            if(player.getPlayerType().equals(PlayerType.HUMAN) && !player.getRole().equals(PlayerRole.GUESSER)){
-                humanPlayers.add(player);
-            }
-        }
-        return humanPlayers;
-    }
-
-    /*
-    * helper function to get all Players that are bots
-    * @param lobby - lobby to check for bot players
-    * @return List<Player> - list of bot players
-     */
-    private List<Player> getBotPlayers(Lobby lobby){
-        Set<Player> players= lobby.getPlayers();
-        List<Player> humanPlayers= new ArrayList<>();
-        for(Player player:players){
-            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) |  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)){
-                humanPlayers.add(player);
-            }
-        }
-        return humanPlayers;
     }
 
 }

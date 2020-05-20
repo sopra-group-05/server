@@ -4,7 +4,6 @@ import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
@@ -20,9 +19,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * User Controller
- * This class is responsible for handling all REST request that are related to the user.
- * The controller will receive the request and delegate the execution to the UserService and finally return the result.
+ * Lobby Controller
+ * This class is responsible for handling all REST request that are related to the lobby.
+ * The controller will receive the request and delegate the execution to the LobbyService and finally return the result.
  */
 @RestController
 public class LobbyController {
@@ -153,21 +152,25 @@ public class LobbyController {
         else throw new ConflictException("You are already in a Lobby or in a Game.");
     }
 
-    @PutMapping("/lobbies/{lobbyId}/invite/{userId}")
+    @PostMapping("/lobbies/{lobbyId}/invite/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inviteUserToLobby(@PathVariable long lobbyId, @PathVariable long userId,
                                   @RequestHeader(name = "Token", required = false) String token){
         // check Access rights via token
-        if (playerService.checkPlayerToken(token))
+        if (Boolean.TRUE.equals(playerService.checkPlayerToken(token)))
             throw new UnauthorizedException("Requesting player does not exist!");
 
         // check whether User is in this Lobby
         User user = userService.checkUserToken(token);
-        Boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
+        boolean isInThisLobby = lobbyService.isUserInLobby(user, lobbyId);
 
         // 401 Unauthorized
         if (!isInThisLobby)
             throw new UnauthorizedException("Requesting User is not in specified lobby!");
+
+        // check that invited user is not requesting user
+        if (userId == user.getId())
+            throw new ForbiddenException("Requesting user is the to be invited user!");
 
         // Get Lobby from lobbyId
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
@@ -179,20 +182,18 @@ public class LobbyController {
         if (invitedUser.getStatus()==UserStatus.OFFLINE)
             throw new ForbiddenException("Requested User is offline!");
 
-        // User is already playing
-        boolean alreadyInAnotherLobby = false;
+        // User is already in a lobby (ths one or another one)
+        Player invitedPlayer = null;
         try {
-            Player invitedPlayer = playerService.getPlayerById(userId);
-            alreadyInAnotherLobby = !lobbyService.isUserInLobby(invitedUser,lobbyId);
+            invitedPlayer = playerService.getPlayerById(userId);
         }
         catch (ForbiddenException e){
             // player doesn't exist -> go ahead with invite
+            lobbyService.inviteUserToLobby(invitedUser, lobby);
         }
-        if (alreadyInAnotherLobby)
-            throw new ForbiddenException("Requested User is in another lobby!");
+        if (invitedPlayer!= null)
+            throw new ForbiddenException("Requested User is in a lobby already!");
 
-
-        lobbyService.inviteUserToLobby(invitedUser, lobby);
     }
 
     @PutMapping("/lobbies/{lobbyId}/leave")
@@ -420,11 +421,19 @@ public class LobbyController {
     public void addClue(@PathVariable long lobbyId,
                                      @RequestHeader(name = "Token", required = false) String token, @RequestBody CluePostDTO cluePostDTO){
         Clue clue = DTOMapper.INSTANCE.convertCluePOSTDTOToEntity(cluePostDTO);
+        Clue clue2 = DTOMapper.INSTANCE.convertClue2POSTDTOToEntity(cluePostDTO);
 
-        //todo: add mysteryword for rule violation
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         Player thisPlayer = playerService.getPlayerByToken(token);
         clueService.addClue(clue, lobby, token);
+        if(!"".equals(clue2.getHint()) && clue2.getHint() != null){
+            if(lobby.getPlayers().size() == 3){
+                clueService.addClue(clue2, lobby, token);
+            } else{
+                throw new ForbiddenException("Number of Players is not 3, you are not allowed to add two clues");
+            }
+
+        }
         lobbyService.setNewStatusToPlayer(lobby.getPlayers(), thisPlayer, PlayerStatus.WAITING_FOR_REVIEW, PlayerStatus.REVIEWING_CLUES);
     }
 
@@ -570,6 +579,25 @@ public class LobbyController {
         } 	
         return statsGetDTOs;
  
+    }
+
+    @PostMapping("/lobbies/{lobbyId}/addBots/{numBots}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public ResponseEntity addBot(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId, @PathVariable int numBots){
+        userService.checkUserToken(token);
+        lobbyService.addBotsPerRequest(lobbyId, numBots);
+        return new ResponseEntity("Created Bot(s)", HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/lobbies/{lobbyId}/restart")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity restartGame(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId){
+        userService.checkUserToken(token);
+        lobbyService.restartGame(lobbyId, token);
+
+        return new ResponseEntity("Restart Game", HttpStatus.OK);
     }
 
 }

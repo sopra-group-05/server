@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
+import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,7 +27,6 @@ public class LobbyService
     //private static final java.util.UUID UUID = ;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
-
 
     private PlayerService playerService;
     private UserService userService;
@@ -216,30 +217,51 @@ public class LobbyService
         //todo fix
         Player player = playerService.getPlayerById(playerId);
         Lobby lobby = this.getLobbyById(lobbyId);
-        Player creator = lobby.getCreator();
-        Game game = lobby.getGame();
-        List<Clue> clues = player.getClues();
-        for(Clue clue:clues){
-        	game.deleteClue(clue);
-            clue.setPlayer(null);
-        }
-        boolean guesserSet = false;
-        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+        if(lobby.getLobbyStatus()==LobbyStatus.RUNNING)
         {
-        	Set<Player> players = lobby.getPlayers();
-        	for(Player candidatPlayer : players)
-        	{
-        		if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
-        		{
-        			lobby.setCreator(candidatPlayer);
-
-        		}
-        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
-        		{
-        			candidatPlayer.setRole(PlayerRole.GUESSER);
-        			guesserSet = true;
-        		}
-        	}
+	        Set<Player> players = lobby.getPlayers();
+	        int humanPlayerCounter = 0;
+        
+	        for(Player countHumanPlayer:players) {
+	        	if(countHumanPlayer.getPlayerType()==PlayerType.HUMAN)
+	        	{
+	        		humanPlayerCounter++;
+	        	}
+	        }
+	        
+	        if((lobby.getPlayers().size() > 3)&&(humanPlayerCounter > 2))
+	        {
+		        Player creator = lobby.getCreator();
+		        Game game = lobby.getGame();
+		        List<Clue> clues = player.getClues();
+		        for(Clue clue:clues){
+		        	game.deleteClue(clue);
+		            clue.setPlayer(null);
+		        }
+		        boolean guesserSet = false;
+		        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+		        {
+		        	for(Player candidatPlayer : players)
+		        	{
+		        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
+		        		{
+		        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+			        		{
+			        			lobby.setCreator(candidatPlayer);	
+			        		}
+			        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+			        		{
+			        			candidatPlayer.setRole(PlayerRole.GUESSER);
+			        			guesserSet = true;
+			        		}
+		        		}
+		        	}
+		        }
+	        }
+	        else //if there are not enough human players left
+	        {
+	        	lobby.setCreator(player);  //set leaving player as creator to delete the game
+	        }
         }
         if(lobby.getCreator().getId() == playerId)
         {
@@ -268,6 +290,11 @@ public class LobbyService
         if(isUserLobbyCreator(lobbyId, creator)) {
             Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
             Set<Player> playersSet = lobby.getPlayers();
+            Game lobbyGame = lobby.getGame();
+            if (lobbyGame != null)
+            {
+            	gameService.deleteGame(lobbyGame);
+            }
             lobbyRepository.delete(lobby);
             playerService.deletePlayers(playersSet);
             result = true;
@@ -342,6 +369,25 @@ public class LobbyService
                         lobby.setNumBots(2);
                     }
                 }
+            }
+        }
+    }
+
+    public void addBotsPerRequest(Long lobbyId, int numBots){
+        Lobby lobby = this.getLobbyById(lobbyId);
+        List<PlayerType> differentBots = new ArrayList<>();
+        differentBots.add(PlayerType.FRIENDLYBOT);
+        differentBots.add(PlayerType.MALICIOUSBOT);
+        differentBots.add(PlayerType.CRAZYBOT);
+        int numPlayers = lobby.getPlayers().size();
+        if(!lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+            throw new ForbiddenException("You have not enabled Bots");
+        } else{
+            while (numPlayers < 7 && numBots > 0){
+                int i = 0 + (int)(Math.random() * ((2 - 0) + 1));
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
+                numPlayers++;
+                numBots--;
             }
         }
     }
@@ -617,32 +663,40 @@ public class LobbyService
      * @param lobby
      */
     public void setNewRoleOfPlayers(Lobby lobby) {
-        int oldPosition = 0; //position of oldGuesser
-        for (Player player : lobby.getPlayers()) {
+        // sort Players of this lobby according to their ID
+        List<Player> playersSorted = lobby.getPlayers().stream().collect(Collectors.toList());
+        Collections.sort(playersSorted, (p1, p2) -> p1.getId().compareTo(p2.getId()));
+
+        // remove bots from List because they can't be a guesser
+        playersSorted.removeIf(player -> player.getPlayerType() != PlayerType.HUMAN);
+
+        // get index of last guesser and set role of that player to ClueCreator
+        int index = this.getIndexOfGuesserAndRemoveGuesser(playersSorted);
+
+        // get size of list
+        int size = playersSorted.size();
+
+        // set new Guesser
+        int indexOfNewGuesser = (index + 1) % size;
+        playersSorted.get(indexOfNewGuesser).setRole(PlayerRole.GUESSER);
+    }
+
+    /**
+     * This function gets the index of the guesser in a List and also removes that status from the guesser (now clue creator)
+     * @param players
+     * @return
+     */
+    private int getIndexOfGuesserAndRemoveGuesser(List<Player> players) {
+        int index = 0;
+        for (Player player : players) {
             if (player.getRole() == PlayerRole.GUESSER){
-                // set old Guesser to Clue Creator
                 player.setRole(PlayerRole.CLUE_CREATOR);
                 break;
-            }
-            if (player.getPlayerType() == PlayerType.HUMAN) {
-                // count at which position the older Guesser was
-                oldPosition = oldPosition + 1;
+            } else {
+                index += 1;
             }
         }
-
-        int size = this.getNumberOfHumanPlayersInLobby(lobby);
-        int newPosition = (oldPosition + 1) % size; // calculate new position of next player
-        int count = 0;
-
-        for (Player player : lobby.getPlayers()) {
-            if (player.getPlayerType() == PlayerType.HUMAN) {
-                if (count == newPosition) {
-                    player.setRole(PlayerRole.GUESSER);
-                    break;
-                }
-                count = count + 1;
-            }
-        }
+        return index;
     }
 
     private int getNumberOfHumanPlayersInLobby(Lobby lobby) {
@@ -663,10 +717,10 @@ public class LobbyService
      *
      */
     public void inviteUserToLobby(User user, Lobby lobby){
-        Player player = playerService.convertUserToPlayer(user, PlayerRole.CLUE_CREATOR);
-        addPlayerToLobby(lobby, player);
-        // add ranking for player
-        gameService.addStats(player.getId(),lobby.getId());
+        User invitedUser = userService.getUserByID(user.getId());
+        Lobby invitingLobby = this.getLobbyById(lobby.getId());
+        // add lobby to set of inviting lobbies
+        userService.addToInvitingLobbies(invitedUser.getId(),invitingLobby);
     }
 
     public void endGame(Lobby lobby){
@@ -675,5 +729,9 @@ public class LobbyService
             player.setStatus(PlayerStatus.FINISHED);
         }
         lobby.setLobbyStatus(LobbyStatus.STOPPED);
+    }
+
+    public void restartGame(long lobbyId, String token){
+        this.startGame(lobbyId);
     }
 }
