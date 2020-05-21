@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-public class CardServiceTest {
+class CardServiceTest {
 
     @Mock
     private CardRepository cardRepository;
@@ -54,7 +54,7 @@ public class CardServiceTest {
      * Checks save Card function with correct input
      */
     @Test
-    public void getCard_validInputs_success() {
+    void getCard_validInputs_success() {
         // when -> any object is being save in the cardRepository -> return the dummy testUser
         Card cardLocal = cardService.getCardById(card.getId());
 
@@ -67,7 +67,7 @@ public class CardServiceTest {
      * Throws ForbiddenException for given invalid input
      */
     @Test
-    public void getCardById_InvalidInput_throwsException() {
+    void getCardById_InvalidInput_throwsException() {
         // then -> attempt to create second user with same user -> check that an error is thrown
         String exceptionMessage = "Card not found";
         ForbiddenException exception = assertThrows(ForbiddenException.class, () -> cardService.getCardById(2L), exceptionMessage);
@@ -78,7 +78,7 @@ public class CardServiceTest {
      * saves new Word and gets the same
      */
     @Test
-    public void saveAndGet_CardById_ValidInput() {
+    void saveAndGet_CardById_ValidInput() {
 
         Card card1 = getCard(2L);
         card1.setDrawn(Boolean.TRUE);
@@ -95,7 +95,7 @@ public class CardServiceTest {
      * Checks save Card function with correct input
      */
     @Test
-    public void get13Cards_validInputs_success() {
+    void get13Cards_validInputs_success() {
 
         List<Card> cardList = new ArrayList<>();
         cardList.add(card);

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class ClueServiceTest {
+class ClueServiceTest {
     @Mock
     private ClueRepository clueRepository;
 
@@ -38,7 +38,6 @@ public class ClueServiceTest {
     private Card card;
     private Deck deck;
     private Game game;
-
 
 
     @BeforeEach
@@ -95,7 +94,7 @@ public class ClueServiceTest {
     }
 
    @Test
-    public void addClueValidInputs(){
+    void addClueValidInputs(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
         Clue clue = new Clue();
         clue.setHint("hint");
@@ -109,20 +108,19 @@ public class ClueServiceTest {
    }
 
    @Test
-    public void addClueEmptySpace(){
+    void addClueEmptySpace(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hi nt");
        clue.setTimeForClue(2L);
        when(clueRepository.save(clue)).thenReturn(clue);
        String exceptionMessage = "Clue can not contain any white spaces";
-       SopraServiceException exception=  assertThrows(SopraServiceException.class, () ->clueService.addClue(clue, lobby, player1.getToken()), exceptionMessage);
+       SopraServiceException exception = assertThrows(SopraServiceException.class, () ->clueService.addClue(clue, lobby, player1.getToken()), exceptionMessage);
        Assertions.assertEquals(exceptionMessage, exception.getMessage());
    }
 
-
    @Test
-   public void addClueSameAsMisteryWord(){
+   void addClueSameAsMisteryWord(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("test");
@@ -132,10 +130,8 @@ public class ClueServiceTest {
        Assertions.assertEquals(exceptionMessage, exception.getMessage());
    }
 
-
-
    @Test
-   public void addClueAnnotateTwice(){
+   void addClueAnnotateTwice(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
@@ -147,7 +143,7 @@ public class ClueServiceTest {
    }
 
    @Test
-    public void flagClueValidInputs(){
+   void flagClueValidInputs(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
@@ -161,7 +157,7 @@ public class ClueServiceTest {
 
 
    @Test
-   public void flagClueIllegalClueId(){
+   void flagClueIllegalClueId(){
        Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
        Clue clue = new Clue();
        clue.setHint("hint");
@@ -183,7 +179,7 @@ public class ClueServiceTest {
 
  */
     @Test
-    public void flagAndDisableClue(){
+    void flagAndDisableClue(){
         Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);
         Clue clue = new Clue();
         clue.setHint("hint");
@@ -197,7 +193,7 @@ public class ClueServiceTest {
     }
 
    @Test
-   public void getCluesForComparingValid(){
+   void getCluesForComparingValid(){
         when(playerService.getPlayerByToken(Mockito.anyString())).thenReturn(player1);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
@@ -219,8 +215,9 @@ public class ClueServiceTest {
        Assertions.assertTrue(clues.contains(clue2));
        Assertions.assertTrue(clues.contains(clue3));
    }
+
    @Test
-   public void getCluesForGuessingValid(){
+   void getCluesForGuessingValid(){
        List<Player> comparingPlayers = new ArrayList<>();
        comparingPlayers.add(player1);
        comparingPlayers.add(player2);
@@ -250,7 +247,7 @@ public class ClueServiceTest {
    }
 
    @Test
-   public void getClueClueCreatorAnnotatingNotFinished(){
+   void getClueClueCreatorAnnotatingNotFinished(){
        when(playerService.getPlayerByToken(Mockito.anyString())).thenReturn(player1);
        Clue clue1 = new Clue();
        clue1.setClueStatus(ClueStatus.ACTIVE);
@@ -273,7 +270,7 @@ public class ClueServiceTest {
    }
 
    @Test
-   public void getClueCluesGuesserComparingNotFinished(){
+   void getClueCluesGuesserComparingNotFinished(){
        List<Player> comparingPlayers = new ArrayList<>();
        comparingPlayers.add(player1);
        comparingPlayers.add(player2);
@@ -302,12 +299,12 @@ public class ClueServiceTest {
    }
 
    @Test
-   public void botAnnotateCluesValid(){
+   void botAnnotateCluesValid(){
 
    }
 
    @Test
-   public void botAnnotateClueAlreadyDone(){
+   void botAnnotateClueAlreadyDone(){
 
    }
 }
