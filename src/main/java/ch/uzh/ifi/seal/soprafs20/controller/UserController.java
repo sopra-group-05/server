@@ -191,7 +191,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<OverallRankDTO> getOverallPlayerRanking(@RequestHeader(name = "Token", required = false) String token, @PathVariable String orderBy) {
-        User user = userService.checkUserToken(token);
+        userService.checkUserToken(token);
 
         List<User> users = userService.getAllUsersOrderBy(RankingOrderBy.valueOf(orderBy));
 

@@ -371,7 +371,7 @@ public class LobbyController {
                                           @RequestBody int selectedNumber,
                                              @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
-        User user = userService.checkUserToken(token);
+        userService.checkUserToken(token);
         lobbyService.getLobbyById(lobbyId);
         if(selectedNumber < 1 || selectedNumber > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -402,8 +402,8 @@ public class LobbyController {
      */
     @PostMapping("/lobbies/{lobbyId}/declineword")
     @ResponseBody
-    public ResponseEntity<?> DeclineMysteryWord(@PathVariable long lobbyId,
-                                                      @RequestHeader(name = "Token", required = false) String token) {
+    public ResponseEntity<?> declineMysteryWord(@PathVariable long lobbyId,
+                                                @RequestHeader(name = "Token", required = false) String token) {
         //check Access rights via token
         User user = userService.checkUserToken(token);
 
@@ -444,7 +444,7 @@ public class LobbyController {
                                    @RequestHeader(name = "Token", required = false) String token){
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
         List<Clue> clues= clueService.getClues(lobby, token);
-        List<ClueGetDTO> clueGetDTOs= new ArrayList<ClueGetDTO>();
+        List<ClueGetDTO> clueGetDTOs= new ArrayList<>();
         for (Clue clue:clues){
             clueGetDTOs.add(DTOMapper.INSTANCE.convertClueToClueGetDTO(clue));
         }
@@ -514,7 +514,7 @@ public class LobbyController {
                                               @PathVariable long lobbyId) {
 
         //check Access rights via token
-        User user = userService.checkUserToken(token);
+        userService.checkUserToken(token);
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
@@ -566,12 +566,12 @@ public class LobbyController {
         userService.checkUserToken(token);
         
         // get all statistics from lobby
-        List<GameStats> LobbyAllGameStats = gameService.getAllLobbyGameStats(lobbyId);
+        List<GameStats> lobbyAllGameStats = gameService.getAllLobbyGameStats(lobbyId);
 
         List<StatsGetDTO> statsGetDTOs = new ArrayList<>();
 
         // convert each statistic to the API representation
-        for (GameStats gameStats : LobbyAllGameStats) {
+        for (GameStats gameStats : lobbyAllGameStats) {
         	StatsGetDTO tempStatsGetDTO = DTOMapper.INSTANCE.convertEntityToStatsGetDTO(gameStats);
         	tempStatsGetDTO.setPlayerName(playerService.getPlayerById(gameStats.getPlayerId()).getUsername());
         	statsGetDTOs.add(tempStatsGetDTO);
