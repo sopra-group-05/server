@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.soprafs20.rest.dto;
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Player;
-import ch.uzh.ifi.seal.soprafs20.entity.Deck;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,7 +17,7 @@ public class LobbyGetDTO {
     private GameModeStatus gameMode;
     private Player creator;
     private String language;
-    private int numberOfBots;
+    //private int numberOfBots;
     private int numberOfCards;
 
     public Long getId() {

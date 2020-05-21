@@ -2,9 +2,6 @@ package ch.uzh.ifi.seal.soprafs20.rest.dto;
 
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
 import ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus;
-import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
-
-import java.time.LocalDateTime;
 
 public class PlayerGetDTO {
 
