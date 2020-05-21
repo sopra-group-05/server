@@ -160,7 +160,7 @@ public class ClueService {
      * is synchronized as the first time a player wants to get the clues, the clues for the bots are annotated
      */
 
-    synchronized private List<Clue> getCluesForComparing(Lobby lobby){
+    private synchronized List<Clue> getCluesForComparing(Lobby lobby){
         List<Clue> clues = lobby.getGame().getClues();
         List<Clue> activeClues = new ArrayList<>();
         Set<Player> players = lobby.getPlayers();
@@ -192,7 +192,7 @@ public class ClueService {
         List<Player> botPlayers = playerService.getBotPlayers(lobby);
         List<Player> playersWhoAnnotated = new ArrayList<>();
         List<Clue> clues = lobby.getGame().getClues();
-        List<Clue> activeClues = new ArrayList<>();
+        // List<Clue> activeClues = new ArrayList<>();
         for (Clue clue : clues) {
             if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
                 playersWhoAnnotated.add(clue.getPlayer());

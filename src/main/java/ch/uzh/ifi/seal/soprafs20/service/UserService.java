@@ -227,8 +227,7 @@ public class UserService {
 
     public List<User> getAllUsersOrderBy(RankingOrderBy orderBy) {
         Sort sort = by(Sort.Direction.ASC, orderBy.name().toLowerCase());
-        List<User> users = userRepository.findAll(sort);
-        return users;
+        return userRepository.findAll(sort);
     }
 
     /**

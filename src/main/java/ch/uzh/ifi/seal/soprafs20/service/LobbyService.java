@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class LobbyService
 {
-    //private static final java.util.UUID UUID = ;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
 
@@ -383,8 +382,9 @@ public class LobbyService
         if(!lobby.getGameMode().equals(GameModeStatus.BOTS)) {
             throw new ForbiddenException("You have not enabled Bots");
         } else{
+            Random r = new Random();
             while (numPlayers < 7 && numBots > 0){
-                int i = 0 + (int) (Math.random() * ((2 - 0) + 1));
+                int i = r.nextInt(3);
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
                 numPlayers++;
                 numBots--;
@@ -640,7 +640,7 @@ public class LobbyService
         }
         Deck deck = lobby.getDeck();
         List<Card> cards = deck.getCards();
-        Card cardToRemove = cards.remove(0);
+        cards.remove(0);
         //cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
         // check if any cards are left to play

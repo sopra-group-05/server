@@ -163,7 +163,7 @@ public class PlayerService {
                 token = Integer.toString(random.nextInt(1000000));
             }
 
-            /*todo: make shûre no ID is used twice
+            /*todo: make sure no ID is used twice
             while (playerRepository.findById(id) != null) {
                 id = random.nextLong();
             }

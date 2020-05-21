@@ -84,7 +84,7 @@ public class GameService {
 		updateLeftCards(game,success,guess);
 		updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
 		updateTeamPoints(lobby.getId(),game);
-		game = gameRepository.save(game);
+		gameRepository.save(game);
 		gameRepository.flush();
     }
     

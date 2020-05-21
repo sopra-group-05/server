@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @Transactional
 public class DefinitionService {
-    private final Logger log = LoggerFactory.getLogger(LobbyService.class);
+    private final Logger log = LoggerFactory.getLogger(DefinitionService.class);
     private final RestTemplate restTemplate;
 
     public DefinitionService(RestTemplateBuilder restTemplateBuilder) {
