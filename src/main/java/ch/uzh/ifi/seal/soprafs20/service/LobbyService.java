@@ -643,19 +643,23 @@ public class LobbyService
         Card cardToRemove = cards.remove(0);
         //cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
-        Card card = cards.get(0);
-        if(card.equals(null)){
+        // check if any cards are left to play
+        Card card;
+        if (cards.size()==0)
             this.endGame(lobby);
-        }
-        deck.setActiveCard(card);
-        deckService.save(deck); 
-        game.setActiveGuess("");//todo check if needed
-        this.setNewRoleOfPlayers(lobby);
-        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
-        Set<Player> allPlayers = lobby.getPlayers();
-        for (Player player:allPlayers){
-            if(!player.getPlayerType().equals(PlayerType.HUMAN)){
-                player.setStatus(PlayerStatus.READY);
+        else {
+            card = cards.get(0);
+
+            deck.setActiveCard(card);
+            deckService.save(deck);
+            game.setActiveGuess(""); // todo check if needed
+            this.setNewRoleOfPlayers(lobby);
+            this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
+            Set<Player> allPlayers = lobby.getPlayers();
+            for (Player player : allPlayers) {
+                if (!player.getPlayerType().equals(PlayerType.HUMAN)) {
+                    player.setStatus(PlayerStatus.READY);
+                }
             }
         }
     }
