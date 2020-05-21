@@ -17,7 +17,7 @@ public class LobbyGetDTO {
     private GameModeStatus gameMode;
     private Player creator;
     private String language;
-    //private int numberOfBots;
+    private int numberOfBots;
     private int numberOfCards;
 
     public Long getId() {
