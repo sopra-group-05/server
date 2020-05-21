@@ -86,6 +86,8 @@ public interface DTOMapper {
     @Mapping(source = "gameMode", target = "gameMode")
     @Mapping(source = "creator", target = "creator")
     @Mapping(source = "language", target = "language")
+    @Mapping(source = "numberOfCards", target = "numberOfCards")
+
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby createdLobby);
 
 

@@ -19,6 +19,7 @@ public class LobbyGetDTO {
     private Player creator;
     private String language;
     private int numberOfBots;
+    private int numberOfCards;
 
     public Long getId() {
         return id;
@@ -76,5 +77,13 @@ public class LobbyGetDTO {
 
     public String getLanguage() {
         return language;
+    }
+
+    public int getNumberOfCards() {
+        return numberOfCards;
+    }
+
+    public void setNumberOfCards(int numberOfCards) {
+        this.numberOfCards = numberOfCards;
     }
 }
