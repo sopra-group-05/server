@@ -18,7 +18,7 @@ public class CrazyBot implements Bot {
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> response;
 
-    final private static EnumMap<Language, String> URLS = new EnumMap<>(Language.class);
+    private static final EnumMap<Language, String> URLS = new EnumMap<>(Language.class);
     static{
         URLS.put(Language.EN, "https://random-word-api.herokuapp.com//word?number=");
         URLS.put(Language.DE, "http:german-api");

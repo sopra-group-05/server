@@ -18,7 +18,7 @@ public class MaliciousBot implements Bot{
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> response;
 
-    final private static EnumMap<Language, String> urls = new EnumMap<>(Language.class){{
+    private static final EnumMap<Language, String> urls = new EnumMap<>(Language.class){{
         put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
         put(Language.DE, "http:german-api");
     }};
