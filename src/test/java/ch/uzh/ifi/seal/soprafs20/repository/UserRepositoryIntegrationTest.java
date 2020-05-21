@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class UserRepositoryIntegrationTest {
+class UserRepositoryIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -26,7 +26,7 @@ public class UserRepositoryIntegrationTest {
      * Should succeed
      */
     @Test
-    public void findByUsername_success() {
+    void findByUsername_success() {
         // given
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -54,7 +54,7 @@ public class UserRepositoryIntegrationTest {
      * Should not find user and assertNull
      */
     @Test
-    public void findByUsername_fail() {
+    void findByUsername_fail() {
         // given a user
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -77,7 +77,7 @@ public class UserRepositoryIntegrationTest {
      * Should find correct user
      */
     @Test
-    public void findByToken_success() {
+    void findByToken_success() {
         // given
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -105,7 +105,7 @@ public class UserRepositoryIntegrationTest {
      * Should not find user and assertNull
      */
     @Test
-    public void findByToken_fail() {
+    void findByToken_fail() {
         // given a user
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -128,7 +128,7 @@ public class UserRepositoryIntegrationTest {
      * Should not find user and assertNull
      */
     @Test
-    public void findById_fail() {
+    void findById_fail() {
         // given a user
         User user = new User();
         user.setUsername("firstname@lastname");

@@ -6,17 +6,19 @@ import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class LobbyRepositoryIntegrationTest {
+class LobbyRepositoryIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
+    @Qualifier("lobbyRepository")
     @Autowired
     private LobbyRepository lobbyRepository;
 
@@ -26,7 +28,7 @@ public class LobbyRepositoryIntegrationTest {
      * Should succeed
      */
     @Test
-    public void findByLobbyname_success() {
+    void findByLobbyName_success() {
         // given
         Lobby lobby = createLobby("Testcase_Lobby");
 
@@ -47,7 +49,7 @@ public class LobbyRepositoryIntegrationTest {
      * Should not find lobby and assertNull
      */
     @Test
-    public void findByLobbyname_fail() {
+    void findByLobbyName_fail() {
         // given
         Lobby lobby = createLobby("Testcase_Lobby");
 
@@ -66,7 +68,7 @@ public class LobbyRepositoryIntegrationTest {
      * Should find correct lobby
      */
     @Test
-    public void findByCreator_success() {
+    void findByCreator_success() {
         User user = createUser("testUser", "1");
         Player player = new Player(user);
         player.setRole(PlayerRole.GUESSER);
@@ -93,7 +95,7 @@ public class LobbyRepositoryIntegrationTest {
      * Should not find lobby and assertNull
      */
     @Test
-    public void findByCreator_fail() {
+    void findByCreator_fail() {
         User user = createUser("testUser", "1");
         Player player = new Player(user);
         player.setRole(PlayerRole.GUESSER);
@@ -122,7 +124,7 @@ public class LobbyRepositoryIntegrationTest {
      * Should not find lobby and assertNull
      */
     @Test
-    public void findById_fail() {
+    void findById_fail() {
         // given
         Lobby lobby = createLobby("Testcase_Lobby");
 
