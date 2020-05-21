@@ -32,6 +32,9 @@ public class LobbyController {
     private final ClueService clueService;
     private final GameService gameService;
 
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
+
+
     @Autowired
     LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, GameService gameService) {
         this.lobbyService = lobbyService;
@@ -54,13 +57,18 @@ public class LobbyController {
 
         //check if User is already Player in another Lobby/Game
         Boolean isPlayerToJoin = playerService.checkPlayerToken(token);
+
         //check Access rights via token
         User creator = userService.checkUserToken(token);
 
+        // convert API lobby to internal representation and check if name is unique
+        Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+        lobbyService.checkIfLobbyExists(lobbyInput);
+
+        log.error("Inside Create Lobby");
         if (Boolean.TRUE.equals(isPlayerToJoin)) {
             Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
-            // convert API lobby to internal representation
-            Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+
             lobbyInput.setCreator(player);
             lobbyInput.addPlayer(player);
             // create lobby
