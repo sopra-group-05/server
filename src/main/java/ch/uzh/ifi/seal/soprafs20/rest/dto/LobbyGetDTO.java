@@ -86,4 +86,12 @@ public class LobbyGetDTO {
     public void setNumberOfCards(int numberOfCards) {
         this.numberOfCards = numberOfCards;
     }
+
+    public int getNumberOfBots() {
+        return numberOfBots;
+    }
+
+    public void setNumberOfBots(int numberOfBots) {
+        this.numberOfBots = numberOfBots;
+    }
 }

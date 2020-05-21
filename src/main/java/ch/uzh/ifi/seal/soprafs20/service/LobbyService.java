@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.LobbyRepository;
-import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -362,17 +361,13 @@ public class LobbyService
             if (lobby.getPlayers().size() < 2) {
                 throw new ForbiddenException("Not enough Players");
             }
-            if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
-                while (lobby.getPlayers().size() < 4) {
-                    if (lobby.getNumBots() == 0) {
-                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
-                        lobby.setNumBots(1);
-                    }
-                    else {
-                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
-                        lobby.setNumBots(2);
-                    }
-                }
+ //                     if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+ //                     while (lobby.getPlayers().size() < 4) {
+            if (lobby.getNumberOfBots() >= 1) {
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+            }
+            if (lobby.getNumberOfBots() >= 2){
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
             }
         }
     }
@@ -474,12 +469,12 @@ public class LobbyService
             lobbyStatus = LobbyStatus.STOPPED;
         }
         else if (gameMode == GameModeStatus.BOTS) {
-            if(this.getLobbyById(lobbyId).getNumBots() == 0) {
+            if(this.getLobbyById(lobbyId).getNumberOfBots() == 0) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
-                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
-            } else if (this.getLobbyById(lobbyId).getNumBots() == 1) {
+                this.getLobbyById(lobbyId).setNumberOfBots(this.getLobbyById(lobbyId).getNumberOfBots()+1);
+            } else if (this.getLobbyById(lobbyId).getNumberOfBots() == 1) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
-                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+                this.getLobbyById(lobbyId).setNumberOfBots(this.getLobbyById(lobbyId).getNumberOfBots()+1);
             } else{
                 lobbyStatus = LobbyStatus.STOPPED;
             }

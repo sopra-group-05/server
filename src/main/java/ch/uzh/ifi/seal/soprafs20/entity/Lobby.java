@@ -53,7 +53,7 @@ public class Lobby
     private Game game;
 
     @Column
-    private int numBots;
+    private int numberOfBots;
 
     @Column
     private int numberOfCards;
@@ -141,12 +141,12 @@ public class Lobby
 		this.game = game;
 	}
 
-    public int getNumBots() {
-        return numBots;
+    public int getNumberOfBots() {
+        return numberOfBots;
     }
 
-    public void setNumBots(int numBots) {
-        this.numBots = numBots;
+    public void setNumberOfBots(int numberOfBots) {
+        this.numberOfBots = numberOfBots;
     }
 
     public int getNumberOfCards() {

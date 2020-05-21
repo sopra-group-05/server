@@ -47,6 +47,7 @@ public interface DTOMapper {
     @Mapping(source = "gameMode", target = "gameMode", qualifiedByName = "convertInt")
     @Mapping(source = "language", target = "language", qualifiedByName = "convertString")
     @Mapping(source = "numberOfCards", target = "numberOfCards")
+    @Mapping(source = "numberOfBots", target = "numberOfBots")
     Lobby convertLobbyPostDTOtoEntity(LobbyPostDTO lobbyPostDTO);
 
     @Named("convertInt")
@@ -87,7 +88,7 @@ public interface DTOMapper {
     @Mapping(source = "creator", target = "creator")
     @Mapping(source = "language", target = "language")
     @Mapping(source = "numberOfCards", target = "numberOfCards")
-
+    @Mapping(source = "numberOfBots", target = "numberOfBots")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby createdLobby);
 
 
