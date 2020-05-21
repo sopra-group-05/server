@@ -1,7 +1,12 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.GameStats;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.*;
@@ -29,6 +34,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -268,6 +274,65 @@ public class UserControllerWithServiceTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Valid input and returns 204
+     */
+    @Test
+    public void acceptInvitation_validInput_returnsNoContent() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Inviting Lobby");
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        invitedUser.addInvitingLobby(lobby);
+        Player player = new Player();
+        player.setId(1L);
+        player.setRole(PlayerRole.CLUE_CREATOR);
+        player.setPlayerType(PlayerType.HUMAN);
+        Lobby lobbyAdded = new Lobby();
+        lobbyAdded.setId(2L);
+        lobbyAdded.setLobbyName("Inviting Lobby");
+        lobbyAdded.setLobbyStatus(LobbyStatus.WAITING);
+        lobbyAdded.addPlayer(player);
+        GameStats stats = new GameStats(player.getId(),lobby.getId());
+        User userRemoved = new User();
+        userRemoved.setId(1L);
+        userRemoved.setToken("1");
+        userRemoved.setStatus(UserStatus.ONLINE);
+        userRemoved.setUsername("Invited User");
+
+        given(userRepository.findByToken(anyString())).willReturn(invitedUser);
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(invitedUser));
+        given(lobbyRepository.findByLobbyId(anyLong())).willReturn(lobby);
+        given(playerRepository.save(ArgumentMatchers.any())).willReturn(player);
+        doNothing().when(playerRepository).flush();
+        given(lobbyRepository.save(ArgumentMatchers.any())).willReturn(lobbyAdded);
+        doNothing().when(lobbyRepository).flush();
+        given(statsRepository.findByPlayerIdAndLobbyId(anyLong(),anyLong())).willReturn(null);
+        given(statsRepository.save(ArgumentMatchers.any())).willReturn(stats);
+        doNothing().when(statsRepository).flush();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(invitedUser));
+        given(userRepository.saveAndFlush(ArgumentMatchers.any())).willReturn(userRemoved);
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + lobby.getId() + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isNoContent())
+                .andDo(print())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     /**
