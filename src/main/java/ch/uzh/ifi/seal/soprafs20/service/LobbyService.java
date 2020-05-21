@@ -33,6 +33,8 @@ public class LobbyService
     private final GameService gameService;
     private final MysteryWordService mysteryWordService;
 
+    private Random rand = new Random();
+
     @Autowired
     public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService, MysteryWordService mysteryWordService) {
         this.lobbyRepository = lobbyRepository;
@@ -386,9 +388,8 @@ public class LobbyService
         if(!lobby.getGameMode().equals(GameModeStatus.BOTS)) {
             throw new ForbiddenException("You have not enabled Bots");
         } else{
-            Random r = new Random();
             while (numPlayers < 7 && numBots > 0){
-                int i = r.nextInt(3);
+                int i = rand.nextInt(3);
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
                 numPlayers++;
                 numBots--;
