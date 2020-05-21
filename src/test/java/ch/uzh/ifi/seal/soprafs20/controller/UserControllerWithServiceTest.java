@@ -58,6 +58,8 @@ class UserControllerWithServiceTest {
     private CardService cardService;
     @MockBean
     private GameService gameService;
+    @MockBean
+    private MysteryWordService mysteryWordService;
 
 
     @MockBean
@@ -70,12 +72,15 @@ class UserControllerWithServiceTest {
     private GameRepository gameRepository;
     @MockBean
     private StatsRepository statsRepository;
+    @MockBean
+    private MysteryWordRepository mysteryWordRepository;
 
 
     @BeforeEach
     public void setup() {
         userService = new UserService(userRepository);
-        lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService);
+        mysteryWordService = new MysteryWordService(mysteryWordRepository);
+        lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService, mysteryWordService);
         playerService = new PlayerService(playerRepository);
         gameService = new GameService(gameRepository,statsRepository, userService);
         UserController uc = new UserController(userService, lobbyService, playerService, gameService);

@@ -31,11 +31,10 @@ public class LobbyService
     private final DeckService deckService;
     private final CardService cardService;
     private final GameService gameService;
-    @Autowired
-    private MysteryWordService mysteryWordService;
+    private final MysteryWordService mysteryWordService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService) {
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, UserService userService, PlayerService playerService, DeckService deckService, CardService cardService, GameService gameService, MysteryWordService mysteryWordService) {
         this.lobbyRepository = lobbyRepository;
         this.playerService = playerService;
         this.userService = userService;
