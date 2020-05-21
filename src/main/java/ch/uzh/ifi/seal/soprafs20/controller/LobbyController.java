@@ -43,7 +43,7 @@ public class LobbyController {
 
     /**
      * CREATE a new lobby
-     * @param lobbyPostDTO
+     * @param lobbyPostDTO - lobby to create
      * @return Status Code 201 and the created lobby
      */
     @PostMapping("/lobbies")
@@ -121,7 +121,7 @@ public class LobbyController {
 
     /**
      * PUT Update a specific Lobby by a Player joining the lobby
-     * @param lobbyId
+     * @param lobbyId - id of the lobby to be joined
      * @return Status Code 204
      */
     @PutMapping("/lobbies/{lobbyId}/join")
@@ -281,7 +281,7 @@ public class LobbyController {
 
     /**
      * PUT Start the game
-     * @param lobbyId
+     * @param lobbyId - lobby that should start the game
      * @return Status Code 204
      */
     @PutMapping("/lobbies/{lobbyId}/start")
@@ -317,7 +317,7 @@ public class LobbyController {
 
     /**
      * PUT Stop the Game (A Player leaves the Game)
-     * @param lobbyId
+     * @param lobbyId - lobby to stop
      * @return Status Code 204
      */
     @PutMapping("/lobbies/{lobbyId}/stop")
@@ -526,7 +526,6 @@ public class LobbyController {
         int leftCards = gameService.getLeftCards(lobby);
         Long wonCards = gameService.getWonCards(lobby);
         int lostCards = gameService.getLostCards(lobby);
-        
         
       
         return DTOMapper.INSTANCE.convertEntityToGuessGETDTO(guess,success,leftCards,wonCards,lostCards,mysteryWord);

@@ -44,7 +44,7 @@ public class PlayerService {
 
     /**
      * Converts the given User to the playerRepository
-     * @param user
+     * @param user - user to be converted
      * @return Player
      */
     public Player convertUserToPlayer(User user, PlayerRole playerRole) {
@@ -104,7 +104,7 @@ public class PlayerService {
     /**
      * Removes the player from Player repository
      *
-     * @param - the Player to be removed from the Player repository
+     * @param player - the Player to be removed from the Player repository
      * */
     public void deletePlayer(Player player) {
         if(player != null) {
@@ -119,7 +119,7 @@ public class PlayerService {
     /**
      * Removes the list of given players from Player repository
      *
-     * @param - set of players to be removed from the Player repository
+     * @param playersSet - set of players to be removed from the Player repository
      * */
     public void deletePlayers(Set<Player> playersSet) {
         if(playersSet != null) {

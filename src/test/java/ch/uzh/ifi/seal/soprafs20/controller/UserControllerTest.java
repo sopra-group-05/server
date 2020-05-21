@@ -1,6 +1,11 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
+import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
@@ -13,13 +18,12 @@ import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -27,7 +31,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -349,9 +356,332 @@ public class UserControllerTest {
     }
 
     /**
+     * Tests Get /userId/invitations
+     * Should return 200 and list of inviting lobbies
+     */
+    @Test
+    public void getInvitations_validInput_lobbiesReturned() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Test Lobby");
+        invitedUser.addInvitingLobby(lobby);
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
+                .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())));
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error with status 401
+     */
+    @Test
+    public void getInvitations_wrongToken_throwsUnauthorized() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willThrow(new UnauthorizedException("You are not allowed to access this page"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("You are not allowed to access this page")));
+
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error with 404
+     */
+    @Test
+    public void getInvitations_wrongId_throwsNotFound() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willThrow(new NotFoundException("User was not found"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/5/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("User was not found")));
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error 403
+     */
+    @Test
+    public void getInvitations_wrongUserId_throwsForbidden() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        User requestingUser = new User();
+        requestingUser.setId(5L);
+        requestingUser.setStatus(UserStatus.ONLINE);
+        requestingUser.setUsername("Requesting User");
+        requestingUser.setToken("5");
+
+
+        given(userService.checkUserToken(anyString())).willReturn(requestingUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", requestingUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isForbidden())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("Wrong user sent request!")));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Valid input and returns 204
+     */
+    @Test
+    public void acceptInvitation_validInput_returnsNoContent() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Inviting Lobby");
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        invitedUser.addInvitingLobby(lobby);
+        Player player = new Player();
+        player.setId(1L);
+        player.setRole(PlayerRole.CLUE_CREATOR);
+        player.setPlayerType(PlayerType.HUMAN);
+        Lobby lobbyAdded = new Lobby();
+        lobbyAdded.setId(2L);
+        lobbyAdded.setLobbyName("Inviting Lobby");
+        lobbyAdded.setLobbyStatus(LobbyStatus.WAITING);
+        lobbyAdded.addPlayer(player);
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+        given(lobbyService.getLobbyById(anyLong())).willReturn(lobby);
+        given(playerService.convertUserToPlayer(ArgumentMatchers.any(), ArgumentMatchers.any())).willReturn(player);
+        given(lobbyService.addPlayerToLobby(ArgumentMatchers.any(),ArgumentMatchers.any())).willReturn(lobbyAdded);
+        doNothing().when(gameService).addStats(anyLong(),anyLong());
+        doNothing().when(userService).removeFromInvitingLobbies(anyLong(),ArgumentMatchers.any());
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + lobby.getId() + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isNoContent())
+                .andDo(print())
+                .andExpect(jsonPath("$").doesNotExist());
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Bad Token - throws 401
+     */
+    @Test
+    public void acceptInvitation_badToken_throwsUnauthorized() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willThrow(new UnauthorizedException("You are not allowed to access this page"));
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + 2L + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", "3");
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isUnauthorized())
+                .andDo(print())
+                .andExpect(jsonPath("$",is("You are not allowed to access this page")));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/iviteId/accept
+     * Non-existent userId - Throws 404
+     */
+    @Test
+    public void acceptInvitation_nonexistentUserId_throwsNotFound() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willThrow(new NotFoundException("User was not found"));
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + 3L
+                + "/invitations/" + 2L + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isNotFound())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("User was not found")));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Wrong user requesting - throws 403
+     */
+    @Test
+    public void acceptInvitation_wrongUser_throwsForbidden() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        User requestingUser = new User();
+        requestingUser.setToken("3");
+        requestingUser.setUsername("Requesting User");
+        requestingUser.setId(3L);
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willReturn(requestingUser);
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + requestingUser.getId()
+                + "/invitations/" + 2L + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isForbidden())
+                .andDo(print())
+                .andExpect(jsonPath("$",is("Wrong user sent request!")));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Non-existent lobby - throw 404
+     */
+    @Test
+    public void acceptInvitation_nonexistentLobby_throwsNotFound() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+        given(lobbyService.getLobbyById(anyLong())).willThrow(new NotFoundException("The requested Lobby does not exist."));
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + 2L + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isNotFound())
+                .andDo(print())
+                .andExpect(jsonPath("$",is("The requested Lobby does not exist.")));
+    }
+
+    /**
+     * Tests PUT /userId/invitations/inviteId/accept
+     * Lobby is not waiting - throws 409
+     */
+    @Test
+    public void acceptInvitation_lobbyIsNotWaiting_throwsConflict() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Inviting Lobby");
+        lobby.setLobbyStatus(LobbyStatus.RUNNING);
+
+        given(userService.checkUserToken(invitedUser.getToken())).willReturn(invitedUser);
+        given(userService.getUserByID(invitedUser.getId())).willReturn(invitedUser);
+        given(lobbyService.getLobbyById(lobby.getId())).willReturn(lobby);
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + lobby.getId() + "/accept/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isConflict())
+                .andDo(print())
+                .andExpect(jsonPath("$",is("Lobby is already playing or has already stopped!")));
+    }
+
+
+    /**
      * Helper Method to convert userPostDTO into a JSON string such that the input can be processed
      * Input will look like this: {"name": "Test User", "username": "testUsername"}
-     * @param object
+     * @param object - object to be mapped
      * @return string
      */
     private String asJsonString(final Object object) {

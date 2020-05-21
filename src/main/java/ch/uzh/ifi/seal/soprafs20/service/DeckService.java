@@ -51,7 +51,7 @@ public class DeckService {
     /**
      * Removes the deck from Deck repository
      *
-     * @param - the deck to be removed from the Deck repository
+     * @param deck - the deck to be removed from the Deck repository
      * */
     public void deleteDeck(Deck deck) {
         if(deck != null) {
@@ -62,7 +62,7 @@ public class DeckService {
     /**
      * Saves the deck using Deck repository
      *
-     * @param - the deck to be updated to the Deck repository
+     * @param deck - the deck to be updated to the Deck repository
      * */
     public void save(Deck deck) {
         if(deck != null) {
@@ -73,7 +73,8 @@ public class DeckService {
     /**
      * Constructs cards and deck for a new game
      *
-     * @param language*/
+     * @param language - language for deck
+     * */
     public Deck constructDeckForLanguage(Language language, int numberOfCards) {
         Deck deck = new Deck();
         List<Card> cards = cardService.get13Cards(language, numberOfCards);

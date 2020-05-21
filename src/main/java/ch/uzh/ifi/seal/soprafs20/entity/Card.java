@@ -72,8 +72,7 @@ public final class Card implements Serializable {
     }
 
     public static Card getInstance(){
-         Card card = new Card();
-         return card;
+        return new Card();
     }
 
     @Override

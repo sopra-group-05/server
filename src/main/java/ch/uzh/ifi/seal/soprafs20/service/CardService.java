@@ -63,7 +63,7 @@ public class CardService {
     /**
      * Saves the card using Card repository
      *
-     * @param - the card to be updated to the Card repository
+     * @param card - the card to be updated to the Card repository
      * */
     public void save(Card card) {
         if(card != null) {
@@ -75,7 +75,8 @@ public class CardService {
      *
      * Generates 13 cards for one deck
      *
-     * @param language*/
+     * @param language - language of deck
+     * */
     public List<Card> get13Cards(Language language, int numberOfCards) {
         List<Card> cardList = cardRepository.findByLanguage(language);
         SecureRandom rand = new SecureRandom();

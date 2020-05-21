@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Table(name = "STATS")
 public class GameStats {
 	
-	final Long MAXTIME = 30l;
+	final Long MAXTIME = 30L;
 	
 	@Id
 	@Column(nullable = false, unique = false)
@@ -58,14 +58,14 @@ public class GameStats {
 	public GameStats(Long playerId, Long lobbyId) {
 		this.playerId = playerId;
 		this.lobbyId = lobbyId;
-		this.guessCount = 0l;
-		this.correctGuessCount = 0l;
-		this.givenClues = 0l;
-		this.goodClues = 0l;
-		this.score = 0l;
-		this.timeToGuess = 0l;
-		this.timeForClue = 0l;
-		this.teamPoints = 0l;
+		this.guessCount = 0L;
+		this.correctGuessCount = 0L;
+		this.givenClues = 0L;
+		this.goodClues = 0L;
+		this.score = 0L;
+		this.timeToGuess = 0L;
+		this.timeForClue = 0L;
+		this.teamPoints = 0L;
 	}
 
 	

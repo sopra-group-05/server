@@ -50,8 +50,8 @@ public class GameService {
     /**
      * This method update the deck stats
      *
-     * @param - the active game
-     * @param - was the guess correct
+     * @param game - the active game
+     * @param success - was the guess correct
      * 
      */
     public void updateLeftCards(Game game, boolean success, String guess)
@@ -65,7 +65,7 @@ public class GameService {
     	}
     	else
     	{
-    		if ((game.getWonCards()>0)&&(guess.isEmpty()==false))
+    		if ((game.getWonCards()>0)&&(!guess.isEmpty()))
     		{
     			game.setWonCards(game.getWonCards()-1);
     			game.setLostCards(game.getLostCards()+1);
@@ -78,8 +78,8 @@ public class GameService {
     /**
      * This method will get a specific will compare the guess with the mystery word and update game repository
      *
-     * @param - the active lobby
-     * @param - the guess from the player
+     * @param lobby - the active lobby
+     * @param guess - the guess from the player
      */
     public void compareGuess(Lobby lobby, String guess, Long guesserId, Long timeToGuess)
     {
@@ -99,12 +99,12 @@ public class GameService {
     {
     
     	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
-    	gameStats.incGuessCount(1l);
+    	gameStats.incGuessCount(1L);
     	gameStats.addGuessTime(timeToGuess);
     	if(success)
     	{
-    		gameStats.incCorrectGuessCount(1l);
-    		userService.updateCorrectGuessCount(playerId, 1l);
+    		gameStats.incCorrectGuessCount(1L);
+    		userService.updateCorrectGuessCount(playerId, 1L);
     	}
     	gameStats.calculateScore();
     	statsRepository.save(gameStats);
@@ -116,12 +116,12 @@ public class GameService {
     public void updateClueGeneratorStats(boolean goodClue, Long timeForClue, Long playerId, Long lobbyId) 
     {
     	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
-    	gameStats.incGivenClueCount(1l);
+    	gameStats.incGivenClueCount(1L);
     	gameStats.addClueTime(timeForClue);
     	if(goodClue)
     	{
-    		gameStats.incGoodClueCount(1l);
-    		userService.updateBestClueCount(playerId, 1l);
+    		gameStats.incGoodClueCount(1L);
+    		userService.updateBestClueCount(playerId, 1L);
     	}
     	gameStats.calculateScore();
     	statsRepository.save(gameStats);
@@ -131,8 +131,8 @@ public class GameService {
 
 	public void reduceGoodClues(Long playerId, Long lobbyId) {
 		GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
-    	gameStats.decGoodClueCount(1l);
-    	userService.updateBestClueCount(playerId, -1l);
+    	gameStats.decGoodClueCount(1L);
+    	userService.updateBestClueCount(playerId, -1L);
      	gameStats.calculateScore();
     	statsRepository.save(gameStats);
     	statsRepository.flush();
@@ -188,7 +188,7 @@ public class GameService {
     	game.setLastGuessSuccess(false);
     	game.setActiveGuess("");
     	game.setLeftCards(lobby.getDeck().getCards().size());
-    	game.setWonCards(0l);
+    	game.setWonCards(0L);
     	game.setLostCards(0);
     	gameRepository.save(game);
     	gameRepository.flush();

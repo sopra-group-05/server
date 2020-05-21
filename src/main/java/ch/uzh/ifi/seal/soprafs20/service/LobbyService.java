@@ -28,11 +28,11 @@ public class LobbyService
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final LobbyRepository lobbyRepository;
 
-    private PlayerService playerService;
-    private UserService userService;
-    private DeckService deckService;
-    private CardService cardService;
-    private GameService gameService;
+    private final PlayerService playerService;
+    private final UserService userService;
+    private final DeckService deckService;
+    private final CardService cardService;
+    private final GameService gameService;
     @Autowired
     private MysteryWordService mysteryWordService;
 
@@ -48,7 +48,7 @@ public class LobbyService
     /**
      * This method will create a lobby in the lobby repository
      *
-     * @param lobbyInput
+     * @param lobbyInput - input for lobby
      * @return The created Lobby
      * @see Lobby
      */
@@ -106,7 +106,7 @@ public class LobbyService
      * Main Goal: Will update the Lobby with the added Player
      * First it Checks the Token (Does it belong to any User? Does the token belong to the user you're trying to edit?)
      * Checks the User ID (Does it even exist?)
-     * @param lobby
+     * @param lobby - lobby to be updated
      * @return Lobby
      */
     public Lobby addPlayerToLobby(Lobby lobby, Player playerToAdd) {
@@ -121,8 +121,8 @@ public class LobbyService
      * This is a helper method that will check the uniqueness criteria of the username
      * defined in the User entity. The method will do nothing if the input is unique and throw an error otherwise.
      *
-     * @param lobbyToBeCreated
-     * @throws ConflictException
+     * @param lobbyToBeCreated - lobby to check for existence
+     * @throws ConflictException - creator of lobby has another lobby / lobby name not unique
      * @see Lobby
      */
     private void checkIfLobbyExists(Lobby lobbyToBeCreated) {
@@ -239,17 +239,17 @@ public class LobbyService
 		            clue.setPlayer(null);
 		        }
 		        boolean guesserSet = false;
-		        if((creator.getId() == playerId)||(player.getRole() == PlayerRole.GUESSER))
+		        if((creator.getId().equals(playerId))||(player.getRole() == PlayerRole.GUESSER))
 		        {
 		        	for(Player candidatPlayer : players)
 		        	{
 		        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
 		        		{
-		        			if((candidatPlayer.getId() != lobby.getCreator().getId())&&(creator.getId() == playerId))
+		        			if((!candidatPlayer.getId().equals(lobby.getCreator().getId()))&&(creator.getId().equals(playerId)))
 			        		{
 			        			lobby.setCreator(candidatPlayer);	
 			        		}
-			        		if((candidatPlayer.getId() != playerId)&&(guesserSet==false))
+			        		if((!candidatPlayer.getId().equals(playerId))&&(!guesserSet))
 			        		{
 			        			candidatPlayer.setRole(PlayerRole.GUESSER);
 			        			guesserSet = true;
@@ -263,7 +263,7 @@ public class LobbyService
 	        	lobby.setCreator(player);  //set leaving player as creator to delete the game
 	        }
         }
-        if(lobby.getCreator().getId() == playerId)
+        if(lobby.getCreator().getId().equals(playerId))
         {
         	endLobby(lobbyId,userService.getUserByID(playerId));
         }
@@ -384,7 +384,7 @@ public class LobbyService
             throw new ForbiddenException("You have not enabled Bots");
         } else{
             while (numPlayers < 7 && numBots > 0){
-                int i = 0 + (int)(Math.random() * ((2 - 0) + 1));
+                int i = 0 + (int) (Math.random() * ((2 - 0) + 1));
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(differentBots.get(i)));
                 numPlayers++;
                 numBots--;
@@ -595,8 +595,8 @@ public class LobbyService
 
     /**
      * Checks if all players have that status
-     * @param playerStatus
-     * @return
+     * @param playerStatus - status to check for
+     * @return boolean whether players all have playerStatus
      */
     private Boolean allPlayerHaveStatus(Set<Player> players, PlayerStatus playerStatus) {
         int playersWithThatStatus = 0;
@@ -605,10 +605,7 @@ public class LobbyService
                 playersWithThatStatus += 1;
             }
         }
-        if (playersWithThatStatus == players.size()){
-            return true;
-        }
-        return false;
+        return playersWithThatStatus == players.size();
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
@@ -646,26 +643,30 @@ public class LobbyService
         Card cardToRemove = cards.remove(0);
         //cardService.delete(cardToRemove);
         game.setComparingGuessCounter(0);
-        Card card = cards.get(0);
-        if(card.equals(null)){
+        // check if any cards are left to play
+        Card card;
+        if (cards.size()==0)
             this.endGame(lobby);
-        }
-        deck.setActiveCard(card);
-        deckService.save(deck); 
-        game.setActiveGuess("");//todo check if needed
-        this.setNewRoleOfPlayers(lobby);
-        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
-        Set<Player> allPlayers = lobby.getPlayers();
-        for (Player player:allPlayers){
-            if(!player.getPlayerType().equals(PlayerType.HUMAN)){
-                player.setStatus(PlayerStatus.READY);
+        else {
+            card = cards.get(0);
+
+            deck.setActiveCard(card);
+            deckService.save(deck);
+            game.setActiveGuess(""); // todo check if needed
+            this.setNewRoleOfPlayers(lobby);
+            this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PICKING_NUMBER, PlayerStatus.WAITING_FOR_NUMBER);
+            Set<Player> allPlayers = lobby.getPlayers();
+            for (Player player : allPlayers) {
+                if (!player.getPlayerType().equals(PlayerType.HUMAN)) {
+                    player.setStatus(PlayerStatus.READY);
+                }
             }
         }
     }
 
     /**
      * This method will assign the Role GUESSER to a new Player (only humans)
-     * @param lobby
+     * @param lobby - current lobby
      */
     public void setNewRoleOfPlayers(Lobby lobby) {
         // sort Players of this lobby according to their ID
@@ -688,8 +689,8 @@ public class LobbyService
 
     /**
      * This function gets the index of the guesser in a List and also removes that status from the guesser (now clue creator)
-     * @param players
-     * @return
+     * @param players - list in which to find & modify guesser
+     * @return int index of now modified guesser
      */
     private int getIndexOfGuesserAndRemoveGuesser(List<Player> players) {
         int index = 0;
