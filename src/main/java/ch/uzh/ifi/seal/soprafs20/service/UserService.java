@@ -208,9 +208,11 @@ public class UserService {
      * @see User
      */
     private void checkIfUserExists(User userToBeCreated) {
-        User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-        if (userByUsername != null) {
-            throw new ConflictException("The username provided is not unique. Therefore, the user could not be created!");
+        List<User> allUsersInDB = userRepository.findAll();
+        for(User user: allUsersInDB) {
+            if (user.getUsername().toLowerCase().equals(userToBeCreated.getUsername().toLowerCase())) {
+                throw new ConflictException("The username provided is not unique. Therefore, the user could not be created!");
+            }
         }
     }
 
