@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
+import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
+import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.NotFoundException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
@@ -12,6 +14,7 @@ import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
 import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -27,6 +30,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -347,6 +352,127 @@ public class UserControllerTest {
                 .andDo(print())
         ;
     }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return 200 and list of inviting lobbies
+     */
+    @Test
+    public void getInvitations_validInput_lobbiesReturned() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Test Lobby");
+        invitedUser.addInvitingLobby(lobby);
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(lobby.getId().intValue())))
+                .andExpect(jsonPath("$[0].lobbyName", is(lobby.getLobbyName())));
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error with status 401
+     */
+    @Test
+    public void getInvitations_wrongToken_throwsUnauthorized() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willThrow(new UnauthorizedException("You are not allowed to access this page"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("You are not allowed to access this page")));
+
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error with 404
+     */
+    @Test
+    public void getInvitations_wrongId_throwsNotFound() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+
+        given(userService.checkUserToken(anyString())).willReturn(invitedUser);
+        given(userService.getUserByID(anyLong())).willThrow(new NotFoundException("User was not found"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/5/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("User was not found")));
+    }
+
+    /**
+     * Tests Get /userId/invitations
+     * Should return error 403
+     */
+    @Test
+    public void getInvitations_wrongUserId_throwsForbidden() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        User requestingUser = new User();
+        requestingUser.setId(5L);
+        requestingUser.setStatus(UserStatus.ONLINE);
+        requestingUser.setUsername("Requesting User");
+        requestingUser.setToken("5");
+
+
+        given(userService.checkUserToken(anyString())).willReturn(requestingUser);
+        given(userService.getUserByID(anyLong())).willReturn(invitedUser);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/" + invitedUser.getId().toString() + "/invitations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", requestingUser.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isForbidden())
+                .andDo(print())
+                .andExpect(jsonPath("$", is("Wrong user sent request!")));
+    }
+
 
     /**
      * Helper Method to convert userPostDTO into a JSON string such that the input can be processed
