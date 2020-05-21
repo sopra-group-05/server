@@ -168,6 +168,7 @@ public class UserService {
         }
         return userById;
     }
+
     /**Delete User
     * @param token - token of the user doing the request
     * @param id - id of the to be deleted user
