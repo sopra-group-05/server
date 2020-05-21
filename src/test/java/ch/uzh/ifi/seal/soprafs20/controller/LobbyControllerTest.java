@@ -506,7 +506,7 @@ public class LobbyControllerTest {
         given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
 
         // make get Request to Lobby with id
-        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() + "/guess")
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/" + lobby.getId() + "/game")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", testUser.getToken());
 
