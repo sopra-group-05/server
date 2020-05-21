@@ -123,8 +123,7 @@ public class LobbyService
      * @throws ConflictException - creator of lobby has another lobby / lobby name not unique
      * @see Lobby
      */
-    public void checkIfLobbyExists(Lobby lobbyToBeCreated) {
-        Lobby lobbyByLobbyName = lobbyRepository.findByLobbyName(lobbyToBeCreated.getLobbyName());
+    private void checkIfLobbyExists(Lobby lobbyToBeCreated) {
         Lobby lobbyByCreator = lobbyRepository.findByCreator(lobbyToBeCreated.getCreator());
         if (lobbyByCreator != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -132,10 +131,15 @@ public class LobbyService
                     new ConflictException("The creator of the lobby is already host of another lobby." +
                             " Therefore, the lobby could not be created!"));
         }
-        else if (lobbyByLobbyName != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Lobby Name Conflict",
-                    new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
+        else {
+            List<Lobby> allLobbiesInDB = lobbyRepository.findAll();
+            for (Lobby lobby : allLobbiesInDB) {
+                if (lobby.getLobbyName().toLowerCase().equals(lobbyToBeCreated.getLobbyName().toLowerCase())) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Lobby Name Conflict",
+                            new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
+                }
+            }
         }
     }
 
@@ -356,17 +360,13 @@ public class LobbyService
             if (lobby.getPlayers().size() < 2) {
                 throw new ForbiddenException("Not enough Players");
             }
-            if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
-                while (lobby.getPlayers().size() < 4) {
-                    if (lobby.getNumBots() == 0) {
-                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
-                        lobby.setNumBots(1);
-                    }
-                    else {
-                        this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
-                        lobby.setNumBots(2);
-                    }
-                }
+ //                     if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
+ //                     while (lobby.getPlayers().size() < 4) {
+            if (lobby.getNumberOfBots() >= 1) {
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
+            }
+            if (lobby.getNumberOfBots() >= 2){
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
             }
         }
     }
@@ -469,12 +469,12 @@ public class LobbyService
             lobbyStatus = LobbyStatus.STOPPED;
         }
         else if (gameMode == GameModeStatus.BOTS) {
-            if(this.getLobbyById(lobbyId).getNumBots() == 0) {
+            if(this.getLobbyById(lobbyId).getNumberOfBots() == 0) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
-                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
-            } else if (this.getLobbyById(lobbyId).getNumBots() == 1) {
+                this.getLobbyById(lobbyId).setNumberOfBots(this.getLobbyById(lobbyId).getNumberOfBots()+1);
+            } else if (this.getLobbyById(lobbyId).getNumberOfBots() == 1) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
-                this.getLobbyById(lobbyId).setNumBots(this.getLobbyById(lobbyId).getNumBots()+1);
+                this.getLobbyById(lobbyId).setNumberOfBots(this.getLobbyById(lobbyId).getNumberOfBots()+1);
             } else{
                 lobbyStatus = LobbyStatus.STOPPED;
             }

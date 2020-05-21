@@ -74,9 +74,11 @@ public class UserServiceTest {
     public void createUser_duplicateUsername_throwsException() {
         // given -> a first user has already been created
         userService.createUser(testUser);
+        List<User> testUserList = new ArrayList<>();
+        testUserList.add(testUser);
 
         // when -> setup additional mocks for UserRepository
-        Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+        Mockito.when(userRepository.findAll()).thenReturn(testUserList);
 
         // then -> attempt to create second user with same user -> check that an error is thrown
         String exceptionMessage = "The username provided is not unique. Therefore, the user could not be created!";
