@@ -47,10 +47,9 @@ public class ClueService {
         checkClue(newClue, lobby);
         List<Clue> clues = lobby.getGame().getClues();
         for(Clue clue:clues){
-            if((clue.getClueStatus().equals(ClueStatus.ACTIVE) | clue.getClueStatus().equals(ClueStatus.DISABLED)) && clue.getPlayer().equals(player)){
-                if(lobby.getPlayers().size() !=3){
-                    throw new SopraServiceException("You already annotated a clue");
-                }
+            if ((clue.getClueStatus().equals(ClueStatus.ACTIVE) || clue.getClueStatus().equals(ClueStatus.DISABLED))
+                    && clue.getPlayer().equals(player) && lobby.getPlayers().size() != 3) {
+                throw new SopraServiceException("You already annotated a clue");
             }
         }
         newClue.setClueStatus(ClueStatus.ACTIVE);
@@ -81,10 +80,8 @@ public class ClueService {
             }
         }
         for(MysteryWord mysteryWord:mysteryWords) {
-            if (mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE)) {
-                if (hint.toLowerCase().equals(mysteryWord.getWord().toLowerCase())) {
-                    throw new SopraServiceException("Clue can not be the same as Mysteryword");
-                }
+            if (mysteryWord.getStatus().equals(MysteryWordStatus.IN_USE) && hint.equalsIgnoreCase(mysteryWord.getWord())) {
+                throw new SopraServiceException("Clue can not be the same as Mysteryword");
             }
         }
     }
@@ -176,7 +173,7 @@ public class ClueService {
             }
         }
         for (Player player:players) {
-            if (!player.getStatus().equals(PlayerStatus.REVIEWING_CLUES) & !player.getRole().equals(PlayerRole.GUESSER)) {
+            if (!player.getStatus().equals(PlayerStatus.REVIEWING_CLUES) && !player.getRole().equals(PlayerRole.GUESSER)) {
                 throw new SopraServiceException("Not all Clues are annotated");
             }
         }

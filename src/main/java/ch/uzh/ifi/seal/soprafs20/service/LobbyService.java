@@ -166,7 +166,7 @@ public class LobbyService
      * @return true if the user is Guesser of this Lobby
      * */
     public Boolean isGuesserOfLobby(User user, long lobbyId) {
-        if(isUserInLobby(user, lobbyId)) {
+        if(Boolean.TRUE.equals(isUserInLobby(user, lobbyId))) {
             Player player = playerService.getPlayerById(user.getId());
             return player.getRole() == PlayerRole.GUESSER;
         }
@@ -552,7 +552,7 @@ public class LobbyService
      * Function to accept or decline the mystery word that was chosen by the active player
      */
     public void acceptOrDeclineMysteryWord(User user, Lobby lobby, Boolean acceptWord) {
-        if (acceptWord) {
+        if (Boolean.TRUE.equals(acceptWord)) {
             // Player accepts mystery word. Changing Status for next state of the game for this Player.
             Player player = playerService.getPlayerByToken(user.getToken());
             player.setStatus(PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD);
@@ -567,7 +567,7 @@ public class LobbyService
             }
 
             // if all players are waiting to accept the mystery word, then change status to writing clues and waiting for clues
-            if (this.allPlayerHaveStatus(lobby.getPlayers(), PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD)) {
+            if (Boolean.TRUE.equals(this.allPlayerHaveStatus(lobby.getPlayers(), PlayerStatus.WAITING_TO_ACCEPT_MYSTERY_WORD))) {
                 this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.WAITING_FOR_CLUES, PlayerStatus.WRITING_CLUES);
             }
 
@@ -609,7 +609,7 @@ public class LobbyService
     }
 
     public void removeFromLobbyAndDeletePlayer(User toDeleteUser){
-        if (playerService.doesPlayerWithTokenExist(toDeleteUser.getToken())) {
+        if (Boolean.TRUE.equals(playerService.doesPlayerWithTokenExist(toDeleteUser.getToken()))) {
             Player player = playerService.getPlayerByToken(toDeleteUser.getToken());
             Lobby lobbyToRemovePlayer = null;
             List<Lobby> lobbies= this.getLobbies();
@@ -645,7 +645,7 @@ public class LobbyService
         game.setComparingGuessCounter(0);
         // check if any cards are left to play
         Card card;
-        if (cards.size()==0)
+        if (cards.isEmpty())
             this.endGame(lobby);
         else {
             card = cards.get(0);

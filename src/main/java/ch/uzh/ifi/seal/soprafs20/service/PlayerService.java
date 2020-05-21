@@ -154,12 +154,12 @@ public class PlayerService {
             String token = "";
             SecureRandom random = new SecureRandom();
             Long id = random.nextLong();
-            while (name.equals("") | playerRepository.findByUsername(name) != null) {
+            while (name.equals("") || playerRepository.findByUsername(name) != null) {
                 String randomAddition = Integer.toString(random.nextInt(100));
                 name = playerType.toString() + "_" + randomAddition;
             }
 
-            while (token.equals("") | playerRepository.findByToken(token) != null) {
+            while (token.equals("") || playerRepository.findByToken(token) != null) {
                 token = Integer.toString(random.nextInt(1000000));
             }
 
@@ -206,7 +206,7 @@ public class PlayerService {
         Set<Player> players= lobby.getPlayers();
         List<Player> humanPlayers= new ArrayList<>();
         for(Player player:players){
-            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) |  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)){
+            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) ||  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)){
                 humanPlayers.add(player);
             }
         }

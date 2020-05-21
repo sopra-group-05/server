@@ -79,7 +79,7 @@ public class GameService {
     	Game game = lobby.getGame();	
     	String mysteryWord = getMysteryWord(lobby);
 		game.setActiveGuess(guess);
-		boolean success = guess.toLowerCase().equals(mysteryWord.toLowerCase());
+		boolean success = guess.equalsIgnoreCase(mysteryWord);
 		game.setLastGuessSuccess(success);
 		updateLeftCards(game,success,guess);
 		updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());

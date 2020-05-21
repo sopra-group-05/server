@@ -106,9 +106,9 @@ public class UserService {
 
         // Change Birthday if edited
         if(((userByToken.getBirthday() == null) ^ (user.getBirthday() == null))
-                || ((userByToken.getBirthday() != null
+                || (userByToken.getBirthday() != null
                 && user.getBirthday() != null
-                && !userByToken.getBirthday().equals(user.getBirthday())))
+                && !userByToken.getBirthday().equals(user.getBirthday()))
         ) {
             userByToken.setBirthday(user.getBirthday());
         }
