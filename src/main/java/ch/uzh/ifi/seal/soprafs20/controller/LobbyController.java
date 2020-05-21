@@ -57,7 +57,7 @@ public class LobbyController {
         //check Access rights via token
         User creator = userService.checkUserToken(token);
 
-        if (isPlayerToJoin) {
+        if (Boolean.TRUE.equals(isPlayerToJoin)) {
             Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
             // convert API lobby to internal representation
             Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
@@ -135,7 +135,7 @@ public class LobbyController {
         User userToJoin = userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        if (isPlayerToJoin) {
+        if (Boolean.TRUE.equals(isPlayerToJoin)) {
             String forbiddenExceptionMsg = "The requested Lobby is already " + lobby.getLobbyStatus();
             if (lobby.getLobbyStatus() != LobbyStatus.RUNNING) {
                 // convert the User to Player
@@ -239,7 +239,7 @@ public class LobbyController {
         Player player = playerService.getPlayerById(user.getId());
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        if(!isInThisLobby) {
+        if(Boolean.FALSE.equals(isInThisLobby)) {
             throw new ForbiddenException("The user is not in this Lobby.");
         }
 
@@ -252,7 +252,7 @@ public class LobbyController {
                 }
             }
         }
-        if (playerService.isPlayerReady(player)){
+        if (Boolean.TRUE.equals(playerService.isPlayerReady(player))){
             // if Player was ready, trigger to not Ready
             playerService.setPlayerToNotReady(player);
         } else {
@@ -302,7 +302,7 @@ public class LobbyController {
         userService.checkUserToken(token);
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        if (isPlayerAllowedToStart) {
+        if (Boolean.TRUE.equals(isPlayerAllowedToStart)) {
             String forbiddenExceptionMsg = "Not all players in the Lobby are ready yet.";
             Set<Player> players = lobby.getPlayers();
 
@@ -489,7 +489,7 @@ public class LobbyController {
         String guess = DTOMapper.INSTANCE.convertGuessPostDTOToGuessString(guessPostDTO);
         Long timeToGuess = DTOMapper.INSTANCE.convertGuessPostDTOToTimeToGuess(guessPostDTO); 
 
-        if (!isGuesserOfLobby) {
+        if (Boolean.FALSE.equals(isGuesserOfLobby)) {
             throw new UnauthorizedException("User is not the current Guesser of the Lobby.");
         }
 
