@@ -290,6 +290,11 @@ public class LobbyService
         if(isUserLobbyCreator(lobbyId, creator)) {
             Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
             Set<Player> playersSet = lobby.getPlayers();
+            Game lobbyGame = lobby.getGame();
+            if (lobbyGame != null)
+            {
+            	gameService.deleteGame(lobbyGame);
+            }
             lobbyRepository.delete(lobby);
             playerService.deletePlayers(playersSet);
             result = true;
@@ -529,11 +534,16 @@ public class LobbyService
         Card activeCard = deck.getActiveCard();
         if(activeCard != null) {
             for(MysteryWord word : activeCard.getMysteryWords()) {
-                if(word.getNumber() == selectedNumber) {
+                if (word.getNumber() == selectedNumber) {
+                    // set new active Word to IN_USE
                     word.setStatus(MysteryWordStatus.IN_USE);
                     word.setTimedrawn(new Date());
-                    mysteryWordService.save(word);
+                } else {
+                    // set all other cards to NOT_USED
+                    word.setStatus(MysteryWordStatus.NOT_USED);
                 }
+                // save word to Database
+                mysteryWordService.save(word);
             }
         }
     }
