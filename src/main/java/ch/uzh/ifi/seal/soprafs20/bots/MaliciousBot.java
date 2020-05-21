@@ -18,15 +18,17 @@ public class MaliciousBot implements Bot{
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> response;
 
-    private static final EnumMap<Language, String> urls = new EnumMap<>(Language.class){{
-        put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
-        put(Language.DE, "http:german-api");
-    }};
+    private static final EnumMap<Language, String> URLS = new EnumMap<>(Language.class);
+
+    static{
+        URLS.put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
+        URLS.put(Language.DE, "http:german-api");
+    }
 
 
     public MaliciousBot(Language language){
         try {
-            this.url = new URL(urls.get(language));
+            this.url = new URL(URLS.get(language));
         } catch (MalformedURLException e){ }
     }
 
