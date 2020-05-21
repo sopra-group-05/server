@@ -2,16 +2,14 @@ package ch.uzh.ifi.seal.soprafs20.bots;
 
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.swing.text.html.HTMLDocument;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.EnumMap;
 
 public class FriendlyBot implements Bot {
     private URL url;
@@ -20,7 +18,7 @@ public class FriendlyBot implements Bot {
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> response;
 
-    private HashMap<Language, String> urls = new HashMap<Language, String>(){{
+    final private static EnumMap<Language, String> urls = new EnumMap<>(Language.class){{
         put(Language.EN, "https://api.datamuse.com/words?ml=");
         put(Language.DE, "http:german-api");
     }};
@@ -29,8 +27,7 @@ public class FriendlyBot implements Bot {
     public FriendlyBot(Language language){
         try {
             this.url = new URL(urls.get(language));
-        } catch (MalformedURLException e){
-        }
+        } catch (MalformedURLException e){}
 
     }
 

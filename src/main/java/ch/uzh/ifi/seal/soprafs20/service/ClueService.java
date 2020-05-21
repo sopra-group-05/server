@@ -5,14 +5,10 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.bots.Bot;
 import ch.uzh.ifi.seal.soprafs20.bots.CrazyBot;
 import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
-import ch.uzh.ifi.seal.soprafs20.bots.MalicousBot;
+import ch.uzh.ifi.seal.soprafs20.bots.MaliciousBot;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
-import ch.uzh.ifi.seal.soprafs20.service.GameService;
-import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.repository.ClueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,7 +231,7 @@ public class ClueService {
             }
         }
         Bot friendlyBot = new FriendlyBot(language);
-        Bot maliciousBot = new MalicousBot(language);
+        Bot maliciousBot = new MaliciousBot(language);
         Bot crazyBot = new CrazyBot(language);
         HashMap<PlayerType, Bot> botHashMap = new HashMap<PlayerType, Bot>(){{
                 put(PlayerType.FRIENDLYBOT, friendlyBot);

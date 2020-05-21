@@ -336,6 +336,48 @@ public class UserControllerWithServiceTest {
     }
 
     /**
+     * Tests PUT /userId/invitations/inviteId/decline
+     * Valid input and returns 204
+     */
+    @Test
+    public void declineInvitation_validInput_returnsNoContent() throws Exception{
+        // given
+        User invitedUser = new User();
+        invitedUser.setId(1L);
+        invitedUser.setToken("1");
+        invitedUser.setStatus(UserStatus.ONLINE);
+        invitedUser.setUsername("Invited User");
+        Lobby lobby = new Lobby();
+        lobby.setId(2L);
+        lobby.setLobbyName("Inviting Lobby");
+        invitedUser.addInvitingLobby(lobby);
+        User updatedUser = new User();
+        updatedUser.setId(1L);
+        updatedUser.setToken("1");
+        updatedUser.setStatus(UserStatus.ONLINE);
+        updatedUser.setUsername("Invited User");
+
+        given(userRepository.findByToken(anyString())).willReturn(invitedUser);
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(invitedUser));
+        given(lobbyRepository.findByLobbyId(anyLong())).willReturn(lobby);
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(invitedUser));
+        given(userRepository.saveAndFlush(ArgumentMatchers.any())).willReturn(updatedUser);
+
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/" + invitedUser.getId()
+                + "/invitations/" + lobby.getId() + "/decline/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Token", invitedUser.getToken());
+
+        // then
+        mockMvc.perform(putRequest).andExpect(status().isNoContent())
+                .andDo(print())
+                .andExpect(jsonPath("$").doesNotExist());
+    }
+
+    /**
      * Helper Method to convert userPostDTO into a JSON string such that the input can be processed
      * Input will look like this: {"name": "Test User", "username": "testUsername"}
      * @param object - object to be mapped
