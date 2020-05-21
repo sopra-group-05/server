@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.soprafs20.bots;
 
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
@@ -10,28 +9,26 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.EnumMap;
 
-public class MalicousBot implements Bot{
+public class MaliciousBot implements Bot{
     private URL url;
 
     RestTemplate restTemplate = new RestTemplate();
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> response;
 
-    private HashMap<Language, String> urls = new HashMap<Language, String>(){{
+    final private static EnumMap<Language, String> urls = new EnumMap<>(Language.class){{
         put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
         put(Language.DE, "http:german-api");
     }};
 
 
-    public MalicousBot(Language language){
+    public MaliciousBot(Language language){
         try {
             this.url = new URL(urls.get(language));
-        } catch (MalformedURLException e){
-        }
+        } catch (MalformedURLException e){ }
     }
-
 
 
 

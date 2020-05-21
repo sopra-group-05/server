@@ -2,11 +2,9 @@ package ch.uzh.ifi.seal.soprafs20.bots;
 
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class MaliciousBotTest {
-    Bot friendlyBot = new MalicousBot(Language.EN);
+    Bot friendlyBot = new MaliciousBot(Language.EN);
     MysteryWord mysteryWord = new MysteryWord();
     /*todo add tests that are not dependent on api
     @Test
