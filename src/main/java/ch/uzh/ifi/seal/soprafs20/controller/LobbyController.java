@@ -8,6 +8,8 @@ import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,9 @@ public class LobbyController {
     private final ClueService clueService;
     private final GameService gameService;
 
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
+
+
     @Autowired
     LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, GameService gameService) {
         this.lobbyService = lobbyService;
@@ -54,13 +59,18 @@ public class LobbyController {
 
         //check if User is already Player in another Lobby/Game
         Boolean isPlayerToJoin = playerService.checkPlayerToken(token);
+
         //check Access rights via token
         User creator = userService.checkUserToken(token);
 
+        // convert API lobby to internal representation and check if name is unique
+        Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+        lobbyService.checkIfLobbyExists(lobbyInput);
+
+        log.error("Inside Create Lobby");
         if (isPlayerToJoin) {
             Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
-            // convert API lobby to internal representation
-            Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
+
             lobbyInput.setCreator(player);
             lobbyInput.addPlayer(player);
             // create lobby

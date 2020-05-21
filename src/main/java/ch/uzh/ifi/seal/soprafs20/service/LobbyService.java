@@ -125,7 +125,7 @@ public class LobbyService
      * @throws ConflictException - creator of lobby has another lobby / lobby name not unique
      * @see Lobby
      */
-    private void checkIfLobbyExists(Lobby lobbyToBeCreated) {
+    public void checkIfLobbyExists(Lobby lobbyToBeCreated) {
         Lobby lobbyByLobbyName = lobbyRepository.findByLobbyName(lobbyToBeCreated.getLobbyName());
         Lobby lobbyByCreator = lobbyRepository.findByCreator(lobbyToBeCreated.getCreator());
         if (lobbyByCreator != null) {
