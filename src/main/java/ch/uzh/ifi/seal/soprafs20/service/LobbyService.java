@@ -126,7 +126,6 @@ public class LobbyService
      * @see Lobby
      */
     private void checkIfLobbyExists(Lobby lobbyToBeCreated) {
-        Lobby lobbyByLobbyName = lobbyRepository.findByLobbyName(lobbyToBeCreated.getLobbyName());
         Lobby lobbyByCreator = lobbyRepository.findByCreator(lobbyToBeCreated.getCreator());
         if (lobbyByCreator != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -134,10 +133,15 @@ public class LobbyService
                     new ConflictException("The creator of the lobby is already host of another lobby." +
                             " Therefore, the lobby could not be created!"));
         }
-        else if (lobbyByLobbyName != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Lobby Name Conflict",
-                    new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
+        else {
+            List<Lobby> allLobbiesInDB = lobbyRepository.findAll();
+            for (Lobby lobby : allLobbiesInDB) {
+                if (lobby.getLobbyName().toLowerCase().equals(lobbyToBeCreated.getLobbyName().toLowerCase())) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Lobby Name Conflict",
+                            new ConflictException("The lobby name provided is not unique. Therefore, the lobby could not be created!"));
+                }
+            }
         }
     }
 
