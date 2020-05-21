@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -233,13 +230,13 @@ public class ClueService {
         Bot friendlyBot = new FriendlyBot(language);
         Bot maliciousBot = new MaliciousBot(language);
         Bot crazyBot = new CrazyBot(language);
-        HashMap<PlayerType, Bot> botHashMap = new HashMap<PlayerType, Bot>(){{
-                put(PlayerType.FRIENDLYBOT, friendlyBot);
-                put(PlayerType.MALICIOUSBOT, maliciousBot);
-                put(PlayerType.CRAZYBOT, crazyBot);
-            }};
+        EnumMap<PlayerType, Bot> botEnumMap = new EnumMap<>(PlayerType.class);
+        botEnumMap.put(PlayerType.FRIENDLYBOT, friendlyBot);
+        botEnumMap.put(PlayerType.MALICIOUSBOT, maliciousBot);
+        botEnumMap.put(PlayerType.CRAZYBOT, crazyBot);
+
         for(Player player:botPlayers){
-            Bot bot = botHashMap.get(player.getPlayerType());
+            Bot bot = botEnumMap.get(player.getPlayerType());
             Clue botClue = new Clue();
             botClue.setHint(bot.getClue(activeMysteryWord));
             botClue.setPlayer(player);

@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
-import ch.uzh.ifi.seal.soprafs20.exceptions.BadRequestException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
