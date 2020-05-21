@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LobbyController.class)
-public class LobbyControllerWithServiceTest {
+class LobbyControllerWithServiceTest {
 
 
     @Autowired
@@ -91,7 +91,7 @@ public class LobbyControllerWithServiceTest {
      * Valid Input, adds the User that sends the request to the Lobby
      */
     @Test
-    public void kickPlayerOut_validInput() throws Exception {
+    void kickPlayerOut_validInput() throws Exception {
         // given
         Lobby lobby = createLobby();
         User testUser = createUser(1L, "testUser", "1");
@@ -128,7 +128,7 @@ public class LobbyControllerWithServiceTest {
      * Tests player leaves the lobby lobbies/{lobbyId}/leave
      */
     @Test
-    public void leaveFromLobby_validInput() throws Exception {
+    void leaveFromLobby_validInput() throws Exception {
         // given
         Lobby lobby = createLobby();
         User testUser = createUser(1L, "testUser", "1");
@@ -165,7 +165,7 @@ public class LobbyControllerWithServiceTest {
      * Tests lobby creator leaves the lobby lobbies/{lobbyId}/terminate
      */
     @Test
-    public void creatorLeavesFromLobby_validInput() throws Exception {
+    void creatorLeavesFromLobby_validInput() throws Exception {
         // given
         Lobby lobby = createLobby();
         User testUser = createUser(1L, "testUser", "1");
@@ -200,7 +200,7 @@ public class LobbyControllerWithServiceTest {
      * Tests get list of mystery words the lobby /lobbies/{lobbyId}/card
      */
     @Test
-    public void getMysteryWordsFromCard_validInput() throws Exception {
+    void getMysteryWordsFromCard_validInput() throws Exception {
         // given
         Lobby lobby = createLobby();
         User testUser = createUser(1L, "testUser", "1");
@@ -252,7 +252,7 @@ public class LobbyControllerWithServiceTest {
      * Valid Input, adds lobby to user's inviting lobbies (204)
      */
     @Test
-    public void inviteUserToLobby_validInput() throws Exception {
+    void inviteUserToLobby_validInput() throws Exception {
         // given
         // init lobby
         Lobby lobby = new Lobby();

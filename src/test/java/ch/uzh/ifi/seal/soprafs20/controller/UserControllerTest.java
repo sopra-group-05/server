@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the UserController works.
  */
 @WebMvcTest(UserController.class)
-public class UserControllerTest {
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +62,7 @@ public class UserControllerTest {
     private GameService gameService;
 
     @Test
-    public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
+    void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
         // given
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -87,7 +87,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void createUser_validInput_userCreated() throws Exception {
+    void createUser_validInput_userCreated() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -122,7 +122,7 @@ public class UserControllerTest {
      * Valid Input, returns User data
      */
     @Test
-    public void getSpecificUser_validInput_userReturned() throws Exception {
+    void getSpecificUser_validInput_userReturned() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -152,7 +152,7 @@ public class UserControllerTest {
      * User ID not found, returns 404 error
      */
     @Test
-    public void getSpecificUser_wrongInput_notFoundStatusReturned() throws Exception {
+    void getSpecificUser_wrongInput_notFoundStatusReturned() throws Exception {
         // make get Request to user with id
         String exceptionMsg = "User was not found";
         MockHttpServletRequestBuilder getRequest = get("/users/100")
@@ -174,7 +174,7 @@ public class UserControllerTest {
      * Valid UserID, but not allowed to view page (no Token / wrong token)
      */
     @Test
-    public void getSpecificUser_validInput_wrongToken_userReturned() throws Exception {
+    void getSpecificUser_validInput_wrongToken_userReturned() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -203,7 +203,7 @@ public class UserControllerTest {
      * Valid Input, returns no content
      */
     @Test
-    public void putSpecificUser_validInput_noContent() throws Exception {
+    void putSpecificUser_validInput_noContent() throws Exception {
         // given a user
         User user = new User();
         user.setId(1L);
@@ -231,7 +231,7 @@ public class UserControllerTest {
      * User Not Found
      */
     @Test
-    public void putSpecificUser_userNotFound_throwsNotFoundException() throws Exception {
+    void putSpecificUser_userNotFound_throwsNotFoundException() throws Exception {
         // given a user
         User user = new User();
         user.setId(1L);
@@ -263,7 +263,7 @@ public class UserControllerTest {
      * Wrong Token, returns unauthorized exception
      */
     @Test
-    public void putSpecificUser_wrongToken_unauthorizedException() throws Exception {
+    void putSpecificUser_wrongToken_unauthorizedException() throws Exception {
         // given a user
         String exceptionMsg = "You are not allowed to access this page";
         User user = new User();
@@ -292,7 +292,7 @@ public class UserControllerTest {
      * Should return OK Status and ID, Token of user
      */
     @Test
-    public void loginUserTest() throws Exception {
+    void loginUserTest() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -326,7 +326,7 @@ public class UserControllerTest {
      * Should return OK Status and ID, Token of user
      */
     @Test
-    public void loginUserTest_wrongPassword() throws Exception {
+    void loginUserTest_wrongPassword() throws Exception {
         // given
         String exceptionMsg = "Password is not correct";
         User user = new User();
@@ -360,7 +360,7 @@ public class UserControllerTest {
      * Should return 200 and list of inviting lobbies
      */
     @Test
-    public void getInvitations_validInput_lobbiesReturned() throws Exception{
+    void getInvitations_validInput_lobbiesReturned() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -393,7 +393,7 @@ public class UserControllerTest {
      * Should return error with status 401
      */
     @Test
-    public void getInvitations_wrongToken_throwsUnauthorized() throws Exception{
+    void getInvitations_wrongToken_throwsUnauthorized() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -420,7 +420,7 @@ public class UserControllerTest {
      * Should return error with 404
      */
     @Test
-    public void getInvitations_wrongId_throwsNotFound() throws Exception{
+    void getInvitations_wrongId_throwsNotFound() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -447,7 +447,7 @@ public class UserControllerTest {
      * Should return error 403
      */
     @Test
-    public void getInvitations_wrongUserId_throwsForbidden() throws Exception{
+    void getInvitations_wrongUserId_throwsForbidden() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -480,7 +480,7 @@ public class UserControllerTest {
      * Valid input and returns 204
      */
     @Test
-    public void acceptInvitation_validInput_returnsNoContent() throws Exception{
+    void acceptInvitation_validInput_returnsNoContent() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -528,7 +528,7 @@ public class UserControllerTest {
      * Bad Token - throws 401
      */
     @Test
-    public void acceptInvitation_badToken_throwsUnauthorized() throws Exception{
+    void acceptInvitation_badToken_throwsUnauthorized() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -556,7 +556,7 @@ public class UserControllerTest {
      * Non-existent userId - Throws 404
      */
     @Test
-    public void acceptInvitation_nonexistentUserId_throwsNotFound() throws Exception{
+    void acceptInvitation_nonexistentUserId_throwsNotFound() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -585,7 +585,7 @@ public class UserControllerTest {
      * Wrong user requesting - throws 403
      */
     @Test
-    public void acceptInvitation_wrongUser_throwsForbidden() throws Exception{
+    void acceptInvitation_wrongUser_throwsForbidden() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -618,7 +618,7 @@ public class UserControllerTest {
      * Non-existent lobby - throw 404
      */
     @Test
-    public void acceptInvitation_nonexistentLobby_throwsNotFound() throws Exception{
+    void acceptInvitation_nonexistentLobby_throwsNotFound() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -648,7 +648,7 @@ public class UserControllerTest {
      * Lobby is not waiting - throws 409
      */
     @Test
-    public void acceptInvitation_lobbyIsNotWaiting_throwsConflict() throws Exception{
+    void acceptInvitation_lobbyIsNotWaiting_throwsConflict() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -682,7 +682,7 @@ public class UserControllerTest {
      * Valid input and returns 204
      */
     @Test
-    public void declineInvitation_validInput_returnsNoContent() throws Exception{
+    void declineInvitation_validInput_returnsNoContent() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -717,7 +717,7 @@ public class UserControllerTest {
      * Bad Token - throws 401
      */
     @Test
-    public void declineInvitation_badToken_throwsUnauthorized() throws Exception{
+    void declineInvitation_badToken_throwsUnauthorized() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -745,7 +745,7 @@ public class UserControllerTest {
      * Non-existent userId - Throws 404
      */
     @Test
-    public void declineInvitation_nonexistentUserId_throwsNotFound() throws Exception{
+    void declineInvitation_nonexistentUserId_throwsNotFound() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -774,7 +774,7 @@ public class UserControllerTest {
      * Wrong user requesting - throws 403
      */
     @Test
-    public void declineInvitation_wrongUser_throwsForbidden() throws Exception{
+    void declineInvitation_wrongUser_throwsForbidden() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -807,7 +807,7 @@ public class UserControllerTest {
      * Non-existent lobby - throw 404
      */
     @Test
-    public void declineInvitation_nonexistentLobby_throwsNotFound() throws Exception{
+    void declineInvitation_nonexistentLobby_throwsNotFound() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -841,7 +841,7 @@ public class UserControllerTest {
      * Player already in lobby - throws 409
      */
     @Test
-    public void declineInvitation_userAlreadyInLobby_throwsConflict() throws Exception{
+    void declineInvitation_userAlreadyInLobby_throwsConflict() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);

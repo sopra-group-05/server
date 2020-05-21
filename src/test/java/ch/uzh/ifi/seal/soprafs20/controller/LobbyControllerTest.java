@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the LobbyController works.
  */
 @WebMvcTest(LobbyController.class)
-public class LobbyControllerTest {
+class LobbyControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +62,7 @@ public class LobbyControllerTest {
      * Valid Input, returns lobby data
      */
     @Test
-    public void createLobby_validInput_lobbyCreated() throws Exception {
+    void createLobby_validInput_lobbyCreated() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -109,7 +109,7 @@ public class LobbyControllerTest {
      * Valid input, but not allowed to view page (no Token / wrong token)
      */
     @Test
-    public void createLobby_validInput_wrongToken_exceptionReturned() throws Exception {
+    void createLobby_validInput_wrongToken_exceptionReturned() throws Exception {
         // given
         String exceptionMsg = "You are not allowed to access this page";
 
@@ -138,7 +138,7 @@ public class LobbyControllerTest {
      * Invalid Input, Conflict, throws error with Status Code 409
      */
     @Test
-    public void createLobby_invalidInput_exceptionReturned() throws Exception {
+    void createLobby_invalidInput_exceptionReturned() throws Exception {
         // given
         String exceptionMsg = "Conflict: same player has another lobby open, " +
                 "or there already is a lobby with the same name";
@@ -164,7 +164,7 @@ public class LobbyControllerTest {
     }
 
     @Test
-    public void getAllLobbies_lobbiesReturned() throws Exception {
+    void getAllLobbies_lobbiesReturned() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -205,7 +205,7 @@ public class LobbyControllerTest {
      * Valid Input, returns the Lobby data
      */
     @Test
-    public void getSpecificLobby_validInput_lobbyReturned() throws Exception {
+    void getSpecificLobby_validInput_lobbyReturned() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -252,7 +252,7 @@ public class LobbyControllerTest {
      * Valid Input, adds the User that sends the request to the Lobby
      */
     @Test
-    public void joinSpecificLobby_validInput_playerAdded() throws Exception {
+    void joinSpecificLobby_validInput_playerAdded() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -297,7 +297,7 @@ public class LobbyControllerTest {
      * Valid input, but not allowed to view page (no Token / wrong token)
      */
     @Test
-    public void getLobbies_wrongToken_exceptionReturned() throws Exception {
+    void getLobbies_wrongToken_exceptionReturned() throws Exception {
         // given
         String exceptionMsg = "You are not allowed to access this page";
 
@@ -348,7 +348,7 @@ public class LobbyControllerTest {
      * Test to get lobby statistics
      * */
     @Test
-    public void getLobbyStatistics_validInput() throws Exception {
+    void getLobbyStatistics_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -404,7 +404,7 @@ public class LobbyControllerTest {
      * Test to go to next round
      * */
     @Test
-    public void getNextRound_validInput() throws Exception {
+    void getNextRound_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -437,7 +437,7 @@ public class LobbyControllerTest {
      * Test to get word definition
      * */
     @Test
-    public void getWordDefinition_validInput() throws Exception {
+    void getWordDefinition_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -472,7 +472,7 @@ public class LobbyControllerTest {
      * Test to guess correct mystery word
      * */
     @Test
-    public void guessMysteryWord_validInput() throws Exception {
+    void guessMysteryWord_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -527,7 +527,7 @@ public class LobbyControllerTest {
      * Valid Input, adds the User that sends the request to the Lobby
      */
     @Test
-    public void kickPlayerOut_validInput() throws Exception {
+    void kickPlayerOut_validInput() throws Exception {
         // given
         Lobby lobby = new Lobby();
         lobby.setId(1L);
@@ -577,7 +577,7 @@ public class LobbyControllerTest {
      * Valid Input, adds lobby to user's inviting lobbies
      */
     @Test
-    public void inviteUserToLobby_validInput() throws Exception {
+    void inviteUserToLobby_validInput() throws Exception {
         // given
         // init lobby
         Lobby lobby = new Lobby();
@@ -626,7 +626,7 @@ public class LobbyControllerTest {
      * Invalid token, throws UnauthorizedException
      */
     @Test
-    public void inviteUserToLobby_invalidToken() throws Exception {
+    void inviteUserToLobby_invalidToken() throws Exception {
         // given
         // init lobby
         Lobby lobby = new Lobby();
@@ -669,7 +669,7 @@ public class LobbyControllerTest {
      * Lobby doesn't exist, throws NotFoundException
      */
     @Test
-    public void inviteUserToLobby_lobbyNotFound() throws Exception {
+    void inviteUserToLobby_lobbyNotFound() throws Exception {
         // given
         // init lobby
         User testUser = new User();
@@ -708,7 +708,7 @@ public class LobbyControllerTest {
      * invitedUser doesn't exist, throws NotFoundException
      */
     @Test
-    public void inviteUserToLobby_invitedUserNotFound() throws Exception {
+    void inviteUserToLobby_invitedUserNotFound() throws Exception {
         // given
         // init lobby
         Lobby lobby = new Lobby();
@@ -749,7 +749,7 @@ public class LobbyControllerTest {
      * invitedUser is offline, throws ForbiddenException
      */
     @Test
-    public void inviteUserToLobby_invitedUserIsOffline() throws Exception {
+    void inviteUserToLobby_invitedUserIsOffline() throws Exception {
         // given
         // init lobby
         Lobby lobby = new Lobby();
@@ -796,7 +796,7 @@ public class LobbyControllerTest {
      * invitedUser is already in another lobby, throws ForbiddenException
      */
     @Test
-    public void inviteUserToLobby_invitedUserInSomeLobby() throws Exception {
+    void inviteUserToLobby_invitedUserInSomeLobby() throws Exception {
         // given
         // init inviting lobby
         Lobby invLobby = new Lobby();

@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(UserController.class)
-public class UserControllerWithServiceTest {
+class UserControllerWithServiceTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -83,7 +83,7 @@ public class UserControllerWithServiceTest {
     }
 
     @Test
-    public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
+    void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
         // given
         User user = new User();
         user.setUsername("firstname@lastname");
@@ -110,7 +110,7 @@ public class UserControllerWithServiceTest {
     }
 
     @Test
-    public void createUser_validInput_userCreated() throws Exception {
+    void createUser_validInput_userCreated() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -147,7 +147,7 @@ public class UserControllerWithServiceTest {
      * Valid Input, returns User data
      */
     @Test
-    public void getSpecificUser_validInput_userReturned() throws Exception {
+    void getSpecificUser_validInput_userReturned() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -180,7 +180,7 @@ public class UserControllerWithServiceTest {
      * Valid Input, returns no content
      */
     @Test
-    public void putSpecificUser_validInput_noContent() throws Exception {
+    void putSpecificUser_validInput_noContent() throws Exception {
         // given a user
         User user = new User();
         user.setId(1L);
@@ -212,7 +212,7 @@ public class UserControllerWithServiceTest {
      * Should return OK Status and ID, Token of user
      */
     @Test
-    public void loginUserTest() throws Exception {
+    void loginUserTest() throws Exception {
         // given
         User user = new User();
         user.setId(1L);
@@ -247,7 +247,7 @@ public class UserControllerWithServiceTest {
      * Should return 200 and list of inviting lobbies
      */
     @Test
-    public void getInvitations_validInput_lobbiesReturned() throws Exception{
+    void getInvitations_validInput_lobbiesReturned() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -281,7 +281,7 @@ public class UserControllerWithServiceTest {
      * Valid input and returns 204
      */
     @Test
-    public void acceptInvitation_validInput_returnsNoContent() throws Exception{
+    void acceptInvitation_validInput_returnsNoContent() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);
@@ -340,7 +340,7 @@ public class UserControllerWithServiceTest {
      * Valid input and returns 204
      */
     @Test
-    public void declineInvitation_validInput_returnsNoContent() throws Exception{
+    void declineInvitation_validInput_returnsNoContent() throws Exception{
         // given
         User invitedUser = new User();
         invitedUser.setId(1L);

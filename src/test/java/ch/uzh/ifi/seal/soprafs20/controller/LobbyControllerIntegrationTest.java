@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
 //@EnableAutoConfiguration
 //@SpringBootConfiguration
 @TestPropertySource(locations = "/application-test.properties")
-public class LobbyControllerIntegrationTest {
+class LobbyControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
