@@ -41,56 +41,45 @@ public class Game {
 		return GameId;
 	}
 
-
 	public void setGameId(Long gameId) {
 		GameId = gameId;
 	}
-
 
 	public Boolean getLastGuessSuccess() {
 		return lastGuessSuccess;
 	}
 
-
 	public void setLastGuessSuccess(Boolean lastGuessSuccess) {
 		this.lastGuessSuccess = lastGuessSuccess;
 	}
-
 
 	public String getActiveGuess() {
 		return activeGuess;
 	}
 
-
 	public void setActiveGuess(String activeGuess) {
 		this.activeGuess = activeGuess;
 	}
-
 
 	public int getLeftCards() {
 		return leftCards;
 	}
 
-
 	public void setLeftCards(int leftCards) {
 		this.leftCards = leftCards;
 	}
-
 
 	public Long getWonCards() {
 		return wonCards;
 	}
 
-
 	public void setWonCards(Long wonCards) {
 		this.wonCards = wonCards;
 	}
 
-
 	public int getLostCards() {
 		return lostCards;
 	}
-
 
 	public void setLostCards(int lostCards) {
 		this.lostCards = lostCards;
@@ -110,8 +99,8 @@ public class Game {
         this.comparingGuessCounter = comparingGuessCounter;
     }
 
-
 	public void deleteClue(Clue clue) {
 		this.clues.remove(clue);		
 	}
+
 }

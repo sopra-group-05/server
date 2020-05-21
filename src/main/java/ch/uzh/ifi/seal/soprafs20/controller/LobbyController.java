@@ -507,7 +507,7 @@ public class LobbyController {
         return ResponseEntity.noContent().build();
     }
     
-    @GetMapping("/lobbies/{lobbyId}/guess")
+    @GetMapping("/lobbies/{lobbyId}/game")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public GuessGetDTO guessMysteryWord(@RequestHeader(name = "Token", required = false) String token,
