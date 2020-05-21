@@ -125,6 +125,11 @@ public class LobbyService
      */
     public void checkIfLobbyExists(Lobby lobbyToBeCreated) {
         Lobby lobbyByCreator = lobbyRepository.findByCreator(lobbyToBeCreated.getCreator());
+
+        if (lobbyToBeCreated.getLobbyName().isBlank() || lobbyToBeCreated.getLobbyName().isEmpty()) {
+            throw new ConflictException("The Lobby name can't be empty");
+        }
+        
         if (lobbyByCreator != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Lobby Creator Conflict",
