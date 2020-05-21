@@ -1,11 +1,12 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
-//test
+
 import ch.uzh.ifi.seal.soprafs20.constant.GameModeStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.Language;
 import ch.uzh.ifi.seal.soprafs20.constant.LobbyStatus;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -17,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "LOBBY")
-public class Lobby
+public class Lobby implements Serializable
 {
     @Id
     @Column(nullable = false, unique = true)
@@ -33,8 +34,8 @@ public class Lobby
     @Column(nullable = false)
     private LobbyStatus lobbyStatus;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @Cascade(value={org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN})
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @Cascade(value={org.hibernate.annotations.CascadeType.ALL})
     private Set<Player> players = new HashSet<>();
 
     @Column(nullable = false)

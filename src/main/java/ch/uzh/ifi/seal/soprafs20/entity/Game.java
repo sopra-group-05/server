@@ -13,7 +13,7 @@ public class Game {
 	@Id
 	@Column(nullable = false, unique = false)
     @GeneratedValue
-    private Long GameId;
+    private Long gameId;
 
 	@Column(nullable = false)
     private Boolean lastGuessSuccess;
@@ -38,11 +38,11 @@ public class Game {
 	
 	
 	public Long getGameId() {
-		return GameId;
+		return gameId;
 	}
 
 	public void setGameId(Long gameId) {
-		GameId = gameId;
+		this.gameId = gameId;
 	}
 
 	public Boolean getLastGuessSuccess() {

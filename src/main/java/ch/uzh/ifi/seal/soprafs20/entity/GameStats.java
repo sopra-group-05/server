@@ -1,12 +1,9 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
-import java.util.List;
-
 import javax.persistence.Id;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 
@@ -15,7 +12,7 @@ import javax.persistence.Table;
 @Table(name = "STATS")
 public class GameStats {
 	
-	final Long MAXTIME = 30L;
+	static final Long MAX_TIME = 30L;
 	
 	@Id
 	@Column(nullable = false, unique = false)
@@ -108,9 +105,9 @@ public class GameStats {
 
 	public void setTimeToGuess(Long timeToGuess) {
 		this.timeToGuess = timeToGuess;
-		if(this.timeToGuess > this.MAXTIME)
+		if(this.timeToGuess > MAX_TIME)
 		{
-			this.timeToGuess = this.MAXTIME;
+			this.timeToGuess = MAX_TIME;
 		}
 	}
 
@@ -137,9 +134,9 @@ public class GameStats {
 
 	public void setTimeForClue(Long timeForClue) {
 		this.timeForClue = timeForClue;
-		if(this.timeForClue > this.MAXTIME)
+		if(this.timeForClue > MAX_TIME)
 		{
-			this.timeForClue = this.MAXTIME;
+			this.timeForClue = MAX_TIME;
 		}
 	}
 	
@@ -196,24 +193,24 @@ public class GameStats {
 	public void addGuessTime(Long time) 
 	{
 		this.timeToGuess = (this.timeToGuess * (this.guessCount - 1) + time) / this.guessCount;
-		if(this.timeToGuess > this.MAXTIME)
+		if(this.timeToGuess > MAX_TIME)
 		{
-			this.timeToGuess = this.MAXTIME;
+			this.timeToGuess = MAX_TIME;
 		}
 	}
 
 	public void addClueTime(Long time) 
 	{
 		this.timeForClue = (this.timeForClue * (this.givenClues - 1) + time) / this.givenClues;
-		if(this.timeForClue > this.MAXTIME)
+		if(this.timeForClue > MAX_TIME)
 		{
-			this.timeForClue = this.MAXTIME;
+			this.timeForClue = MAX_TIME;
 		}
 	}	
 	
 	public void calculateScore()
 	{
-		this.score = this.teamPoints * this.MAXTIME + this.correctGuessCount * (this.MAXTIME - this.timeToGuess) + this.goodClues * (this.MAXTIME - this.timeForClue); 
+		this.score = this.teamPoints * MAX_TIME + this.correctGuessCount * (MAX_TIME - this.timeToGuess) + this.goodClues * (MAX_TIME - this.timeForClue);
 	}
 
 
