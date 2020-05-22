@@ -133,6 +133,11 @@ it some extra points.
 - The Player that wrote the chosen clue should get extra points.
 - The active Player should be able to skip if no clue stands out.
 
+### Frontend German Language
+
+As a user if I join a lobby that plays in German I want to play the whole game in German (and not just the words).
+- Translated text to German for all content inside a lobby.
+
 ## Authors and acknowledgement
 
 - [Adiboeh](https://github.com/Adiboeh)
