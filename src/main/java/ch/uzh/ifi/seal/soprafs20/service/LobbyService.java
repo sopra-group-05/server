@@ -366,23 +366,28 @@ public class LobbyService
         playerService.saveAll(players);
     }
 
+    /**
+     * Add bots to lobby
+     * @param lobbyId
+     */
     public void addBots(Long lobbyId){
         if(this.getLobbyById(lobbyId).getGameMode().equals(GameModeStatus.BOTS)) {
             Lobby lobby = this.getLobbyById(lobbyId);
             if (lobby.getPlayers().size() < 2) {
                 throw new ForbiddenException("Not enough Players");
             }
- //                     if (lobby.getGameMode().equals(GameModeStatus.BOTS)) {
- //                     while (lobby.getPlayers().size() < 4) {
             if (lobby.getNumberOfBots() >= 1) {
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.FRIENDLYBOT));
             }
             if (lobby.getNumberOfBots() >= 2){
                 this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.MALICIOUSBOT));
             }
+            if (lobby.getNumberOfBots() >= 3){
+                this.addPlayerToLobby(lobby, playerService.createBotPlayer(PlayerType.CRAZYBOT));
+            }
         }
     }
-
+/*not in use
     public void addBotsPerRequest(Long lobbyId, int numBots){
         Lobby lobby = this.getLobbyById(lobbyId);
         List<PlayerType> differentBots = new ArrayList<>();
@@ -401,6 +406,8 @@ public class LobbyService
             }
         }
     }
+
+ */
 
     /**
      * Checks if there are enough Human Players in the lobby to start the game.
@@ -757,7 +764,7 @@ public class LobbyService
     	}
     	catch(Exception e)
     	{
-    		log.info("Exception {}",e);
+    		log.info("Exception ",e);
     	}
     	this.startGame(lobbyId);
     }
