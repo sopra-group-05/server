@@ -144,7 +144,7 @@ insert into mysteryword (card_id, word, number, status) values(17, 'Elektrizitä
 insert into mysteryword (card_id, word, number, status) values(18, 'Genie', 1, 0);
 insert into mysteryword (card_id, word, number, status) values(18, 'Dracula', 2, 0);
 insert into mysteryword (card_id, word, number, status) values(18, 'Löwe', 3, 0);
-insert into mysteryword (card_id, word, number, status) values(18, 'Socke rFreitag', 4, 0);
+insert into mysteryword (card_id, word, number, status) values(18, 'Freitag', 4, 0);
 insert into mysteryword (card_id, word, number, status) values(18, 'Pirat', 5, 0);
 insert into mysteryword (card_id, word, number, status) values(19, 'Ferien', 1, 0);
 insert into mysteryword (card_id, word, number, status) values(19, 'Elfe', 2, 0);
