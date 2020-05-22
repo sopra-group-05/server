@@ -361,6 +361,10 @@ public class LobbyService
         playerService.saveAll(players);
     }
 
+    /**
+     * Add bots to lobby
+     * @param lobbyId
+     */
     public void addBots(Long lobbyId){
         if(this.getLobbyById(lobbyId).getGameMode().equals(GameModeStatus.BOTS)) {
             Lobby lobby = this.getLobbyById(lobbyId);

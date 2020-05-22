@@ -206,7 +206,8 @@ public class PlayerService {
         Set<Player> players= lobby.getPlayers();
         List<Player> humanPlayers= new ArrayList<>();
         for(Player player:players){
-            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) ||  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)){
+            if(player.getPlayerType().equals(PlayerType.FRIENDLYBOT) ||  player.getPlayerType().equals(PlayerType.MALICIOUSBOT)
+                    || player.getPlayerType().equals(PlayerType.CRAZYBOT)){
                 humanPlayers.add(player);
             }
         }
