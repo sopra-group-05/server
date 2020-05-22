@@ -486,7 +486,7 @@ class LobbyControllerTest {
         lobby.addPlayer(testPlayer);
         lobby.setGameMode(GameModeStatus.HUMANS);
         lobby.setCreator(testPlayer);
-        lobby.setLobbyStatus(LobbyStatus.WAITING);
+        lobby.setLobbyStatus(LobbyStatus.RUNNING);
         String guessedWord = "Moon";
         String mysteryWord = "Star";
         boolean success = true;
