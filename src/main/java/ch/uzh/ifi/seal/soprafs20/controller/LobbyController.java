@@ -2,9 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.controller;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.ForbiddenException;
-import ch.uzh.ifi.seal.soprafs20.exceptions.UnauthorizedException;
+import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.*;
 import ch.uzh.ifi.seal.soprafs20.rest.mapper.DTOMapper;
 import ch.uzh.ifi.seal.soprafs20.service.*;
@@ -67,7 +65,6 @@ public class LobbyController {
         Lobby lobbyInput = DTOMapper.INSTANCE.convertLobbyPostDTOtoEntity(lobbyPostDTO);
         lobbyService.checkIfLobbyExists(lobbyInput);
 
-        log.error("Inside Create Lobby");
         if (Boolean.TRUE.equals(isPlayerToJoin)) {
             Player player = playerService.convertUserToPlayer(creator, PlayerRole.GUESSER);
 
@@ -527,6 +524,10 @@ public class LobbyController {
         userService.checkUserToken(token);
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
+
+        if (lobby.getLobbyStatus() == LobbyStatus.WAITING) {
+            throw new NotFoundException("The Lobby is still waiting. You can't get round statistics yet.");
+        }
 
         String guess = gameService.getGuess(lobby);
         String mysteryWord = gameService.getMysteryWord(lobby);
