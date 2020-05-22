@@ -143,6 +143,33 @@ public class PlayerService {
     public void saveAll(Set<Player> playerSet) {
         playerRepository.saveAll(playerSet);
     }
+    
+    private String botTypeToName(PlayerType botType)
+    {
+        SecureRandom random = new SecureRandom();
+        String name = "";
+        
+    	if (botType == PlayerType.FRIENDLYBOT)
+    	{
+    		name = "Friendly Bot";
+    	}
+    	else if (botType == PlayerType.MALICIOUSBOT)
+    	{
+    		name = "Malicious Bot";
+    	}
+    	else if (botType == PlayerType.CRAZYBOT)
+    	{
+    		name = "Crazy Bot";
+    	}
+    	else
+    	{
+    		name = "Unknown Bot";
+    	}
+		String randomAddition = Integer.toString(random.nextInt(100));
+        name = name + " " + randomAddition;
+        
+    	return name;
+    }
 
     public Player createBotPlayer(PlayerType playerType) {
         if (!playerType.equals(PlayerType.HUMAN)) {
@@ -155,8 +182,7 @@ public class PlayerService {
             SecureRandom random = new SecureRandom();
             Long id = random.nextLong();
             while (name.equals("") || playerRepository.findByUsername(name) != null) {
-                String randomAddition = Integer.toString(random.nextInt(100));
-                name = playerType.toString() + "_" + randomAddition;
+                name = botTypeToName(playerType);
             }
 
             while (token.equals("") || playerRepository.findByToken(token) != null) {

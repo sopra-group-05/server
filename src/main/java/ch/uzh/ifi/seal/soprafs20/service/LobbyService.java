@@ -243,25 +243,28 @@ public class LobbyService
 		        Player creator = lobby.getCreator();
 		        Game game = lobby.getGame();
 		        List<Clue> clues = player.getClues();
+		        log.info("Player to be deleted {} / Creator {}",playerId, creator.getId());
 		        for(Clue clue:clues){
 		        	game.deleteClue(clue);
 		            clue.setPlayer(null);
 		        }
-		        boolean guesserSet = false;
-		        if((creator.getId().equals(playerId))||(player.getRole() == PlayerRole.GUESSER))
+		        boolean guesserChange = (player.getRole() == PlayerRole.GUESSER);
+		        if((creator.getId().equals(playerId))||(guesserChange))
 		        {
 		        	for(Player candidatPlayer : players)
 		        	{
-		        		if(candidatPlayer.getPlayerType() == PlayerType.HUMAN)
+		        		if((candidatPlayer.getPlayerType() == PlayerType.HUMAN)&&(!candidatPlayer.getId().equals(playerId)))
 		        		{
-		        			if((!candidatPlayer.getId().equals(lobby.getCreator().getId()))&&(creator.getId().equals(playerId)))
+		        			if(lobby.getCreator().getId().equals(playerId))
 			        		{
-			        			lobby.setCreator(candidatPlayer);	
+			        			lobby.setCreator(candidatPlayer);
+			        			log.info("Changed Creator to {}",candidatPlayer.getId());
 			        		}
-			        		if((!candidatPlayer.getId().equals(playerId))&&(!guesserSet))
+			        		if(guesserChange)
 			        		{
+			        			log.info("Changed Guesser to {}",candidatPlayer.getId());
 			        			candidatPlayer.setRole(PlayerRole.GUESSER);
-			        			guesserSet = true;
+			        			guesserChange = false;
 			        		}
 		        		}
 		        	}
@@ -275,6 +278,7 @@ public class LobbyService
         if(lobby.getCreator().getId().equals(playerId))
         {
         	endLobby(lobbyId,userService.getUserByID(playerId));
+        	log.info("End Lobby");
         }
         else
         {
@@ -283,6 +287,7 @@ public class LobbyService
 	       playerService.deletePlayer(player);
 	       this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PLAYER_LEFT, PlayerStatus.PLAYER_LEFT);
 	       lobbyRepository.flush();  
+	       log.info("remove User");
         }
     }
 
