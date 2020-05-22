@@ -152,7 +152,12 @@ public class GameService {
 
 	public String getGuess(Lobby lobby)
     {
-    	return lobby.getGame().getActiveGuess();
+		if(lobby.getGame()!=null)
+		{
+			return lobby.getGame().getActiveGuess();
+		}
+		else
+			return "";
     }
     
     public boolean getGuessSuccess(Lobby lobby)
@@ -218,23 +223,27 @@ public class GameService {
 
 	public String getMysteryWord(Lobby lobby) 
 	{
-			
-    	List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
-    	
-    	for(MysteryWord w : mysteryWords)
-    	{   		
-    		if (w.getStatus() == MysteryWordStatus.IN_USE)
-    		{
-    			return(w.getWord());		
-      		}
-    	}
-    	return("");
-
+		try {
+	    	List<MysteryWord> mysteryWords = lobby.getDeck().getActiveCard().getMysteryWords();
+	    	
+	    	for(MysteryWord w : mysteryWords)
+	    	{   		
+	    		if (w.getStatus() == MysteryWordStatus.IN_USE)
+	    		{
+	    			return(w.getWord());		
+	      		}
+	    	}
+	    	return("");
+		}
+		catch(Exception e)
+		{
+			return("");
+		}
+		
 	}
 
 	public void deleteGame(Game lobbyGame) {
 		this.gameRepository.delete(lobbyGame);
 	}
-    
     
 }

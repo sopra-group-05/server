@@ -743,6 +743,17 @@ public class LobbyService
     }
 
     public void restartGame(long lobbyId, String token){
-        this.startGame(lobbyId);
+    	try
+    	{
+	    	Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+	    	Game game =lobby.getGame();
+	    	lobby.setGame(null);
+	    	gameService.deleteGame(game);
+    	}
+    	catch(Exception e)
+    	{
+    		log.info("Exception {}",e);
+    	}
+    	this.startGame(lobbyId);
     }
 }

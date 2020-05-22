@@ -27,9 +27,6 @@ public class Clue {
 
     @ManyToOne
     private Card card;
-
-    @ManyToOne
-    private Game game;
     
     @Column
     private Long timeForClue;
@@ -72,15 +69,7 @@ public class Clue {
     public void setCard(Card card) {
         this.card = card;
     }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
-    }
-
+    
 	public Long getTimeForClue() {
 		return timeForClue;
 	}

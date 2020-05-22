@@ -55,7 +55,6 @@ public class ClueService {
         newClue.setClueStatus(ClueStatus.ACTIVE);
         newClue.setPlayer(player);
         newClue.setCard(lobby.getDeck().getActiveCard());
-        newClue.setGame(lobby.getGame());
         newClue.setFlagCounter(0);
         clueRepository.save(newClue);
         clueRepository.flush();
@@ -192,7 +191,6 @@ public class ClueService {
         List<Player> botPlayers = playerService.getBotPlayers(lobby);
         List<Player> playersWhoAnnotated = new ArrayList<>();
         List<Clue> clues = lobby.getGame().getClues();
-        // List<Clue> activeClues = new ArrayList<>();
         for (Clue clue : clues) {
             if (clue.getClueStatus().equals(ClueStatus.ACTIVE)) {
                 playersWhoAnnotated.add(clue.getPlayer());
@@ -239,7 +237,6 @@ public class ClueService {
             botClue.setPlayer(player);
             botClue.setClueStatus(ClueStatus.ACTIVE);
             botClue.setCard(lobby.getDeck().getActiveCard());
-            botClue.setGame(lobby.getGame());
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
@@ -260,7 +257,6 @@ public class ClueService {
         int humanPlayersNotActive = playerService.getHumanPlayersExceptActivePlayer(lobby).size();
         return compared == humanPlayersNotActive;
     }
-
 }
 
 
