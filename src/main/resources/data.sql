@@ -668,8 +668,3 @@ insert into mysteryword (card_id, word, number, status) values(74, 'Canada', 2, 
 insert into mysteryword (card_id, word, number, status) values(74, 'Zoo', 3, 0);
 insert into mysteryword (card_id, word, number, status) values(74, 'Whistle', 4, 0);
 insert into mysteryword (card_id, word, number, status) values(74, 'Book', 5, 0);
-
-INSERT INTO user(id,created,username,password,token,status,birthday,score,correct_guesses,best_clues) VALUES (1000,'2020-05-08T00:04:30.978988','1','1','1000',0,NULL,0,0,0);
-INSERT INTO user(id,created,username,password,token,status,birthday,score,correct_guesses,best_clues) VALUES (2000,'2020-05-08T00:05:30.978988','2','2','2000',0,NULL,0,0,0);
-INSERT INTO user(id,created,username,password,token,status,birthday,score,correct_guesses,best_clues) VALUES (3000,'2020-05-08T00:06:30.978988','3','3','3000',0,NULL,0,0,0);
-INSERT INTO user(id,created,username,password,token,status,birthday,score,correct_guesses,best_clues) VALUES (4000,'2020-05-08T00:06:30.978988','4','4','4000',0,NULL,0,0,0);
