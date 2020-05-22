@@ -752,7 +752,7 @@ public class LobbyService
     	}
     	catch(Exception e)
     	{
-    		log.info("Exception {}",e);
+    		log.info("Exception ",e);
     	}
     	this.startGame(lobbyId);
     }
