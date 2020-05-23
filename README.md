@@ -165,6 +165,9 @@ As a user if I join a lobby that plays in German I want to play the whole game i
 - [mgoki](https://github.com/mgoki)
 - [InfoYak](https://github.com/InfoYak)
 
+We would like to extend our thanks to anyone who has supported us through this challenging project. 
+Also, we'd like to especially mention our TA Anja Koller whose advice and guidance was very valuable to us.
+
 ### Credits to the APIs that werde used in this project:
 - [Adorable Avatars API](http://avatars.adorable.io/) for the profile pictures
 - [Language API](https://languages.oup.com/) for the definitions of the mystery words
