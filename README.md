@@ -113,7 +113,7 @@ Have a look here: https://www.baeldung.com/spring-boot-testing
 
 ## Roadmap
 
-Here are two features that you, as a new member of our team, could contribute to this project!
+Here are three features that you, as a new member of our team, could contribute to this project!
 
 ### Adding custom Mystery-Word Cards
 
@@ -128,7 +128,7 @@ playing the same words over and over again.
 
 As an active Player, I want to be able to choose the best clue presented in order to award the player who wrote 
 it some extra points.
-- Alle Clues should be visible to the active Player.
+- All Clues should be visible to the active Player.
 - The active Player should be able to click on the best clue.
 - The Player that wrote the chosen clue should get extra points.
 - The active Player should be able to skip if no clue stands out.
