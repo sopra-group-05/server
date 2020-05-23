@@ -676,7 +676,7 @@ public class LobbyService
             Set<Player> allPlayers = lobby.getPlayers();
             for (Player player : allPlayers) {
                 if (!player.getPlayerType().equals(PlayerType.HUMAN)) {
-                    player.setStatus(PlayerStatus.READY);
+                    player.setStatus(PlayerStatus.WAITING_FOR_NUMBER);
                 }
             }
         }
