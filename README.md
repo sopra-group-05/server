@@ -175,7 +175,7 @@ Also, we'd like to especially mention our TA Anja Koller whose advice and guidan
 
 ## License
 
-(MIT License)[https://choosealicense.com/licenses/mit/]
+[MIT License](https://choosealicense.com/licenses/mit/)
 
 Copyright (c) 2020 Sopra Group 05
 
