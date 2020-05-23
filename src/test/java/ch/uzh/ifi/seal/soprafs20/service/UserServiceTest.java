@@ -121,7 +121,7 @@ public class UserServiceTest {
     @Test
     public void loginUser_validInputs_success() {
         // when trying to find user, return user
-        Mockito.when(userRepository.findByUsername(Mockito.anyString())).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsernameIgnoreCase(Mockito.anyString())).thenReturn(testUser);
 
         // try login
         User loggedInUser = userService.loginUser(testUser);
@@ -137,7 +137,7 @@ public class UserServiceTest {
     @Test
     public void loginUser_wrongPassword_throwsException() {
         // when trying to find user, return user
-        Mockito.when(userRepository.findByUsername(Mockito.anyString())).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsernameIgnoreCase(Mockito.anyString())).thenReturn(testUser);
 
         // given a login attempt with the wrong password
         User testUserTwo = new User();

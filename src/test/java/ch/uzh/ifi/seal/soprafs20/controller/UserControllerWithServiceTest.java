@@ -230,7 +230,7 @@ class UserControllerWithServiceTest {
         userPostDTO.setUsername("testUsername");
         userPostDTO.setPassword("pw");
 
-        given(userRepository.findByUsername(ArgumentMatchers.any())).willReturn(user);
+        given(userRepository.findByUsernameIgnoreCase(ArgumentMatchers.any())).willReturn(user);
 
 
         // when/then -> do the request + validate the result

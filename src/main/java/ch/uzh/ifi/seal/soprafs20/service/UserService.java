@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 import ch.uzh.ifi.seal.soprafs20.constant.RankingOrderBy;
 import ch.uzh.ifi.seal.soprafs20.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.entity.User;
 import ch.uzh.ifi.seal.soprafs20.exceptions.*;
 import ch.uzh.ifi.seal.soprafs20.repository.UserRepository;
@@ -138,7 +139,7 @@ public class UserService {
      */
     public User loginUser(User user) {
         // find user
-        User userByUsername = userRepository.findByUsername(user.getUsername());
+        User userByUsername = userRepository.findByUsernameIgnoreCase(user.getUsername());
         if (userByUsername == null) {
             // user was not found
             throw new UnauthorizedException("User was not found");

@@ -97,6 +97,10 @@ public class UserController {
     public ResponseEntity updateUser(@RequestHeader(name = "Token", required = false) String token, @PathVariable long userId,  @RequestBody UserPutDTO userPutDTO) {
         userService.checkUserToken(token);
 
+        if (playerService.doesPlayerWithTokenExist(token)){
+            throw new ConflictException("You cannot edit your account while inside a lobby.");
+        }
+
         // convert API input to internal representation
         User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
 
@@ -115,6 +119,11 @@ public class UserController {
         userService.checkUserToken(token);
 
         User toDeleteUser = DTOMapper.INSTANCE.convertUserDeleteDTOToEntity(userDeleteDTO);
+
+        if (playerService.doesPlayerWithTokenExist(token)){
+            throw new ConflictException("You cannot delete your account while inside a lobby.");
+        }
+
         // delete User
         User user = userService.authenticateDeletion(userId, token, toDeleteUser);
         lobbyService.removeFromLobbyAndDeletePlayer(user);

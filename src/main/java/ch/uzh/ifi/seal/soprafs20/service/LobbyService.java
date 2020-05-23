@@ -282,12 +282,13 @@ public class LobbyService
         }
         else
         {
-	       lobby.leave(player);
-	       lobby = lobbyRepository.save(lobby);
-	       playerService.deletePlayer(player);
-	       this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PLAYER_LEFT, PlayerStatus.PLAYER_LEFT);
-	       lobbyRepository.flush();  
-	       log.info("remove User");
+            gameService.removeStats(player.getId(),lobby.getId());
+	        lobby.leave(player);
+	        lobby = lobbyRepository.save(lobby);
+	        playerService.deletePlayer(player);
+	        this.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.PLAYER_LEFT, PlayerStatus.PLAYER_LEFT);
+	        lobbyRepository.flush();
+	        log.info("remove User");
         }
     }
 

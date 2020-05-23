@@ -105,10 +105,14 @@ public class ClueService {
         clue.setFlagCounter(1 + clue.getFlagCounter());
         if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
+            if(clue.getPlayer().getPlayerType()==PlayerType.HUMAN)
+            {
+            	gameService.reduceGoodClues(clue.getPlayer().getId(), lobby.getId());
+            	
+            }
             bool = true;
         }
         clueRepository.save(clue);
-        gameService.reduceGoodClues(playerService.getPlayerByToken(token).getId(), lobby.getId());
         return bool;
     }
 

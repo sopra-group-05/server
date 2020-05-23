@@ -23,11 +23,28 @@ Getting started with Spring Boot:
     -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
     -   Building REST services with Spring: http://spring.io/guides/tutorials/bookmarks/
 
-## High-Level components [todo]
+## High-Level components
 
 In this section we'll tell you about three main components and their role.
 
-todo for backend!
+__LobbyService__: Responsible for handling the logic for the lobbies (e.g. creating a new
+lobby, joining a lobby, setting the attributes, inviting a user to join your lobby).
+[LobbyService.java](src/main/java/ch/uzh/ifi/seal/soprafs20/service/LobbyService.java)
+
+__GameService__: Responsible for handling part of the gamelogic that is not handled by the LobbyService, e.g. checking
+the guess of the active player and updating the statistics.
+[GameService.java](src/main/java/ch/uzh/ifi/seal/soprafs20/service/GameService.java)
+
+__PlayerService__: Responsible for converting a user into a player when he joins a lobby. Also handles all tasks 
+related to the three types of Bots.
+[PlayerService.java](src/main/java/ch/uzh/ifi/seal/soprafs20/service/PlayerService.java)
+
+### How they interact with each other
+Our most important component is our LobbyService because it unites different players in one single lobby in which they
+can play together. When a new Lobby is created inside the LobbyService, the lobby Creator is converted into a Player
+using the PlayerService. The same will happen when a user joins the lobby. Also if the game mode "Bots" was chosen, 
+Bots will be brought into the game using the PlayerService. The LobbyService is also connected to the  GameService 
+which handles e.g. the statistics and other business logic of that round.
 
 ## Launch & Deployment 
 ### Setup this Template with your IDE of choice
@@ -113,7 +130,7 @@ Have a look here: https://www.baeldung.com/spring-boot-testing
 
 ## Roadmap
 
-Here are two features that you, as a new member of our team, could contribute to this project!
+Here are three features that you, as a new member of our team, could contribute to this project!
 
 ### Adding custom Mystery-Word Cards
 
@@ -128,7 +145,7 @@ playing the same words over and over again.
 
 As an active Player, I want to be able to choose the best clue presented in order to award the player who wrote 
 it some extra points.
-- Alle Clues should be visible to the active Player.
+- All Clues should be visible to the active Player.
 - The active Player should be able to click on the best clue.
 - The Player that wrote the chosen clue should get extra points.
 - The active Player should be able to skip if no clue stands out.
@@ -140,6 +157,7 @@ As a user if I join a lobby that plays in German I want to play the whole game i
 
 ## Authors and acknowledgement
 
+### Authors
 - [Adiboeh](https://github.com/Adiboeh)
 - [Floribur](https://github.com/Floribur)
 - [nmulle](https://github.com/nmulle)
@@ -147,6 +165,34 @@ As a user if I join a lobby that plays in German I want to play the whole game i
 - [mgoki](https://github.com/mgoki)
 - [InfoYak](https://github.com/InfoYak)
 
+We would like to extend our thanks to anyone who has supported us through this challenging project. 
+Also, we'd like to especially mention our TA Anja Koller whose advice and guidance was very valuable to us.
+
+### Credits to the APIs that werde used in this project:
+- [Adorable Avatars API](http://avatars.adorable.io/) for the profile pictures
+- [Language API](https://languages.oup.com/) for the definitions of the mystery words
+- [Datamuse API](https://www.datamuse.com/api/) for synonyms and antonyms of the bots.
+
 ## License
 
-[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/) 
+[MIT License](https://choosealicense.com/licenses/mit/)
+
+Copyright (c) 2020 Sopra Group 05
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

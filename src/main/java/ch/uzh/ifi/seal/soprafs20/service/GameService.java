@@ -104,8 +104,7 @@ public class GameService {
     	statsRepository.flush();
 	}
     
-    
-    
+
     public void updateClueGeneratorStats(boolean goodClue, Long timeForClue, Long playerId, Long lobbyId) 
     {
     	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
@@ -120,7 +119,6 @@ public class GameService {
     	statsRepository.save(gameStats);
     	statsRepository.flush();
 	}
-    
 
 	public void reduceGoodClues(Long playerId, Long lobbyId) {
 		GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
@@ -203,6 +201,18 @@ public class GameService {
             statsRepository.flush();
         }
 	}
+
+    /**
+     * This method removes the player stats, when said player leaves the lobby
+     */
+	public void removeStats(long playerId, long lobbyId){
+	    // get stats for player in lobby
+        GameStats stats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
+        if (stats != null){
+            statsRepository.delete(stats);
+            statsRepository.flush();
+        }
+    }
 
 	public List<GameStats> getAllLobbyGameStats (Long lobbyId)
 	{
