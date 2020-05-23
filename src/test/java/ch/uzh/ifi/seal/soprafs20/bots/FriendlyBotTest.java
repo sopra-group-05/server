@@ -25,10 +25,12 @@ import java.net.URL;
 public class FriendlyBotTest {
     @Mock
     private RestTemplate restTemplate;
-
+/*
     @InjectMocks
     private Bot friendlyBot = new FriendlyBot(Language.EN);
+*
 
+ */
     MysteryWord mysteryWord = new MysteryWord();
     String json;
 
@@ -47,7 +49,11 @@ public class FriendlyBotTest {
         String clue = friendlyBot.getClue(mysteryWord);
         Assertions.assertEquals(clue, "exam");
     }
+
 */
 
-
+    @Test
+    public void test(){
+        FriendlyBot friendlyBot = new FriendlyBot(Language.EN);
+    }
 }
