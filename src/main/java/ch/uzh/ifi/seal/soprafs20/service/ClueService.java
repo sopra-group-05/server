@@ -244,8 +244,18 @@ public class ClueService {
             clueRepository.save(botClue);
             clueRepository.flush();
             lobby.getGame().addClue(botClue);
+            if(lobby.getPlayers().size()==3){
+                bot = botEnumMap.get(PlayerType.MALICIOUSBOT);
+                Clue botClue2 = new Clue();
+                botClue2.setHint(bot.getClue(activeMysteryWord));
+                botClue2.setPlayer(player);
+                botClue2.setClueStatus(ClueStatus.ACTIVE);
+                botClue2.setCard(lobby.getDeck().getActiveCard());
+                clueRepository.save(botClue2);
+                clueRepository.flush();
+                lobby.getGame().addClue(botClue2);
+            }
             player.setStatus(PlayerStatus.REVIEWING_CLUES);
-
         }
     }
 
