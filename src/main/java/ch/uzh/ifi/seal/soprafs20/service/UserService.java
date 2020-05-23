@@ -139,7 +139,7 @@ public class UserService {
      */
     public User loginUser(User user) {
         // find user
-        User userByUsername = userRepository.findByUsername(user.getUsername());
+        User userByUsername = userRepository.findByUsernameIgnoreCase(user.getUsername());
         if (userByUsername == null) {
             // user was not found
             throw new UnauthorizedException("User was not found");
