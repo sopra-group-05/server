@@ -213,8 +213,6 @@ public class LobbyController {
         //verify if the throwing out player is the lobby creator
         lobbyService.removePlayerFromLobby(lobbyId, leavingPlayer.getId());
         return new ResponseEntity<>("", HttpStatus.NO_CONTENT);
-
-
     }
 
     @PutMapping("/lobbies/{lobbyId}/terminate")
