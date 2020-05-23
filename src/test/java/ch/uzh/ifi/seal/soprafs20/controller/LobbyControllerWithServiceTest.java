@@ -80,7 +80,7 @@ class LobbyControllerWithServiceTest {
         mysteryWordService = new MysteryWordService(mysteryWordRepository);
         deckService = new DeckService(deckRepository, cardService);
         cardService = new CardService(cardRepository, mysteryWordService);
-        gameService = new GameService(gameRepository,statsRepository, userService);
+        gameService = new GameService(gameRepository,statsRepository, userService, clueService);
         lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService, mysteryWordService);
         LobbyController lc = new LobbyController(userService, lobbyService, playerService, clueService, gameService);
         mockMvc = MockMvcBuilders.standaloneSetup(lc).build();

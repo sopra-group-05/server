@@ -25,7 +25,7 @@ public class Game {
 	private int leftCards;
 	
 	@Column(nullable = false)
-	private Long wonCards;
+	private int wonCards;
 	
 	@Column(nullable = false)
 	private int lostCards;
@@ -69,11 +69,11 @@ public class Game {
 		this.leftCards = leftCards;
 	}
 
-	public Long getWonCards() {
+	public int getWonCards() {
 		return wonCards;
 	}
 
-	public void setWonCards(Long wonCards) {
+	public void setWonCards(int wonCards) {
 		this.wonCards = wonCards;
 	}
 

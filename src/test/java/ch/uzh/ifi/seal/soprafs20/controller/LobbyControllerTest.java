@@ -491,7 +491,7 @@ class LobbyControllerTest {
         String mysteryWord = "Star";
         boolean success = true;
         int leftCards = 1;
-        Long wonCards = 2l;
+        int wonCards = 2;
         int lostCards = 6;
 
         given(gameService.getGuess(lobby)).willReturn(guessedWord);
@@ -516,7 +516,7 @@ class LobbyControllerTest {
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.guess", is(guessedWord)))
                 .andExpect(jsonPath("$.leftCards", is(leftCards)))
-                .andExpect(jsonPath("$.wonCards", is(wonCards.intValue())))
+                .andExpect(jsonPath("$.wonCards", is(wonCards)))
                 .andExpect(jsonPath("$.mysteryWord", is(mysteryWord)))
                 .andDo(print());
 

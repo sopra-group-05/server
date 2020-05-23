@@ -1,10 +1,15 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.constant.ClueStatus;
 import ch.uzh.ifi.seal.soprafs20.constant.MysteryWordStatus;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerRole;
+import ch.uzh.ifi.seal.soprafs20.constant.PlayerType;
+import ch.uzh.ifi.seal.soprafs20.entity.Clue;
 import ch.uzh.ifi.seal.soprafs20.entity.Game;
 import ch.uzh.ifi.seal.soprafs20.entity.GameStats;
 import ch.uzh.ifi.seal.soprafs20.entity.Lobby;
 import ch.uzh.ifi.seal.soprafs20.entity.MysteryWord;
+import ch.uzh.ifi.seal.soprafs20.entity.Player;
 import ch.uzh.ifi.seal.soprafs20.repository.GameRepository;
 import ch.uzh.ifi.seal.soprafs20.repository.StatsRepository;
 
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -32,12 +38,14 @@ public class GameService {
     private final GameRepository gameRepository;
     private final StatsRepository statsRepository;
     private final UserService userService;
+    private final ClueService clueService;
 
     @Autowired
-    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("statsRepository") StatsRepository statsRepository, UserService userService) {
+    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("statsRepository") StatsRepository statsRepository, UserService userService, ClueService clueService) {
         this.gameRepository = gameRepository;
         this.statsRepository = statsRepository;
         this.userService = userService;
+        this.clueService = clueService;
     }
     
     /**
@@ -47,10 +55,10 @@ public class GameService {
      * @param success - was the guess correct
      * 
      */
-    public void updateLeftCards(Game game, boolean success, String guess)
+    public void updateLeftCards(Lobby lobby, Game game, boolean success, String guess)
     {
 
-    	game.setLeftCards(game.getLeftCards()-1);
+    	game.setLeftCards(lobby.getDeck().getCards().size()-1);
     	
     	if (success)
     	{
@@ -61,9 +69,8 @@ public class GameService {
     		if ((game.getWonCards()>0)&&(!guess.isEmpty()))
     		{
     			game.setWonCards(game.getWonCards()-1);
-    			game.setLostCards(game.getLostCards()+1);
     		}
-    		game.setLostCards(game.getLostCards()+1);
+    		game.setLostCards((lobby.getNumberOfCards()-game.getLeftCards()-game.getWonCards()));
     	}
     }
     
@@ -81,8 +88,9 @@ public class GameService {
 		game.setActiveGuess(guess);
 		boolean success = guess.equalsIgnoreCase(mysteryWord);
 		game.setLastGuessSuccess(success);
-		updateLeftCards(game,success,guess);
+		updateLeftCards(lobby,game,success,guess);
 		updateGuesserStats(success,timeToGuess,guesserId,lobby.getId());
+		updateClueGeneratorStats(lobby);
 		updateTeamPoints(lobby.getId(),game);
 		gameRepository.save(game);
 		gameRepository.flush();
@@ -105,29 +113,34 @@ public class GameService {
 	}
     
 
-    public void updateClueGeneratorStats(boolean goodClue, Long timeForClue, Long playerId, Long lobbyId) 
+    public void updateClueGeneratorStats(Lobby lobby) 
     {
-    	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
-    	gameStats.incGivenClueCount(1L);
-    	gameStats.addClueTime(timeForClue);
-    	if(goodClue)
+    	Set<Player> playersInLobby = lobby.getPlayers();
+    	for(Player playerInLobby : playersInLobby)
     	{
-    		gameStats.incGoodClueCount(1L);
-    		userService.updateBestClueCount(playerId, 1L);
+    		if((playerInLobby.getRole() == PlayerRole.CLUE_CREATOR)&&(playerInLobby.getPlayerType() == PlayerType.HUMAN))
+    		{
+    	    	GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerInLobby.getId(),lobby.getId());
+    	    	List<Clue> cluesOfPlayer = clueService.getCluesOfPlayer(playerInLobby);
+    	    	
+    	    	for(Clue clueOfPlayer:cluesOfPlayer)
+    	    	{
+    	    		if(clueOfPlayer.getClueStatus() != ClueStatus.INACTIVE)
+    	    		{
+    	    			gameStats.incGivenClueCount(1L);
+    	    			gameStats.addClueTime(clueOfPlayer.getTimeForClue());
+    	    			if(clueOfPlayer.getClueStatus() == ClueStatus.ACTIVE)
+    	    			{
+            	    		gameStats.incGoodClueCount(1L);
+            	    		userService.updateBestClueCount(playerInLobby.getId(), 1L);	
+    	    			}
+    	    		}
+    	    	} 	    	
+    	    	gameStats.calculateScore();
+    	    	statsRepository.save(gameStats);
+    		}
     	}
-    	gameStats.calculateScore();
-    	statsRepository.save(gameStats);
     	statsRepository.flush();
-	}
-
-	public void reduceGoodClues(Long playerId, Long lobbyId) {
-		GameStats gameStats = statsRepository.findByPlayerIdAndLobbyId(playerId,lobbyId);
-    	gameStats.decGoodClueCount(1L);
-    	userService.updateBestClueCount(playerId, -1L);
-     	gameStats.calculateScore();
-    	statsRepository.save(gameStats);
-    	statsRepository.flush();
-		
 	}
 	
 	public void updateTeamPoints(Long lobbyId, Game game)
@@ -135,7 +148,7 @@ public class GameService {
 		List<GameStats> allGameStats = statsRepository.findAllByLobbyId(lobbyId);
 		for (GameStats eachGameStats : allGameStats)
 		{
-			eachGameStats.setTeamPoints(game.getWonCards());
+			eachGameStats.setTeamPoints((long)game.getWonCards());
 			eachGameStats.calculateScore();
 		}
 		//if there are no more cards left, then update overall stats for each user
@@ -168,7 +181,7 @@ public class GameService {
     	return lobby.getGame().getLeftCards();
     }
     
-    public Long getWonCards(Lobby lobby)
+    public int getWonCards(Lobby lobby)
     {
     	return lobby.getGame().getWonCards();
     }
@@ -184,7 +197,7 @@ public class GameService {
     	game.setLastGuessSuccess(false);
     	game.setActiveGuess("");
     	game.setLeftCards(lobby.getDeck().getCards().size());
-    	game.setWonCards(0L);
+    	game.setWonCards(0);
     	game.setLostCards(0);
     	gameRepository.save(game);
     	gameRepository.flush();

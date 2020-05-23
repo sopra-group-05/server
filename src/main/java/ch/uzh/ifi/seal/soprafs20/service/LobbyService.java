@@ -243,6 +243,7 @@ public class LobbyService
 		        Player creator = lobby.getCreator();
 		        Game game = lobby.getGame();
 		        List<Clue> clues = player.getClues();
+		        gameService.updateLeftCards(lobby, game, false, "");
 		        log.info("Player to be deleted {} / Creator {}",playerId, creator.getId());
 		        for(Clue clue:clues){
 		        	game.deleteClue(clue);
@@ -676,7 +677,7 @@ public class LobbyService
             Set<Player> allPlayers = lobby.getPlayers();
             for (Player player : allPlayers) {
                 if (!player.getPlayerType().equals(PlayerType.HUMAN)) {
-                    player.setStatus(PlayerStatus.READY);
+                    player.setStatus(PlayerStatus.WAITING_FOR_NUMBER);
                 }
             }
         }

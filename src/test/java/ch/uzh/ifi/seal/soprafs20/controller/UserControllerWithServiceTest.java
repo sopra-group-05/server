@@ -59,6 +59,8 @@ class UserControllerWithServiceTest {
     @MockBean
     private GameService gameService;
     @MockBean
+    private ClueService clueService;
+    @MockBean
     private MysteryWordService mysteryWordService;
 
 
@@ -82,7 +84,7 @@ class UserControllerWithServiceTest {
         mysteryWordService = new MysteryWordService(mysteryWordRepository);
         lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService, mysteryWordService);
         playerService = new PlayerService(playerRepository);
-        gameService = new GameService(gameRepository,statsRepository, userService);
+        gameService = new GameService(gameRepository,statsRepository, userService, clueService);
         UserController uc = new UserController(userService, lobbyService, playerService, gameService);
         mockMvc = MockMvcBuilders.standaloneSetup(uc).build();
     }

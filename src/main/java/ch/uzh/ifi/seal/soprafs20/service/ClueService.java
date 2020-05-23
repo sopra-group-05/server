@@ -25,13 +25,12 @@ public class ClueService {
     private final Logger log = LoggerFactory.getLogger(ClueService.class);
     private final ClueRepository clueRepository;
     private final PlayerService playerService;
-    private final GameService gameService;
+//    private final GameService gameService;
 
     @Autowired
-    public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository, PlayerService playerService, GameService gameService) {
+    public ClueService(@Qualifier("clueRepository") ClueRepository clueRepository, PlayerService playerService) {
         this.clueRepository = clueRepository;
         this.playerService = playerService;
-        this.gameService = gameService;
     }
 
     /*
@@ -59,8 +58,6 @@ public class ClueService {
         clueRepository.save(newClue);
         clueRepository.flush();
         lobby.getGame().addClue(newClue);
-        //TODO Set correct time for coming up whit the clue
-        gameService.updateClueGeneratorStats(true, newClue.getTimeForClue(), player.getId(), lobby.getId());
         return newClue;
     }
 
@@ -105,11 +102,6 @@ public class ClueService {
         clue.setFlagCounter(1 + clue.getFlagCounter());
         if(clue.getClueStatus() == ClueStatus.ACTIVE && clue.getFlagCounter() >= numPlayersbyTwo){
             clue.setClueStatus(ClueStatus.DISABLED);
-            if(clue.getPlayer().getPlayerType()==PlayerType.HUMAN)
-            {
-            	gameService.reduceGoodClues(clue.getPlayer().getId(), lobby.getId());
-            	
-            }
             bool = true;
         }
         clueRepository.save(clue);
@@ -271,6 +263,11 @@ public class ClueService {
         int humanPlayersNotActive = playerService.getHumanPlayersExceptActivePlayer(lobby).size();
         return compared == humanPlayersNotActive;
     }
+
+	public List<Clue> getCluesOfPlayer(Player playerInLobby) {
+		
+		return clueRepository.findAllByPlayer(playerInLobby);
+	}
 }
 
 

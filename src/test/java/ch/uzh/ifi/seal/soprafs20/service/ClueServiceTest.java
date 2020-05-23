@@ -88,8 +88,7 @@ class ClueServiceTest {
         lobby.addPlayer(player4);
         lobby.setDeck(deck);
         lobby.setGame(game);
-        Mockito.doThrow(new RuntimeException()).when(gameService).updateClueGeneratorStats(Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong());
-        Mockito.doThrow(new RuntimeException()).when(gameService).reduceGoodClues(Mockito.anyLong(), Mockito.anyLong());
+        Mockito.doThrow(new RuntimeException()).when(gameService).updateClueGeneratorStats(Mockito.any());
 
     }
 

@@ -500,11 +500,7 @@ public class LobbyController {
 
         Lobby lobby = lobbyService.getLobbyById(lobbyId);
 
-        //TODO set correct time for guess
         gameService.compareGuess(lobby, guess, user.getId(),timeToGuess); 
-        // todo add points if correct (distribute them)
-        // todo move arround roles of players? (Guesser vs Clue maker etc)
-        // todo end of game what happens??
 
         // set Status of all Players to End of Turn.
         lobbyService.setNewPlayersStatus(lobby.getPlayers(), PlayerStatus.END_OF_TURN, PlayerStatus.END_OF_TURN);
@@ -533,7 +529,7 @@ public class LobbyController {
         boolean success = gameService.getGuessSuccess(lobby);
         
         int leftCards = gameService.getLeftCards(lobby);
-        Long wonCards = gameService.getWonCards(lobby);
+        int wonCards = gameService.getWonCards(lobby);
         int lostCards = gameService.getLostCards(lobby);
         
       
