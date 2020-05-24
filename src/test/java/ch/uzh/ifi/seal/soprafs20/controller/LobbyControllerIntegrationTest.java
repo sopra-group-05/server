@@ -13,6 +13,7 @@ import ch.uzh.ifi.seal.soprafs20.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.seal.soprafs20.rest.dto.UserPostDTO;
 import ch.uzh.ifi.seal.soprafs20.service.LobbyService;
 import ch.uzh.ifi.seal.soprafs20.service.PlayerService;
+import ch.uzh.ifi.seal.soprafs20.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,9 @@ class LobbyControllerIntegrationTest {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ClueRepository clueRepository;
@@ -294,18 +298,16 @@ class LobbyControllerIntegrationTest {
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$").doesNotExist());
 
-        //user2 leaves lobby
-        MockHttpServletRequestBuilder requestBuilderError = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/stop");
-        requestBuilderError.header("Token", userEntity2.getToken());
+        //user leaves lobby
+        MockHttpServletRequestBuilder requestBuilderStop = getMockHttpRequestBuilderForPut(null, "/lobbies/"+ lobby.getId() +"/stop");
+        requestBuilderStop.header("Token", userEntity.getToken());
 
-        //todo: work in progress as stopping lobby is not fully implemented
-        // then
-        mockMvc.perform(requestBuilder)
-                .andExpect(status().isNoContent());
-                /*.andExpect(jsonPath("$.id", is(lobby.getId())))
+        mockMvc.perform(requestBuilderStop)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(lobby.getId().intValue())))
                 .andExpect(jsonPath("$.lobbyName", is(lobbyPostDTO.getLobbyName())))
-                .andExpect(jsonPath("$.lobbyStatus", is(LobbyStatus.STOPPED)))
-                .andDo(print());*/
+                .andExpect(jsonPath("$.lobbyStatus", is(LobbyStatus.STOPPED.toString())))
+                .andDo(print());
 
     }
 
