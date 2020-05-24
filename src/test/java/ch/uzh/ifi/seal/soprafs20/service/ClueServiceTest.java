@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.service;
 
+import ch.uzh.ifi.seal.soprafs20.bots.FriendlyBot;
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
@@ -24,6 +25,10 @@ class ClueServiceTest {
     private PlayerService playerService;
     @Mock
     private GameService gameService;
+
+    @Mock
+    private FriendlyBot friendlyBot = new FriendlyBot(Language.EN);
+
     @InjectMocks
     private ClueService clueService;
 
@@ -299,11 +304,23 @@ class ClueServiceTest {
 
    @Test
    void botAnnotateCluesValid(){
-
-   }
-
-   @Test
-   void botAnnotateClueAlreadyDone(){
-
+        Mockito.when(friendlyBot.getClue(Mockito.any())).thenReturn("BotClue");
+        player3.setPlayerType(PlayerType.FRIENDLYBOT);
+        List players = new ArrayList();
+        players.add(player3);
+       Mockito.when(playerService.getBotPlayers(Mockito.any())).thenReturn(players);
+       when(playerService.getPlayerByToken(Mockito.anyString())).thenReturn(player1);
+       Clue clue1 = new Clue();
+       clue1.setClueStatus(ClueStatus.ACTIVE);
+       Clue clue2 = new Clue();
+       clue2.setClueStatus(ClueStatus.ACTIVE);
+       lobby.addClue(clue1);
+       lobby.addClue(clue2);
+       player1.setStatus(PlayerStatus.REVIEWING_CLUES);
+       player2.setStatus(PlayerStatus.REVIEWING_CLUES);
+       game.addClue(clue1);
+       game.addClue(clue2);
+       List<Clue> clues = clueService.getClues(lobby, player1.getToken());
+       Assertions.assertTrue(clues.size() == 3);
    }
 }

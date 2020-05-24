@@ -41,7 +41,7 @@ public class FriendlyBot implements Bot {
     }
 
 
-    public String getClueFromAPI(MysteryWord mysteryWord) {
+    private String getClueFromAPI(MysteryWord mysteryWord) {
         String synonym;
         try {
             response = restTemplate.getForEntity(url + mysteryWord.getWord(), String.class);
@@ -60,10 +60,10 @@ public class FriendlyBot implements Bot {
 
     @Override
     public String getClue(MysteryWord mysteryWord) {
-        if(cluesTable.get(mysteryWord.getWord()).equals("")){
-            return getClueFromAPI(mysteryWord);
+        if(cluesTable.containsKey(mysteryWord.getWord()) && !cluesTable.get(mysteryWord.getWord()).equals("")) {
+                return cluesTable.get(mysteryWord.getWord());
         } else {
-            return cluesTable.get(mysteryWord.getWord());
+            return getClueFromAPI(mysteryWord);
         }
     }
 

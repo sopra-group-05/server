@@ -28,7 +28,7 @@ public class MaliciousBot implements Bot{
 
     static{
         URLS.put(Language.EN, "https://api.datamuse.com/words?rel_ant=");
-        URLS.put(Language.DE, "http:german-api");
+        URLS.put(Language.DE, "http:german-api"); //todo
     }
 
 
@@ -58,10 +58,10 @@ public class MaliciousBot implements Bot{
 
     @Override
     public String getClue(MysteryWord mysteryWord) {
-        if(cluesTable.get(mysteryWord.getWord()).equals("")){
-            return getClueFromAPI(mysteryWord);
-        } else {
+        if(cluesTable.containsKey(mysteryWord.getWord()) && !cluesTable.get(mysteryWord.getWord()).equals("")) {
             return cluesTable.get(mysteryWord.getWord());
+        } else {
+            return getClueFromAPI(mysteryWord);
         }
     }
 
