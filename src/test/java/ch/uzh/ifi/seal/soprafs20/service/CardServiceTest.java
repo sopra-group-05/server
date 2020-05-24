@@ -95,7 +95,7 @@ class CardServiceTest {
      * Checks save Card function with correct input
      */
     @Test
-    void get13Cards_validInputs_success() {
+    void getCards_validInputs_success() {
 
         List<Card> cardList = new ArrayList<>();
         cardList.add(card);
@@ -106,7 +106,7 @@ class CardServiceTest {
         Mockito.when(cardRepository.findByLanguage(Language.EN)).thenReturn(cardList);
 
         // when -> any object is being save in the cardRepository -> return the dummy testUser
-        List<Card> cardLocalList = cardService.get13Cards(Language.EN,3);
+        List<Card> cardLocalList = cardService.getCards(Language.EN,3);
 
         assertEquals(cardList.size(), cardLocalList.size());
     }

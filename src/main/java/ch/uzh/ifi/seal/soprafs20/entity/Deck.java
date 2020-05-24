@@ -40,7 +40,7 @@ public class Deck implements Serializable
     }
 
     public void addCard(Card card) {
-        if(getCards().size()<13){
+        if(getCards().size()<21){
             this.cards.add(card);
         } else{
             throw new SopraServiceException("the maximum number of cards has been reached for this deck");
