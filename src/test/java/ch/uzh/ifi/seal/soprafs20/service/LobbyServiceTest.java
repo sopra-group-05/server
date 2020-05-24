@@ -405,4 +405,29 @@ public class LobbyServiceTest {
         assertEquals( 3, lobby.getPlayers().size());
     }
 
+    /**
+     *
+     * Start next round in lobby
+     * */
+    @Test
+    public void nextRound_startLobby() {
+        Clue clue1 = new Clue();
+        clue1.setClueStatus(ClueStatus.ACTIVE);
+        clue1.setHint("UnitTest");
+        clue1.setPlayer(testPlayer);
+        testPlayer2.setClue(clue1);
+        lobby.setLobbyStatus(LobbyStatus.STOPPED);
+        Game game = gameService.createNewGame(lobby);
+        lobby.setGame(game);
+
+        Deck deck = lobby.getDeck();
+        Card activeCard = deck.getCards().get(0);
+        MysteryWord word = activeCard.getMysteryWords().get(0);
+        word.setStatus(MysteryWordStatus.IN_USE);
+        deck.setActiveCard(activeCard);
+
+        lobbyService.nextRound(lobby.getId(), testUser.getToken());
+        assertEquals(botPlayer1.getStatus(), WAITING_FOR_NUMBER);
+    }
+
 }
