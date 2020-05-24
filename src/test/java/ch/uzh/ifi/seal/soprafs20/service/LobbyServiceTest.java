@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.soprafs20.service;
 
 import ch.uzh.ifi.seal.soprafs20.constant.*;
 import ch.uzh.ifi.seal.soprafs20.entity.*;
+import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 import ch.uzh.ifi.seal.soprafs20.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -130,6 +131,7 @@ public class LobbyServiceTest {
         when(playerRepository.saveAll(anyList()))
                 .thenAnswer(invocation -> invocation.getArgument(0, List.class));
         when(mysteryWordRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
+        when(playerRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
 
         doNothing().when(lobbyRepository).delete(any());
         doNothing().when(gameRepository).delete(any());
@@ -331,10 +333,6 @@ public class LobbyServiceTest {
         testPlayer.setClue(clue1);
 
         Mockito.when(playerRepository.findByToken(testUser.getToken())).thenReturn(testPlayer);
-        /*MysteryWord mysteryWord1 = createMysteryWord(1L, "Sun", 1);
-        MysteryWord mysteryWord2 = createMysteryWord(2L, "Moon", 2);
-        when(mysteryWordRepository.save(mysteryWord1)).thenReturn(mysteryWord1);
-        when(mysteryWordRepository.save(mysteryWord2)).thenReturn(mysteryWord2);*/
 
         lobby.setLobbyStatus(LobbyStatus.RUNNING);
         Game game = gameService.createNewGame(lobby);
@@ -346,6 +344,49 @@ public class LobbyServiceTest {
         assertEquals(botPlayer1.getStatus(), WAITING_FOR_NUMBER);
         assertEquals(testPlayer2.getStatus(), WAITING_FOR_NUMBER);
         assertEquals(testPlayer.getStatus(), PICKING_NUMBER);
+
+        Deck deck = lobby.getDeck();
+        Card activeCard = deck.getCards().get(0);
+        MysteryWord word = activeCard.getMysteryWords().get(0);
+        word.setStatus(MysteryWordStatus.IN_USE);
+        deck.setActiveCard(activeCard);
+        // test with three players and end the game
+        lobbyService.acceptOrDeclineMysteryWord(testUser, lobby, Boolean.FALSE);
+        assertEquals(testPlayer.getStatus(), PICKING_NUMBER);
+        assertEquals(word.getStatus(), MysteryWordStatus.NOT_USED);
+
+        lobby.setDeck(null);
+        try {
+            lobbyService.acceptOrDeclineMysteryWord(testUser, lobby, Boolean.FALSE);
+        } catch(SopraServiceException ex) {
+            assertEquals("Lobby has no Deck assigned!", ex.getMessage());
+        }
+    }
+
+    /**
+     * add bots in lobby
+     */
+    @Test
+    public void addBots_InLobby() {
+
+        Clue clue1 = new Clue();
+        clue1.setClueStatus(ClueStatus.ACTIVE);
+        clue1.setHint("UnitTest");
+        clue1.setPlayer(testPlayer);
+        testPlayer.setClue(clue1);
+
+        Mockito.when(playerRepository.findByToken(testUser.getToken())).thenReturn(testPlayer);
+
+        lobby.setLobbyStatus(LobbyStatus.RUNNING);
+        Game game = gameService.createNewGame(lobby);
+        lobby.setGame(game);
+        lobby.setNumberOfBots(3);
+        // test with three players and end the game
+        lobbyService.addBots(lobby.getId());
+
+        assertEquals(6, lobby.getPlayers().size());
+
+
     }
 
 }
