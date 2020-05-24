@@ -73,11 +73,11 @@ public class CardService {
 
     /***
      *
-     * Generates 13 cards for one deck
+     * Generates cards for one deck
      *
      * @param language - language of deck
      * */
-    public List<Card> get13Cards(Language language, int numberOfCards) {
+    public List<Card> getCards(Language language, int numberOfCards) {
         List<Card> cardList = cardRepository.findByLanguage(language);
         SecureRandom rand = new SecureRandom();
         int streamSize = cardList.size() > numberOfCards ? numberOfCards : cardList.size();
