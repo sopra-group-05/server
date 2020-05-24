@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs20.entity;
 
+import ch.uzh.ifi.seal.soprafs20.exceptions.ConflictException;
 import ch.uzh.ifi.seal.soprafs20.exceptions.SopraServiceException;
 
 import javax.persistence.*;
@@ -48,8 +49,8 @@ public class Deck implements Serializable
     }
 
     public void clearAndAddCards(List<Card> cards) {
-        if(cards.size() > 13) {
-            throw new SopraServiceException("the maximum number of cards for a deck is only 13 cards");
+        if(cards.size() > 21) {
+            throw new ConflictException("the maximum number of cards for a deck is only 21 cards");
         } else {
             this.cards.clear();
             this.cards.addAll(cards);
