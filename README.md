@@ -1,4 +1,4 @@
-# SoPra FS20 - Just One M4 - Server
+# SoPra FS20 - Just One (Server)
 
 ## Introduction
 
