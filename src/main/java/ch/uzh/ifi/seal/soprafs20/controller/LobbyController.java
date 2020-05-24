@@ -582,16 +582,6 @@ public class LobbyController {
         return statsGetDTOs;
  
     }
-/* not in use
-    @PostMapping("/lobbies/{lobbyId}/addBots/{numBots}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ResponseBody
-    public ResponseEntity addBot(@RequestHeader(name = "Token", required = false) String token, @PathVariable long lobbyId, @PathVariable int numBots){
-        userService.checkUserToken(token);
-        lobbyService.addBotsPerRequest(lobbyId, numBots);
-        return new ResponseEntity("Created Bot(s)", HttpStatus.NO_CONTENT);
-    }
- */
 
     @PutMapping("/lobbies/{lobbyId}/restart")
     @ResponseStatus(HttpStatus.OK)
