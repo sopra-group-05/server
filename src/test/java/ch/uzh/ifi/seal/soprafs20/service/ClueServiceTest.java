@@ -173,15 +173,7 @@ class ClueServiceTest {
        SopraServiceException exception = Assertions.assertThrows(SopraServiceException.class, () -> clueService.flagClue(savedClue.getId(),player1.getToken(),lobby), exceptionMessage);
        Assertions.assertEquals(exceptionMessage, exception.getMessage());
    }
-/*todo
 
-   @Test
-   public void flagClueTwice(){
-
-   }
-
-
- */
     @Test
     void flagAndDisableClue(){
         Mockito.when(playerService.getPlayerByToken(Mockito.any())).thenReturn(player1);

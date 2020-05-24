@@ -189,12 +189,7 @@ public class PlayerService {
                 token = Integer.toString(random.nextInt(1000000));
             }
 
-            /*todo: make sure no ID is used twice
-            while (playerRepository.findById(id) != null) {
-                id = random.nextLong();
-            }
 
-             */
             botPlayer.setUsername(name);
             botPlayer.setToken(token);
             botPlayer.setId(id);
@@ -261,9 +256,6 @@ public class PlayerService {
      */
     public boolean playerIsInLobby(String token, Lobby lobby){
         Player player = this.getPlayerByToken(token);
-        if (player == null) {
-            throw new UnauthorizedException("User is not a Player");
-        }
         if (!lobby.getPlayers().contains(player)){
             throw new UnauthorizedException("Player is not in Lobby");
         } else{
