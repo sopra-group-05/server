@@ -850,4 +850,76 @@ class LobbyControllerTest {
                 .andExpect(jsonPath("$", is("Requested User is in a lobby already!")))
                 .andDo(print());
     }
+
+
+    /**
+     * Tests acceptMysteryWord POST /lobbies/{lobbyId}/acceptword
+     * Accepts the given mysteryword
+     */
+    @Test
+    void acceptMysteryWord_Success() throws Exception {
+        // given
+        // init lobby
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("active Lobby");
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        doNothing().when(lobbyService).acceptOrDeclineMysteryWord(Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/acceptword")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
+    /**
+     * Tests acceptMysteryWord POST /lobbies/{lobbyId}/declineword
+     * Accepts the given mysteryword
+     */
+    @Test
+    void declineMysteryWord_Success() throws Exception {
+        // given
+        // init lobby
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername("testUser");
+        testUser.setToken("1");
+        Player testPlayer = new Player(testUser);
+        testPlayer.setRole(PlayerRole.GUESSER);
+
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyName("active Lobby");
+        lobby.setLobbyStatus(LobbyStatus.WAITING);
+
+        given(userService.checkUserToken(Mockito.anyString())).willReturn(testUser);
+        given(lobbyService.getLobbyById(Mockito.anyLong())).willReturn(lobby);
+        doNothing().when(lobbyService).acceptOrDeclineMysteryWord(Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+
+        // make post Request to Lobby with id & user with id
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/" + lobby.getId() + "/declineword")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testUser.getToken());
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
 }

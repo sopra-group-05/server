@@ -32,8 +32,6 @@ public class LobbyController {
     private final ClueService clueService;
     private final GameService gameService;
 
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
-
 
     @Autowired
     LobbyController(UserService userService, LobbyService lobbyService, PlayerService playerService, ClueService clueService, GameService gameService) {

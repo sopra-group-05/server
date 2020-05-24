@@ -5,19 +5,17 @@ import ch.uzh.ifi.seal.soprafs20.entity.*;
 import ch.uzh.ifi.seal.soprafs20.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 import java.util.Optional;
 
+import static ch.uzh.ifi.seal.soprafs20.constant.PlayerStatus.*;
 import static ch.uzh.ifi.seal.soprafs20.constant.PlayerType.FRIENDLYBOT;
 import static ch.uzh.ifi.seal.soprafs20.constant.PlayerType.HUMAN;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +30,12 @@ public class LobbyServiceTest {
     private GameRepository gameRepository;
     @Mock
     private StatsRepository statsRepository;
+    @Mock
+    private DeckRepository deckRepository;
+    @Mock
+    private CardRepository cardRepository;
+    @Mock
+    private MysteryWordRepository mysteryWordRepository;
 
     @InjectMocks
     private LobbyService lobbyService;
@@ -43,12 +47,20 @@ public class LobbyServiceTest {
     private UserService userService;
     @MockBean
     private ClueService clueService;
+    @MockBean
+    private MysteryWordService mysteryWordService;
+    @MockBean
+    private DeckService deckService;
+    @MockBean
+    private CardService cardService;
 
     private Lobby lobby;
     private Player testPlayer;
     private Player testPlayer2;
+    private Player botPlayer1;
     private User testUser;
     private User testUser2;
+    private User botUser1;
 
 
     /**
@@ -64,7 +76,11 @@ public class LobbyServiceTest {
         playerService = new PlayerService(playerRepository);
         userService = new UserService(userRepository);
         gameService = new GameService(gameRepository,statsRepository, userService, clueService);
-        lobbyService = new LobbyService(lobbyRepository, userService, playerService, null, null, gameService, null);
+
+        mysteryWordService = new MysteryWordService(mysteryWordRepository);
+        deckService = new DeckService(deckRepository, cardService);
+        cardService = new CardService(cardRepository, mysteryWordService);
+        lobbyService = new LobbyService(lobbyRepository, userService, playerService, deckService, cardService, gameService, mysteryWordService);
 
         // given
         lobby = new Lobby();
@@ -74,9 +90,10 @@ public class LobbyServiceTest {
 
         testUser = new User();
         testUser.setId(1L);
+        testUser.setToken("1");
         testUser2 = new User();
         testUser2.setId(2L);
-        User botUser1 = new User();
+        botUser1 = new User();
         botUser1.setId(11L);
 
         testPlayer = new Player(testUser);
@@ -88,9 +105,10 @@ public class LobbyServiceTest {
         testPlayer2 = new Player(testUser2);
         testPlayer2.setRole(PlayerRole.CLUE_CREATOR);
         testPlayer2.setPlayerType(HUMAN);
+        testPlayer.setToken("1");
         lobby.addPlayer(testPlayer2);
 
-        Player botPlayer1 = new Player(botUser1);
+        botPlayer1 = new Player(botUser1);
         botPlayer1.setRole(PlayerRole.CLUE_CREATOR);
         botPlayer1.setPlayerType(FRIENDLYBOT);
         lobby.addPlayer(botPlayer1);
@@ -102,21 +120,22 @@ public class LobbyServiceTest {
         GameStats gameStats = new GameStats(testPlayer2.getId(), lobby.getId());
 
         // when -> any object is being save in the lobbyRepository -> return the dummy lobby
-        Mockito.when(lobbyRepository.save(Mockito.any())).thenReturn(lobby);
-        Mockito.when(lobbyRepository.findById(Mockito.any())).thenReturn(Optional.of(lobby));
-        Mockito.when(lobbyRepository.findByLobbyId(Mockito.any())).thenReturn(lobby);
+        Mockito.when(lobbyRepository.save(any())).thenReturn(lobby);
+        Mockito.when(lobbyRepository.findById(any())).thenReturn(Optional.of(lobby));
+        Mockito.when(lobbyRepository.findByLobbyId(any())).thenReturn(lobby);
         Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         Mockito.when(userRepository.findById(testUser2.getId())).thenReturn(Optional.of(testUser2));
         Mockito.when(playerRepository.findById(testPlayer.getId())).thenReturn(Optional.of(testPlayer));
         Mockito.when(playerRepository.findById(testPlayer2.getId())).thenReturn(Optional.of(testPlayer2));
         when(playerRepository.saveAll(anyList()))
                 .thenAnswer(invocation -> invocation.getArgument(0, List.class));
+        when(mysteryWordRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
 
-        doNothing().when(lobbyRepository).delete(Mockito.any());
-        doNothing().when(gameRepository).delete(Mockito.any());
-        doNothing().when(playerRepository).delete(Mockito.any());
-        doNothing().when(statsRepository).delete(Mockito.any());
-        doNothing().when(playerRepository).deleteAll(Mockito.any());
+        doNothing().when(lobbyRepository).delete(any());
+        doNothing().when(gameRepository).delete(any());
+        doNothing().when(playerRepository).delete(any());
+        doNothing().when(statsRepository).delete(any());
+        doNothing().when(playerRepository).deleteAll(any());
 
         Mockito.when(statsRepository.findByPlayerIdAndLobbyId(testPlayer2.getId(), lobby.getId())).thenReturn(gameStats);
     }
@@ -266,6 +285,67 @@ public class LobbyServiceTest {
         assertNotEquals(lobby.getCreator().getId(), testPlayer.getId());
         assertNull(clue1.getPlayer());
         assertFalse(lobby.getPlayers().contains(testPlayer));
+    }
+
+    /**
+     * accepts MysteryWord and change playerStatus
+     */
+    @Test
+    public void acceptMysteryWord_InLobby() {
+
+        Clue clue1 = new Clue();
+        clue1.setClueStatus(ClueStatus.ACTIVE);
+        clue1.setHint("UnitTest");
+        clue1.setPlayer(testPlayer);
+        testPlayer.setClue(clue1);
+
+        Mockito.when(playerRepository.findByToken(testUser.getToken())).thenReturn(testPlayer);
+
+        lobby.setLobbyStatus(LobbyStatus.RUNNING);
+        Game game = gameService.createNewGame(lobby);
+        lobby.setGame(game);
+        lobbyService.acceptOrDeclineMysteryWord(testUser, lobby, Boolean.TRUE);
+
+        //check bot player's status
+        assertEquals(botPlayer1.getStatus(), WAITING_TO_ACCEPT_MYSTERY_WORD);
+
+        testPlayer.setStatus(WAITING_TO_ACCEPT_MYSTERY_WORD);
+        testPlayer2.setStatus(WAITING_TO_ACCEPT_MYSTERY_WORD);
+        lobbyService.acceptOrDeclineMysteryWord(testUser, lobby, Boolean.TRUE);
+        // check human and bot player status
+        assertEquals(botPlayer1.getStatus(), WRITING_CLUES);
+        assertEquals(testPlayer2.getStatus(), WRITING_CLUES);
+        assertEquals(testPlayer.getStatus(), WAITING_FOR_CLUES);
+    }
+
+    /**
+     * declines MysteryWord and change playerStatus
+     */
+    @Test
+    public void declineMysteryWord_InLobby() {
+
+        Clue clue1 = new Clue();
+        clue1.setClueStatus(ClueStatus.ACTIVE);
+        clue1.setHint("UnitTest");
+        clue1.setPlayer(testPlayer);
+        testPlayer.setClue(clue1);
+
+        Mockito.when(playerRepository.findByToken(testUser.getToken())).thenReturn(testPlayer);
+        /*MysteryWord mysteryWord1 = createMysteryWord(1L, "Sun", 1);
+        MysteryWord mysteryWord2 = createMysteryWord(2L, "Moon", 2);
+        when(mysteryWordRepository.save(mysteryWord1)).thenReturn(mysteryWord1);
+        when(mysteryWordRepository.save(mysteryWord2)).thenReturn(mysteryWord2);*/
+
+        lobby.setLobbyStatus(LobbyStatus.RUNNING);
+        Game game = gameService.createNewGame(lobby);
+        lobby.setGame(game);
+        // test with three players and end the game
+        lobbyService.acceptOrDeclineMysteryWord(testUser, lobby, Boolean.FALSE);
+
+        // check human and bot player status
+        assertEquals(botPlayer1.getStatus(), WAITING_FOR_NUMBER);
+        assertEquals(testPlayer2.getStatus(), WAITING_FOR_NUMBER);
+        assertEquals(testPlayer.getStatus(), PICKING_NUMBER);
     }
 
 }
